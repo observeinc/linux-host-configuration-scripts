@@ -11,9 +11,9 @@ getFiles(){
     local branch_replace="$1"
     rm "config_files/*"
     curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.flags > config_files/osquery.flags
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/telegraf.conf > config_files/telegraf.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/telegraf.conf > config_files/telegraf.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/td-agent-bit.conf > config_files/td-agent-bit.conf
 
 }
 
@@ -159,7 +159,7 @@ config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
-appgroup=""
+appgroup="UNSET"
 branch_input="main"
 
 if [ "$1" == "--help" ]; then
@@ -305,7 +305,7 @@ if [ "$ec2metadata" == TRUE ]; then
 fi
 
 # shellcheck disable=SC2154 #used in downstream script
-if [ "$appgroup" != "UNSET" ]; then
+if [ "$appgroup" != UNSET ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/Record appgroup ${appgroup}/g" ./*
 fi
 
