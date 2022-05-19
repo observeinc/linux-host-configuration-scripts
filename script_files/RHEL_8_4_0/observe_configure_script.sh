@@ -10,10 +10,10 @@ getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
     rm "config_files/*"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.conf > config_files/osquery.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.flags > config_files/osquery.flags
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/td-agent-bit.conf > config_files/td-agent-bit.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.conf > config_files/osquery.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/td-agent-bit.conf > config_files/td-agent-bit.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.flags > config_files/osquery.flags
 
 }
 
@@ -338,6 +338,9 @@ fi
 echo "APP_GRP: ${APP_GRP}"
 
 sed -i "s/REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/r $APP_GRP/g" ./*
+
+# shellcheck disable=SC2154 #set by input
+testEject "${testeject}" "EJECT2"
 
 # shellcheck disable=SC2154 #input dynamically set by terraform
 config_path=/home/"ec2-user"/config_files
