@@ -11,10 +11,10 @@ config_files_clean=true
 getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_20_04_LTS/osquery.flags > config_files/osquery.flags
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_20_04_LTS/osquery.conf > config_files/osquery.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_20_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_20_04_LTS/telegraf.conf > config_files/telegraf.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/UBUNTU_20_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/UBUNTU_20_04_LTS/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/UBUNTU_20_04_LTS/telegraf.conf > config_files/telegraf.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/UBUNTU_20_04_LTS/osquery.conf > config_files/osquery.conf
 
 }
 
