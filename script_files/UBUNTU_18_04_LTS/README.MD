@@ -51,7 +51,7 @@ STAGE for testing PROD for production
 
 1. Run following script
 ```
-curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/script_files/UBUNTU_18_04_LTS/observe_configure_script.sh"  | bash -s -- --customer_id "YOUR_CUSTOMERID" --ingest_token "YOUR_DATA_STREAM_TOKEN" --observe_host_name "collect.observeinc.com" --config_files_clean TRUE --ec2metadata TRUE --datacenter "MYDATACENTER" --appgroup "MYAPPGROUP"
+curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/observe_configure_script.sh"  | bash -s -- --customer_id "YOUR_CUSTOMERID" --ingest_token "YOUR_DATA_STREAM_TOKEN" --observe_host_name "collect.observeinc.com" --config_files_clean TRUE --ec2metadata TRUE --datacenter "MYDATACENTER" --appgroup "MYAPPGROUP"
 
 
 ```
