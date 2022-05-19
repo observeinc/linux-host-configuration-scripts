@@ -7,14 +7,10 @@ mkdir config_files
 
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles(){
-    curl         https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/td-agent-bit.conf
- > config_files/td-agent-bit.conf
-curl         https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/telegraf.conf
- > config_files/telegraf.conf
-curl         https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/osquery.conf
- > config_files/osquery.conf
-curl         https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/osquery.flags
- > config_files/osquery.flags
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/telegraf.conf > config_files/telegraf.conf
 
 }
 
