@@ -10,10 +10,10 @@ getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
     rm "config_files/*"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/AMAZON_LINUX_2/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/AMAZON_LINUX_2/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/AMAZON_LINUX_2/osquery.flags > config_files/osquery.flags
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/AMAZON_LINUX_2/td-agent-bit.conf > config_files/td-agent-bit.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/AMAZON_LINUX_2/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/AMAZON_LINUX_2/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/AMAZON_LINUX_2/telegraf.conf > config_files/telegraf.conf
 
 }
 
@@ -284,9 +284,6 @@ echo "$SPACER"
 
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles "$branch_input"
-
-# shellcheck disable=SC2154 #set by input
-testEject "${testeject}" "EJECT2"
 
 echo "$SPACER"
 
