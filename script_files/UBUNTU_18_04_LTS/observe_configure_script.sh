@@ -9,10 +9,10 @@ mkdir config_files
 getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_18_04_LTS/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_18_04_LTS/osquery.conf > config_files/osquery.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_18_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_18_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_18_04_LTS/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_18_04_LTS/telegraf.conf > config_files/telegraf.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_18_04_LTS/osquery.conf > config_files/osquery.conf
 
 }
 
@@ -158,7 +158,7 @@ config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
-appgroup=""
+appgroup="UNSET"
 branch_input="main"
 
 if [ "$1" == "--help" ]; then
@@ -304,7 +304,7 @@ if [ "$ec2metadata" == TRUE ]; then
 fi
 
 # shellcheck disable=SC2154 #used in downstream script
-if [ "$appgroup" != "UNSET" ]; then
+if [ "$appgroup" != UNSET ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/Record appgroup ${appgroup}/g" ./*
 fi
 
