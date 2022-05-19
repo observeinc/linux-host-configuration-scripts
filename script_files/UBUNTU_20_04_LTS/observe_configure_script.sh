@@ -5,16 +5,14 @@ cd ~ || exit
 
 mkdir config_files
 
-config_files_clean=true 
-
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/telegraf.conf > config_files/telegraf.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.conf > config_files/osquery.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/telegraf.conf > config_files/telegraf.conf
 
 }
 
@@ -126,14 +124,24 @@ printVars(){
 
 testEject(){
 local bail="$1"
-if [[ "$bail" == "EJECT" ]]; then
+local bailPosition="$2"
+if [[ "$bail" == "$bailPosition" ]]; then
     echo "$SPACER"
     echo "$SPACER"
     echo " TEST EJECTION "
+    echo "Position = $bailPosition"
     echo "$SPACER"
     echo "$SPACER"
+
+    if [[ "$bailPosition" == "EJECT2" ]]; then
+      removeConfigDirectory
+    fi
     exit 0;
 fi
+}
+
+removeConfigDirectory() {
+      rm -f -R config_path
 }
 
 SPACER=$(generateSpacer)
@@ -150,7 +158,7 @@ echo "Validate inputs ..."
 customer_id=0
 ingest_token=0
 observe_host_name="collect.observeinc.com"
-config_files_clean="TRUE"
+config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
@@ -272,13 +280,15 @@ echo "    Customer ID:  $customer_id"
 echo 
 echo "    Customer Ingest Token:  $ingest_token"
 
-testEject "${testeject}"
+testEject "${testeject}" "EJECT1"
 
 echo "$SPACER"
 
-
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles "$branch_input"
+
+# shellcheck disable=SC2154 #set by input
+testEject "${testeject}" "EJECT2"
 
 echo "$SPACER"
 
@@ -338,7 +348,11 @@ config_path=/home/"ubuntu"/config_files
 #####################################
 # osquery
 #####################################
-
+echo 
+echo "$SPACER"
+echo "osquery"
+echo "$SPACER"
+echo 
 sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
 if ! grep -Fq https://pkg.osquery.io/deb /etc/apt/sources.list.d/osquery.list
 then
@@ -380,7 +394,11 @@ sudo service osqueryd restart
 # #####################################
 # # fluent
 # #####################################
-
+echo 
+echo "$SPACER"
+echo "fluent"
+echo "$SPACER"
+echo 
 wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
 
 echo deb https://packages.fluentbit.io/ubuntu/focal focal main | sudo tee -a /etc/apt/sources.list
@@ -406,7 +424,11 @@ sudo service td-agent-bit restart
 # #####################################
 # # telegraf
 # #####################################
-
+echo 
+echo "$SPACER"
+echo "telegraf"
+echo "$SPACER"
+echo 
 wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
 source /etc/lsb-release
 if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
@@ -519,10 +541,5 @@ echo "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
 
 # shellcheck disable=SC2154 #set in upstream script
 if [ "$config_files_clean" == TRUE ]; then
-  rm -F "$config_path"
-fi
-
-# remove config files directory
-if ((config_files_clean)); then
-  rm -f -R config_path
+  removeConfigDirectory
 fi
