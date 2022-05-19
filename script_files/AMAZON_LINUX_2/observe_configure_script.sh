@@ -7,10 +7,10 @@ mkdir config_files
 
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles(){
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/$branch_replace/script_files/AMAZON_LINUX_2/td-agent-bit.conf > config_files/td-agent-bit.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/$branch_replace/script_files/AMAZON_LINUX_2/osquery.flags > config_files/osquery.flags
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/$branch_replace/script_files/AMAZON_LINUX_2/osquery.conf > config_files/osquery.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/$branch_replace/script_files/AMAZON_LINUX_2/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/$branch_replace/script_files/AMAZON_LINUX_2/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/$branch_replace/script_files/AMAZON_LINUX_2/td-agent-bit.conf > config_files/td-agent-bit.conf
 
 }
 
