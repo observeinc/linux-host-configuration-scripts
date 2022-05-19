@@ -7,10 +7,10 @@ mkdir config_files
 
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles(){
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/script_files/UBUNTU_18_04_LTS/osquery.conf > config_files/osquery.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/script_files/UBUNTU_18_04_LTS/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/script_files/UBUNTU_18_04_LTS/osquery.flags > config_files/osquery.flags
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/script_files/UBUNTU_18_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts//script_files/UBUNTU_18_04_LTS/telegraf.conf > config_files/telegraf.conf
 
 }
 
@@ -151,6 +151,7 @@ ec2metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
 appgroup="UNSET"
+branch_input="main"
 
 if [ "$1" == "--help" ]; then
 echo "$SPACER"
@@ -196,6 +197,10 @@ fi
         --testeject)
         # shellcheck disable=SC2034 #used in downstream script
           testeject="$2"
+          ;;
+        --branch_input)
+        # shellcheck disable=SC2034 #used in downstream script
+          branch_input="$2"
           ;;
         *)
           
