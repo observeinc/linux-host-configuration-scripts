@@ -8,9 +8,9 @@ mkdir config_files
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles(){
     curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.conf > config_files/osquery.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/telegraf.conf > config_files/telegraf.conf
 
 }
 
@@ -146,7 +146,7 @@ echo "Validate inputs ..."
 customer_id=0
 ingest_token=0
 observe_host_name="collect.observeinc.com"
-config_files_clean="FALSE"
+config_files_clean="TRUE"
 ec2metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
