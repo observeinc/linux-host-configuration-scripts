@@ -1,0 +1,14 @@
+--enable_syslog=true
+--audit_allow_config=true
+--audit_allow_sockets
+--audit_persist=true
+--disable_audit=false
+--events_expiry=1
+--events_Max=500000
+--logger_min_status=1
+--logger_plugin=filesystem
+--watchdog_memory_limit=350
+--watchdog_utilization_limit=130
+--logger_rotate=true
+--logger_rotate_size=262144000
+--logger_rotate_max_files=3
