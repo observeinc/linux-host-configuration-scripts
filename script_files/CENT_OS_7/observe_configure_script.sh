@@ -7,10 +7,10 @@ mkdir config_files
 
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles(){
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/CENT_OS_7/osquery.flags > config_files/osquery.flags
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/CENT_OS_7/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/CENT_OS_7/osquery.conf > config_files/osquery.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/CENT_OS_7/telegraf.conf > config_files/telegraf.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/37735branch_input/script_files/CENT_OS_7/telegraf.conf > config_files/telegraf.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/37744branch_input/script_files/CENT_OS_7/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/37750branch_input/script_files/CENT_OS_7/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/37752branch_input/script_files/CENT_OS_7/td-agent-bit.conf > config_files/td-agent-bit.conf
 
 }
 
