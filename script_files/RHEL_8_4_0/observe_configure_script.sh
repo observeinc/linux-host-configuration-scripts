@@ -7,10 +7,12 @@ mkdir config_files
 
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles(){
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.flags > config_files/osquery.flags
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.conf > config_files/osquery.conf
+    # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
+    local branch_replace="$1"
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.conf > config_files/osquery.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/telegraf.conf > config_files/telegraf.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/td-agent-bit.conf > config_files/td-agent-bit.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/RHEL_8_4_0/osquery.flags > config_files/osquery.flags
 
 }
 
@@ -122,14 +124,24 @@ printVars(){
 
 testEject(){
 local bail="$1"
-if [[ "$bail" == "EJECT" ]]; then
+local bailPosition="$2"
+if [[ "$bail" == "$bailPosition" ]]; then
     echo "$SPACER"
     echo "$SPACER"
     echo " TEST EJECTION "
+    echo "Position = $bailPosition"
     echo "$SPACER"
     echo "$SPACER"
+
+    if [[ "$bailPosition" == "EJECT2" ]]; then
+      removeConfigDirectory
+    fi
     exit 0;
 fi
+}
+
+removeConfigDirectory() {
+      rm -f -R config_path
 }
 
 SPACER=$(generateSpacer)
@@ -146,7 +158,7 @@ echo "Validate inputs ..."
 customer_id=0
 ingest_token=0
 observe_host_name="collect.observeinc.com"
-config_files_clean="TRUE"
+config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
@@ -268,11 +280,15 @@ echo "    Customer ID:  $customer_id"
 echo 
 echo "    Customer Ingest Token:  $ingest_token"
 
-testEject "${testeject}"
+testEject "${testeject}" "EJECT1"
 
 echo "$SPACER"
 
-getFiles
+# shellcheck disable=SC2154 #input dynamically set by terraform
+getFiles "$branch_input"
+
+# shellcheck disable=SC2154 #set by input
+testEject "${testeject}" "EJECT2"
 
 echo "$SPACER"
 
@@ -530,5 +546,5 @@ echo "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
 
 # shellcheck disable=SC2154 #set in upstream script
 if [ "$config_files_clean" == TRUE ]; then
-  rm -F "$config_path"
+  removeConfigDirectory
 fi
