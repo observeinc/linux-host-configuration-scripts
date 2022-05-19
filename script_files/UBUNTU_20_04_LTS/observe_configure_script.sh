@@ -12,9 +12,9 @@ getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
     curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.flags > config_files/osquery.flags
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.conf > config_files/osquery.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/telegraf.conf > config_files/telegraf.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.flags > config_files/osquery.flags
 
 }
 
@@ -150,7 +150,7 @@ echo "Validate inputs ..."
 customer_id=0
 ingest_token=0
 observe_host_name="collect.observeinc.com"
-config_files_clean="FALSE"
+config_files_clean="TRUE"
 ec2metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
