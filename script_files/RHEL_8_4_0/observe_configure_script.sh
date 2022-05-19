@@ -7,10 +7,10 @@ mkdir config_files
 
 # shellcheck disable=SC2154 #input dynamically set by terraform
 getFiles(){
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/RHEL_8_4_0/osquery.flags > config_files/osquery.flags
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/RHEL_8_4_0/osquery.conf > config_files/osquery.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/RHEL_8_4_0/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/''/script_files/RHEL_8_4_0/td-agent-bit.conf > config_files/td-agent-bit.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/37737branch_input/script_files/RHEL_8_4_0/td-agent-bit.conf > config_files/td-agent-bit.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/37739branch_input/script_files/RHEL_8_4_0/telegraf.conf > config_files/telegraf.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/37742branch_input/script_files/RHEL_8_4_0/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/37748branch_input/script_files/RHEL_8_4_0/osquery.flags > config_files/osquery.flags
 
 }
 
