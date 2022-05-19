@@ -10,10 +10,10 @@ getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
     rm "config_files/*"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/td-agent-bit.conf > config_files/td-agent-bit.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.flags > config_files/osquery.flags
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/UBUNTU_20_04_LTS/osquery.conf > config_files/osquery.conf
 
 }
 
@@ -159,7 +159,7 @@ config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
-appgroup="UNSET"
+appgroup=""
 branch_input="main"
 
 if [ "$1" == "--help" ]; then
@@ -313,28 +313,36 @@ read -r -d '' AWS_EC2 <<'EOF'
    hostname true
    vpc_id true
 EOF
-else 
-# shellcheck disable=SC2154 #used in downstream script
-    AWS_EC2=""
-fi
 
 echo "AWS_EC2: ${AWS_EC2}"
 
 sed -i "s/REPLACE_WITH_OBSERVE_EC2_OPTION/$AWS_EC2/g" ./*
 
-# shellcheck disable=SC2154 #used in downstream script
-if [ "$appgroup" != "UNSET" ]; then
-read -r -d '' APP_GRP <<'EOF'
-Record appgroup "${appgroup}"
-EOF
 else 
 # shellcheck disable=SC2154 #used in downstream script
-    APP_GRP=""
+AWS_EC2=""
+echo "AWS_EC2: ${AWS_EC2}"
+
+sed -i "s/REPLACE_WITH_OBSERVE_EC2_OPTION/$AWS_EC2/g" ./*
 fi
 
-echo "APP_GRP: ${APP_GRP}"
 
-sed -i "s/REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/$APP_GRP/g" ./*
+
+
+
+# # shellcheck disable=SC2154 #used in downstream script
+# if [ "$appgroup" != "UNSET" ]; then
+# read -r -d '' APP_GRP <<'EOF'
+# Record appgroup "${appgroup}"
+# EOF
+# else 
+# # shellcheck disable=SC2154 #used in downstream script
+#     APP_GRP=""
+# fi
+
+# echo "APP_GRP: ${APP_GRP}"
+
+sed -i "s/REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/$appgroup/g" ./*
 
 # shellcheck disable=SC2154 #set by input
 testEject "${testeject}" "EJECT2"
