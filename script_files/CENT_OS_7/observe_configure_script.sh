@@ -9,10 +9,11 @@ mkdir config_files
 getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/telegraf.conf > config_files/telegraf.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.conf > config_files/osquery.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.flags > config_files/osquery.flags
+    rm "config_files/*"
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.conf > config_files/osquery.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/telegraf.conf > config_files/telegraf.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/td-agent-bit.conf > config_files/td-agent-bit.conf
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.flags > config_files/osquery.flags
 
 }
 
@@ -132,10 +133,6 @@ if [[ "$bail" == "$bailPosition" ]]; then
     echo "Position = $bailPosition"
     echo "$SPACER"
     echo "$SPACER"
-
-    if [[ "$bailPosition" == "EJECT2" ]]; then
-      removeConfigDirectory
-    fi
     exit 0;
 fi
 }
