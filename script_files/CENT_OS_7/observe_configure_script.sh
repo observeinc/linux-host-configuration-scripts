@@ -10,10 +10,10 @@ getFiles(){
     # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
     local branch_replace="$1"
     rm "config_files/*"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/telegraf.conf > config_files/telegraf.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.conf > config_files/osquery.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.flags > config_files/osquery.flags
+curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/telegraf.conf > config_files/telegraf.conf
 curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/td-agent-bit.conf > config_files/td-agent-bit.conf
-curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"$branch_replace"/script_files/CENT_OS_7/osquery.conf > config_files/osquery.conf
 
 }
 
@@ -320,12 +320,12 @@ fi
 
 echo "AWS_EC2: ${AWS_EC2}"
 
-sed -i "s/REPLACE_WITH_OBSERVE_EC2_OPTION/r $AWS_EC2/g" ./*
+sed -i "s/REPLACE_WITH_OBSERVE_EC2_OPTION/$AWS_EC2/g" ./*
 
 # shellcheck disable=SC2154 #used in downstream script
 if [ "$appgroup" != "UNSET" ]; then
 read -r -d '' APP_GRP <<'EOF'
-Record appgroup $appgroup
+Record appgroup "${appgroup}"
 EOF
 else 
 # shellcheck disable=SC2154 #used in downstream script
@@ -334,7 +334,7 @@ fi
 
 echo "APP_GRP: ${APP_GRP}"
 
-sed -i "s/REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/r $APP_GRP/g" ./*
+sed -i "s/REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/$APP_GRP/g" ./*
 
 # shellcheck disable=SC2154 #set by input
 testEject "${testeject}" "EJECT2"
