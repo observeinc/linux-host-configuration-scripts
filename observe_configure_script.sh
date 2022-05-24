@@ -1,25 +1,37 @@
 #!/bin/bash
-# Run this to make executable - # chmod u=rwx,g=rx,o=r configure_script.sh
 
 cd ~ || exit
 
-mkdir config_files
+config_file_directory="$HOME/observe_config_files"
+
+mkdir "$config_file_directory"
 
 getConfigurationFiles(){
     local branch_replace="$1"
-    rm "config_files/*"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.conf > config_files/osquery.conf
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/telegraf.conf > config_files/telegraf.conf
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/td-agent-bit.conf > config_files/td-agent-bit.conf
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.flags > config_files/osquery.flags
+
+    if [ ! -f "$config_file_directory/osquery.conf" ]; then
+      curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.conf > "$config_file_directory/osquery.conf"
+    fi 
+
+    if [ ! -f "$config_file_directory/telegraf.conf" ]; then
+      curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/telegraf.conf > "$config_file_directory/telegraf.conf"
+    fi 
+
+    if [ ! -f "$config_file_directory/td-agent-bit.conf" ]; then
+      curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/td-agent-bit.conf > "$config_file_directory/td-agent-bit.conf"
+    fi 
+
+    if [ ! -f "$config_file_directory/osquery.flags" ]; then
+      curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.flags > "$config_file_directory/osquery.flags"
+    fi
 }
 
 generateTestKey(){
-echo "${OBSERVE_TEST_RUN_KEY}"
+  echo "${OBSERVE_TEST_RUN_KEY}"
 }
 
 if [ -f /etc/os-release ]; then
-
+    #shellcheck disable=SC1091
     . /etc/os-release
 
     OS=$( echo "${ID}" | tr '[:upper:]' '[:lower:]')
@@ -274,7 +286,7 @@ fi
 
 testEject "${testeject}" "EJECT2"
 
-config_path="$HOME/config_files"
+config_path="$config_file_directory"
 # https://docs.observeinc.com/en/latest/content/integrations/linux/linux.html
 
 printMessage(){
