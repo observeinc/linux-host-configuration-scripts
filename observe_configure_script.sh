@@ -361,10 +361,11 @@ case ${OS} in
       printMessage "osquery"
 
       curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
-        sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
-        sudo yum-config-manager --enable osquery-s3-rpm-repo
-        sudo yum install osquery -y
-        sudo service osqueryd start 2>/dev/null || true
+      
+      sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
+      sudo yum-config-manager --enable osquery-s3-rpm-repo
+      sudo yum install osquery -y
+      sudo service osqueryd start 2>/dev/null || true
 
 
       # ################
@@ -382,7 +383,7 @@ case ${OS} in
       sudo cp "$sourcefilename" "$filename"
 
       sourcefilename=$config_file_directory/osquery.flags
-      filename=/etc/osquery/osquery.flagsosquery_flags_filename=/etc/osquery/osquery.flags
+      filename=/etc/osquery/osquery.flags
       osquery_flags_filename=/etc/osquery/osquery.flags
 
       if [ -f "$filename" ]
@@ -478,7 +479,7 @@ EOT
       # ################
       sourcefilename=$config_file_directory/osquery.conf
       filename=/etc/osquery/osquery.conf
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+
       osquery_conf_filename=/etc/osquery/osquery.conf
 
       if [ -f "$filename" ]
@@ -490,7 +491,7 @@ EOT
 
       sourcefilename=$config_file_directory/osquery.flags
       filename=/etc/osquery/osquery.flags
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+    
       osquery_flags_filename=/etc/osquery/osquery.flags
 
       if [ -f "$filename" ]
@@ -523,7 +524,7 @@ EOF
 
       sourcefilename=$config_file_directory/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
 
       if [ -f "$filename" ]
@@ -553,7 +554,7 @@ EOF
 
       sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+
       telegraf_conf_filename=/etc/telegraf/telegraf.conf
 
       if [ -f "$filename" ]
@@ -594,7 +595,7 @@ EOT
       # ################
       sourcefilename=$config_file_directory/osquery.conf
       filename=/etc/osquery/osquery.conf
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+
       osquery_conf_filename=/etc/osquery/osquery.conf
 
       if [ -f "$filename" ]
@@ -606,7 +607,7 @@ EOT
 
       sourcefilename=$config_file_directory/osquery.flags
       filename=/etc/osquery/osquery.flags
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+
       osquery_flags_filename=/etc/osquery/osquery.flags
 
       if [ -f "$filename" ]
@@ -625,7 +626,7 @@ EOT
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
 
-      echo deb https://packages.fluentbit.io/ubuntu/${CODENAME} ${CODENAME} main | sudo tee -a /etc/apt/sources.list
+      echo deb https://packages.fluentbit.io/ubuntu/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
 
       sudo apt-get update
       sudo apt-get install -y td-agent-bit
@@ -651,6 +652,7 @@ EOT
       printMessage "telegraf"  
 
       wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+          #shellcheck disable=SC1091
       source /etc/lsb-release
       if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
       then
