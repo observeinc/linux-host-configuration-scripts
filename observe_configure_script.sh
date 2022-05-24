@@ -354,7 +354,7 @@ case ${OS} in
       # #####################################
       printMessage "fluent"
 
-sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null <<EOT
+sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null << EOT
 [td-agent-bit]
 name = TD Agent Bit
 baseurl = https://packages.fluentbit.io/amazonlinux/2/\$basearch/
@@ -384,7 +384,7 @@ EOT
       # #####################################
       printMessage "telegraf"
 
-      sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null <<- EOT
+sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null << EOT
 [influxdb]
 name = InfluxDB Repository - RHEL
 baseurl = https://repos.influxdata.com/rhel/7/x86_64/stable/
@@ -392,6 +392,7 @@ enabled = 1
 gpgcheck = 1
 gpgkey = https://repos.influxdata.com/influxdb.key
 EOT
+      
       sudo yum install telegraf -y
 
       sourcefilename=$config_file_directory/telegraf.conf
@@ -537,8 +538,8 @@ EOF
 
       if ! grep -Fq https://pkg.osquery.io/deb /etc/apt/sources.list.d/osquery.list
       then
-      sudo tee -a /etc/apt/sources.list.d/osquery.list > /dev/null <<- EOT
-        deb [arch=amd64] https://pkg.osquery.io/deb deb main
+sudo tee -a /etc/apt/sources.list.d/osquery.list > /dev/null << EOT
+deb [arch=amd64] https://pkg.osquery.io/deb deb main
 EOT
       fi
 
@@ -609,8 +610,8 @@ EOT
       source /etc/lsb-release
       if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
       then
-        sudo tee -a /etc/apt/sources.list.d/influxdb.list > /dev/null <<- EOT
-        deb https://repos.influxdata.com/"${DISTRIB_ID,,}" "${DISTRIB_CODENAME}" stable
+sudo tee -a /etc/apt/sources.list.d/influxdb.list > /dev/null << EOT
+deb https://repos.influxdata.com/"${DISTRIB_ID,,}" "${DISTRIB_CODENAME}" stable
 EOT
       fi
 
