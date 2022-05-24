@@ -10,9 +10,10 @@ getConfigurationFiles(){
     SPACER=$(generateSpacer)
     if [ ! -d "$config_file_directory" ]; then
       mkdir "$config_file_directory"
-      echo "$SPACER $config_file_directory created $SPACER"
+      echo "$SPACER $config_file_directory CREATED $SPACER"
     else 
-      rm -f "$config_file_directory/*"
+      rm -r "${config_file_directory:?}/*"
+      echo "$SPACER $config_file_directory DELETED $SPACER"
     fi
 
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
