@@ -507,14 +507,14 @@ EOT
       # #####################################
       printMessage "fluent" 
 
-      cat <<- EOF | sudo tee /etc/yum.repos.d/td-agent-bit.repo
-      [td-agent-bit]
-      name = TD Agent Bit
-      baseurl = https://packages.fluentbit.io/centos/\$releasever/\$basearch/
-      gpgcheck=1
-      repo_gpgcheck=1
-      gpgkey=https://packages.fluentbit.io/fluentbit.key
-      enabled=1
+cat << EOF | sudo tee /etc/yum.repos.d/td-agent-bit.repo
+[td-agent-bit]
+name = TD Agent Bit
+baseurl = https://packages.fluentbit.io/centos/\$releasever/\$basearch/
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://packages.fluentbit.io/fluentbit.key
+enabled=1
 EOF
 
       sudo yum install td-agent-bit -y
@@ -540,13 +540,13 @@ EOF
       # #####################################
       printMessage "telegraf" 
 
-      cat <<- EOF | sudo tee /etc/yum.repos.d/influxdb.repo
-      [influxdb]
-      name = InfluxDB Repository - RHEL \$releasever
-      baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
-      enabled = 1
-      gpgcheck = 0
-      gpgkey = https://repos.influxdata.com/influxdb.key
+cat << EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+[influxdb]
+name = InfluxDB Repository - RHEL \$releasever
+baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+enabled = 1
+gpgcheck = 0
+gpgkey = https://repos.influxdata.com/influxdb.key
 EOF
 
       sudo yum install telegraf -y
