@@ -13,13 +13,15 @@ getConfigurationFiles(){
       echo "$SPACER $config_file_directory CREATED $SPACER"
     else 
       rm -r "${config_file_directory:?}/*"
+      echo "$SPACER"
       echo "$SPACER $config_file_directory DELETED $SPACER"
+      ls "$config_file_directory"
+      echo "$SPACER"
     fi
 
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.conf" 
       filename="$config_file_directory/osquery.conf"
-
       echo "$filename"
 
       echo "$url"
