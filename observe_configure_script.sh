@@ -4,10 +4,12 @@ cd ~ || exit
 
 config_file_directory="$HOME/observe_config_files"
 
-mkdir "$config_file_directory"
-
 getConfigurationFiles(){
     local branch_replace="$1"
+
+    if [ ! -d "$config_file_directory" ]; then
+      mkdir "$config_file_directory"
+    fi
 
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
       curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.conf > "$config_file_directory/osquery.conf"
