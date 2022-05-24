@@ -12,9 +12,10 @@ getConfigurationFiles(){
       mkdir "$config_file_directory"
       echo "$SPACER $config_file_directory CREATED $SPACER"
     else 
-      rm "${config_file_directory:?}/*"
+      rm "${config_file_directory:?}"/*
       echo "$SPACER"
-      echo "$SPACER $config_file_directory DELETED $SPACER"
+      echo "$config_file_directory DELETED" 
+      echo "$SPACER"
       ls "$config_file_directory"
       echo "$SPACER"
     fi
