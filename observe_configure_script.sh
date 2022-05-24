@@ -17,7 +17,7 @@ getConfigurationFiles(){
     fi
 
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/\"${branch_replace}\"/config_files/osquery.conf" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.conf" 
       filename="$config_file_directory/osquery.conf"
 
       echo "$filename"
@@ -29,7 +29,7 @@ getConfigurationFiles(){
     fi 
 
     if [ ! -f "$config_file_directory/telegraf.conf" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/\"${branch_replace}\"/config_files/telegraf.conf" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/telegraf.conf" 
       filename="$config_file_directory/telegraf.conf"
       
       echo "$filename"
@@ -41,7 +41,7 @@ getConfigurationFiles(){
     fi 
 
     if [ ! -f "$config_file_directory/td-agent-bit.conf" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/\"${branch_replace}\"/config_files/td-agent-bit.conf" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/td-agent-bit.conf" 
       filename="$config_file_directory/td-agent-bit.conf"
       
       echo "$filename"
@@ -53,7 +53,7 @@ getConfigurationFiles(){
     fi 
 
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/\"${branch_replace}\"/config_files/osquery.flags" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.flags" 
       filename="$config_file_directory/osquery.flags"
       
       echo "$filename"
