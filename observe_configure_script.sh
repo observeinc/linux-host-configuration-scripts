@@ -354,7 +354,7 @@ case ${OS} in
       # #####################################
       printMessage "fluent"
 
-      sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null <<EOT
+      sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null <<-EOT
       [td-agent-bit]
       name = TD Agent Bit
       baseurl = https://packages.fluentbit.io/amazonlinux/2/\$basearch/
@@ -383,7 +383,7 @@ EOT
       # #####################################
       printMessage "telegraf"
 
-      sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null <<EOT
+      sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null <<- EOT
       [influxdb]
       name = InfluxDB Repository - RHEL
       baseurl = https://repos.influxdata.com/rhel/7/x86_64/stable/
@@ -461,7 +461,7 @@ EOT
       # #####################################
       printMessage "fluent" 
 
-      cat << EOF | sudo tee /etc/yum.repos.d/td-agent-bit.repo
+      cat <<- EOF | sudo tee /etc/yum.repos.d/td-agent-bit.repo
       [td-agent-bit]
       name = TD Agent Bit
       baseurl = https://packages.fluentbit.io/centos/\$releasever/\$basearch/
@@ -494,7 +494,7 @@ EOF
       # #####################################
       printMessage "telegraf" 
 
-      cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+      cat <<- EOF | sudo tee /etc/yum.repos.d/influxdb.repo
       [influxdb]
       name = InfluxDB Repository - RHEL \$releasever
       baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
@@ -536,7 +536,7 @@ EOF
 
       if ! grep -Fq https://pkg.osquery.io/deb /etc/apt/sources.list.d/osquery.list
       then
-      sudo tee -a /etc/apt/sources.list.d/osquery.list > /dev/null <<-EOT
+      sudo tee -a /etc/apt/sources.list.d/osquery.list > /dev/null <<- EOT
         deb [arch=amd64] https://pkg.osquery.io/deb deb main
 EOT
       fi
@@ -608,7 +608,7 @@ EOT
       source /etc/lsb-release
       if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
       then
-        sudo tee -a /etc/apt/sources.list.d/influxdb.list > /dev/null <<EOT
+        sudo tee -a /etc/apt/sources.list.d/influxdb.list > /dev/null <<- EOT
         deb https://repos.influxdata.com/"${DISTRIB_ID,,}" "${DISTRIB_CODENAME}" stable
 EOT
       fi
