@@ -125,7 +125,7 @@ fi
 }
 
 removeConfigDirectory() {
-      rm -f -R config_path
+      rm -f -R "$config_file_directory"
 }
 
 SPACER=$(generateSpacer)
