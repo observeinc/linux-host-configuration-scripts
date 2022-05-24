@@ -266,7 +266,7 @@ getConfigurationFiles "$branch_input"
 
 echo "$SPACER"
 
-cd config_files || exit
+cd "$config_file_directory" || exit
 
 sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
 
