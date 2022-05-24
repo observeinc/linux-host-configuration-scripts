@@ -322,7 +322,7 @@ case ${OS} in
 
 
       # ################
-      sourcefilename=$config_path/osquery.conf
+      sourcefilename=$config_file_directory/osquery.conf
       filename=/etc/osquery/osquery.conf
 
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
@@ -335,7 +335,7 @@ case ${OS} in
 
       sudo cp "$sourcefilename" "$filename"
 
-      sourcefilename=$config_path/osquery.flags
+      sourcefilename=$config_file_directory/osquery.flags
       filename=/etc/osquery/osquery.flagsosquery_flags_filename=/etc/osquery/osquery.flags
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       osquery_flags_filename=/etc/osquery/osquery.flags
@@ -365,7 +365,7 @@ EOT
 
       sudo yum install td-agent-bit -y
 
-      sourcefilename=$config_path/td-agent-bit.conf
+      sourcefilename=$config_file_directory/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
@@ -394,7 +394,7 @@ gpgkey = https://repos.influxdata.com/influxdb.key
 EOT
       sudo yum install telegraf -y
 
-      sourcefilename=$config_path/telegraf.conf
+      sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
       
       telegraf_conf_filename=/etc/telegraf/telegraf.conf
@@ -431,7 +431,7 @@ EOT
 
 
       # ################
-      sourcefilename=$config_path/osquery.conf
+      sourcefilename=$config_file_directory/osquery.conf
       filename=/etc/osquery/osquery.conf
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       osquery_conf_filename=/etc/osquery/osquery.conf
@@ -443,7 +443,7 @@ EOT
 
       sudo cp "$sourcefilename" "$filename"
 
-      sourcefilename=$config_path/osquery.flags
+      sourcefilename=$config_file_directory/osquery.flags
       filename=/etc/osquery/osquery.flags
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       osquery_flags_filename=/etc/osquery/osquery.flags
@@ -476,7 +476,7 @@ EOF
 
       sudo service td-agent-bit start
 
-      sourcefilename=$config_path/td-agent-bit.conf
+      sourcefilename=$config_file_directory/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
@@ -506,7 +506,7 @@ EOF
 
       sudo yum install telegraf -y
 
-      sourcefilename=$config_path/telegraf.conf
+      sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       telegraf_conf_filename=/etc/telegraf/telegraf.conf
@@ -547,7 +547,7 @@ EOT
       sudo service osqueryd start 2>/dev/null || true
 
       # ################
-      sourcefilename=$config_path/osquery.conf
+      sourcefilename=$config_file_directory/osquery.conf
       filename=/etc/osquery/osquery.conf
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       osquery_conf_filename=/etc/osquery/osquery.conf
@@ -559,7 +559,7 @@ EOT
 
       sudo cp "$sourcefilename" "$filename"
 
-      sourcefilename=$config_path/osquery.flags
+      sourcefilename=$config_file_directory/osquery.flags
       filename=/etc/osquery/osquery.flags
       # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       osquery_flags_filename=/etc/osquery/osquery.flags
@@ -586,7 +586,7 @@ EOT
       sudo apt-get install -y td-agent-bit
       sudo service td-agent-bit start
 
-      sourcefilename=$config_path/td-agent-bit.conf
+      sourcefilename=$config_file_directory/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
  
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
@@ -618,7 +618,7 @@ EOT
       sudo apt-get install -y telegraf
       sudo apt-get install -y ntp
 
-      sourcefilename=$config_path/telegraf.conf
+      sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
 
       telegraf_conf_filename=/etc/telegraf/telegraf.conf
