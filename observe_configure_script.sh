@@ -11,26 +11,56 @@ getConfigurationFiles(){
     if [ ! -d "$config_file_directory" ]; then
       mkdir "$config_file_directory"
       echo "$SPACER $config_file_directory created $SPACER"
+    else 
+      rm -f "$config_file_directory/*"
     fi
 
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
-      curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.conf > "$config_file_directory/osquery.conf"
-      echo "$SPACER $config_file_directory/osquery.conf created $SPACER"    
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/\"${branch_replace}\"/config_files/osquery.conf" 
+      filename="$config_file_directory/osquery.conf"
+
+      echo "$filename"
+
+      echo "$url"
+      curl "$url" > "$filename"
+
+      echo "$SPACER $filename created $SPACER"    
     fi 
 
     if [ ! -f "$config_file_directory/telegraf.conf" ]; then
-      curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/telegraf.conf > "$config_file_directory/telegraf.conf"
-      echo "$SPACER $config_file_directory/telegraf.conf created $SPACER"  
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/\"${branch_replace}\"/config_files/telegraf.conf" 
+      filename="$config_file_directory/telegraf.conf"
+      
+      echo "$filename"
+
+      echo "$url"
+      curl "$url" > "$filename"
+
+      echo "$SPACER $filename created $SPACER"
     fi 
 
     if [ ! -f "$config_file_directory/td-agent-bit.conf" ]; then
-      curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/td-agent-bit.conf > "$config_file_directory/td-agent-bit.conf"
-      echo "$SPACER $config_file_directory/td-agent-bit.conf created $SPACER"  
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/\"${branch_replace}\"/config_files/td-agent-bit.conf" 
+      filename="$config_file_directory/td-agent-bit.conf"
+      
+      echo "$filename"
+
+      echo "$url"
+      curl "$url" > "$filename"
+
+      echo "$SPACER $filename created $SPACER"
     fi 
 
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
-      curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.flags > "$config_file_directory/osquery.flags"
-      echo "$SPACER $config_file_directory/osquery.flags created $SPACER"  
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/\"${branch_replace}\"/config_files/osquery.flags" 
+      filename="$config_file_directory/osquery.flags"
+      
+      echo "$filename"
+
+      echo "$url"
+      curl "$url" > "$filename"
+
+      echo "$SPACER $filename created $SPACER"
     fi
 }
 
@@ -294,7 +324,6 @@ fi
 
 testEject "${testeject}" "EJECT2"
 
-config_path="$config_file_directory"
 # https://docs.observeinc.com/en/latest/content/integrations/linux/linux.html
 
 printMessage(){
@@ -308,7 +337,7 @@ printMessage(){
 
 case ${OS} in
     amzn|amazonlinux)
-      echo "Amazon OS"
+    echo "Amazon OS"
       #####################################
       # osquery
       #####################################
@@ -325,7 +354,7 @@ case ${OS} in
       sourcefilename=$config_file_directory/osquery.conf
       filename=/etc/osquery/osquery.conf
 
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+
       osquery_conf_filename=/etc/osquery/osquery.conf
 
       if [ -f "$filename" ]
@@ -337,7 +366,6 @@ case ${OS} in
 
       sourcefilename=$config_file_directory/osquery.flags
       filename=/etc/osquery/osquery.flagsosquery_flags_filename=/etc/osquery/osquery.flags
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       osquery_flags_filename=/etc/osquery/osquery.flags
 
       if [ -f "$filename" ]
@@ -367,7 +395,6 @@ EOT
 
       sourcefilename=$config_file_directory/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
 
       if [ -f "$filename" ]
