@@ -6,25 +6,31 @@ config_file_directory="$HOME/observe_config_files"
 
 getConfigurationFiles(){
     local branch_replace="$1"
-
+    local SPACER
+    SPACER=$(generateSpacer)
     if [ ! -d "$config_file_directory" ]; then
       mkdir "$config_file_directory"
+      echo "$SPACER $config_file_directory created $SPACER"
     fi
 
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
       curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.conf > "$config_file_directory/osquery.conf"
+      echo "$SPACER $config_file_directory/osquery.conf created $SPACER"    
     fi 
 
     if [ ! -f "$config_file_directory/telegraf.conf" ]; then
       curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/telegraf.conf > "$config_file_directory/telegraf.conf"
+      echo "$SPACER $config_file_directory/telegraf.conf created $SPACER"  
     fi 
 
     if [ ! -f "$config_file_directory/td-agent-bit.conf" ]; then
       curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/td-agent-bit.conf > "$config_file_directory/td-agent-bit.conf"
+      echo "$SPACER $config_file_directory/td-agent-bit.conf created $SPACER"  
     fi 
 
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
       curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.flags > "$config_file_directory/osquery.flags"
+      echo "$SPACER $config_file_directory/osquery.flags created $SPACER"  
     fi
 }
 
