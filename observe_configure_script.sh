@@ -232,6 +232,10 @@ if ((validate_endpoint != 1 )); then
     echo "Invalid value for customer_id or ingest_token"
     echo "$curl_endpoint"
     exit 1
+else
+    echo "$SPACER"
+    echo "Successfully validated customer_id and ingest_token"
+    echo "$curl_endpoint"
 fi
 
 echo
