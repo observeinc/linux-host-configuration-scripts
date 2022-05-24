@@ -22,48 +22,61 @@ getConfigurationFiles(){
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.conf" 
       filename="$config_file_directory/osquery.conf"
-      echo "$filename"
-
-      echo "$url"
+      
+      echo "$SPACER"
+      echo "filename = $filename"
+      echo "$SPACER"
+      echo "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER $filename created $SPACER"    
+      echo "$SPACER"
+      echo "$filename created"
+      echo "$SPACER"    
     fi 
 
     if [ ! -f "$config_file_directory/telegraf.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/telegraf.conf" 
       filename="$config_file_directory/telegraf.conf"
       
-      echo "$filename"
-
-      echo "$url"
+      echo "$SPACER"
+      echo "filename = $filename"
+      echo "$SPACER"
+      echo "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER $filename created $SPACER"
+      echo "$SPACER"
+      echo "$filename created"
+      echo "$SPACER"    
     fi 
 
     if [ ! -f "$config_file_directory/td-agent-bit.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/td-agent-bit.conf" 
       filename="$config_file_directory/td-agent-bit.conf"
       
-      echo "$filename"
-
-      echo "$url"
+      echo "$SPACER"
+      echo "filename = $filename"
+      echo "$SPACER"
+      echo "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER $filename created $SPACER"
+      echo "$SPACER"
+      echo "$filename created"
+      echo "$SPACER"    
     fi 
 
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.flags" 
       filename="$config_file_directory/osquery.flags"
       
-      echo "$filename"
-
-      echo "$url"
+      echo "$SPACER"
+      echo "filename = $filename"
+      echo "$SPACER"
+      echo "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER $filename created $SPACER"
+      echo "$SPACER"
+      echo "$filename created"
+      echo "$SPACER"    
     fi
 }
 
