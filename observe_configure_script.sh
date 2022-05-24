@@ -5,14 +5,13 @@ cd ~ || exit
 
 mkdir config_files
 
-getFiles(){
-    # shellcheck disable=SC2034 #value in string TERRAFORM_REPLACE_GITHUB_CURL_COMMANDS
+getConfigurationFiles(){
     local branch_replace="$1"
     rm "config_files/*"
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/universal/config_files/osquery.conf > config_files/osquery.conf
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/universal/config_files/telegraf.conf > config_files/telegraf.conf
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/universal/config_files/td-agent-bit.conf > config_files/td-agent-bit.conf
-    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/universal/config_files/osquery.flags > config_files/osquery.flags
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.conf > config_files/osquery.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/telegraf.conf > config_files/telegraf.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/td-agent-bit.conf > config_files/td-agent-bit.conf
+    curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/"${branch_replace}"/config_files/osquery.flags > config_files/osquery.flags
 }
 
 generateTestKey(){
@@ -49,7 +48,7 @@ curlObserve(){
 
 }
 
-help(){
+printHelp(){
       printf "Required inputs\n"
       printf "Required --customer_id YOUR_CUSTOMERID \n"
       printf "Required --ingest_token YOUR_DATA_STREAM_TOKEN \n"
@@ -61,6 +60,7 @@ help(){
       printf "    controls fluentbit config for whether to use default ec2 metrics \n"
       printf "Optional --datacenter defaults to AWS\n"
       printf "Optional --appgroup id supplied sets value in fluentbit config\n"
+      printf "Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main}"
       printf "***************************\n"
       printf " Sample command:\n"
       printf "./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name collect.observe-staging.com --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP
@@ -74,14 +74,13 @@ requiredInputs(){
       printf "***************************\n"
       printf "* Error: Invalid argument.*\n"
       printf "***************************\n"
-      printVars
-      help
+      printVariables
+      printHelp
       exit 1
 
 }
 
-# shellcheck disable=SC2154 #set in downstream script
-printVars(){
+printVariables(){
       printf "***************************\n"
       printf "* VARIABLEs *\n"
       printf "***************************\n"
@@ -93,6 +92,7 @@ printVars(){
       echo "datacenter: ${datacenter}"
       echo "appgroup: ${appgroup}"
       echo "testeject: ${testeject}"
+      echo "branch_input: ${branch_input}"
       printf "***************************\n"
 }
 
@@ -119,9 +119,6 @@ SPACER=$(generateSpacer)
 echo "$SPACER"
 echo "Script starting ..."
 
-# shellcheck disable=SC2154 #input dynamically set by terraform
-#!/bin/bash
-
 echo "$SPACER"
 echo "Validate inputs ..."
 
@@ -139,7 +136,7 @@ if [ "$1" == "--help" ]; then
 echo "$SPACER"
 echo "Help - "
 echo "$SPACER"
-  help
+  printHelp
   exit 0
 fi
 
@@ -161,27 +158,21 @@ fi
           observe_host_name="$2"
           ;;
         --config_files_clean)
-        # shellcheck disable=SC2034 #used in downstream script
           config_files_clean="$2"
           ;;
         --ec2metadata)
-        # shellcheck disable=SC2034 #used in downstream script
           ec2metadata="$2"
           ;;
         --datacenter)
-        # shellcheck disable=SC2034 #used in downstream script
           datacenter="$2"
           ;;
         --appgroup)
-        # shellcheck disable=SC2034 #used in downstream script
           appgroup="$2"
           ;;
         --testeject)
-        # shellcheck disable=SC2034 #used in downstream script
           testeject="$2"
           ;;
         --branch_input)
-        # shellcheck disable=SC2034 #used in downstream script
           branch_input="$2"
           ;;
         *)
@@ -257,46 +248,43 @@ testEject "${testeject}" "EJECT1"
 
 echo "$SPACER"
 
-# shellcheck disable=SC2154 #input dynamically set by terraform
-getFiles "$branch_input"
+getConfigurationFiles "$branch_input"
 
 echo "$SPACER"
 
 cd config_files || exit
 
-# shellcheck disable=SC2154 #input dynamically set by terraform
-#!/bin/bash
-
 sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
+
 sed -i "s/REPLACE_WITH_HOSTNAME/${DEFAULT_OBSERVE_HOSTNAME}/g" ./*
-# shellcheck disable=SC2154 #used in downstream script
+
 sed -i "s/REPLACE_WITH_CUSTOMER_ID/${customer_id}/g" ./*
-# shellcheck disable=SC2154 #used in downstream script
+
 sed -i "s/REPLACE_WITH_CUSTOMER_INGEST_TOKEN/${ingest_token}/g" ./*
+
 sed -i "s/REPLACE_WITH_OBSERVE_ENVIRONMENT/${OBSERVE_ENVIRONMENT}/g" ./*
 
-# shellcheck disable=SC2154 #used in downstream script
 if [ "$ec2metadata" == TRUE ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_EC2_OPTION//g" ./*
 fi
 
-# shellcheck disable=SC2154 #used in downstream script
 if [ "$appgroup" != UNSET ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/Record appgroup ${appgroup}/g" ./*
 fi
 
-# shellcheck disable=SC2154 #set by input
 testEject "${testeject}" "EJECT2"
 
-# shellcheck disable=SC2154 #input dynamically set by terraform
 config_path="$HOME/config_files"
 # https://docs.observeinc.com/en/latest/content/integrations/linux/linux.html
 
-echo 
-echo "$SPACER"
-echo "osquery"
-echo "$SPACER"
-echo 
+printMessage(){
+  local message="$1"
+  echo 
+  echo "$SPACER"
+  echo "$message"
+  echo "$SPACER"
+  echo 
+}
 
 case ${OS} in
     amzn|amazonlinux)
@@ -304,11 +292,8 @@ case ${OS} in
       #####################################
       # osquery
       #####################################
-      echo 
-      echo "$SPACER"
-      echo "osquery"
-      echo "$SPACER"
-      echo 
+      printMessage "osquery"
+
       curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
         sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
         sudo yum-config-manager --enable osquery-s3-rpm-repo
@@ -347,11 +332,8 @@ case ${OS} in
       # #####################################
       # # fluent
       # #####################################
-      echo 
-      echo "$SPACER"
-      echo "fluent"
-      echo "$SPACER"
-      echo 
+      printMessage "fluent"
+
       sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null <<EOT
       [td-agent-bit]
       name = TD Agent Bit
@@ -379,11 +361,8 @@ EOT
       # #####################################
       # # telegraf
       # #####################################
-      echo 
-      echo "$SPACER"
-      echo "telegraf"
-      echo "$SPACER"
-      echo 
+      printMessage "telegraf"
+
       sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null <<EOT
       [influxdb]
       name = InfluxDB Repository - RHEL
@@ -396,7 +375,7 @@ EOT
 
       sourcefilename=$config_path/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+      
       telegraf_conf_filename=/etc/telegraf/telegraf.conf
 
       if [ -f "$filename" ]
@@ -417,11 +396,8 @@ EOT
       #####################################
       # osquery
       #####################################
-      echo 
-      echo "$SPACER"
-      echo "osquery"
-      echo "$SPACER"
-      echo 
+      printMessage "osquery" 
+
       sudo yum install yum-utils -y
 
       curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
@@ -463,11 +439,8 @@ EOT
       # #####################################
       # # fluent
       # #####################################
-      echo 
-      echo "$SPACER"
-      echo "fluent"
-      echo "$SPACER"
-      echo 
+      printMessage "fluent" 
+
       cat << EOF | sudo tee /etc/yum.repos.d/td-agent-bit.repo
       [td-agent-bit]
       name = TD Agent Bit
@@ -499,11 +472,8 @@ EOF
       # #####################################
       # # telegraf
       # #####################################
-      echo 
-      echo "$SPACER"
-      echo "telegraf"
-      echo "$SPACER"
-      echo 
+      printMessage "telegraf" 
+
       cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
       [influxdb]
       name = InfluxDB Repository - RHEL \$releasever
@@ -540,6 +510,8 @@ EOF
       #####################################
       # osquery
       #####################################
+      printMessage "osquery" 
+
       sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
 
       if ! grep -Fq https://pkg.osquery.io/deb /etc/apt/sources.list.d/osquery.list
@@ -583,11 +555,8 @@ EOT
       # #####################################
       # # fluent
       # #####################################
-      echo 
-      echo "$SPACER"
-      echo "fluent"
-      echo "$SPACER"
-      echo 
+      printMessage "fluent"  
+
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
 
       echo deb https://packages.fluentbit.io/ubuntu/${CODENAME} ${CODENAME} main | sudo tee -a /etc/apt/sources.list
@@ -598,7 +567,7 @@ EOT
 
       sourcefilename=$config_path/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+ 
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
 
       if [ -f "$filename" ]
@@ -613,11 +582,8 @@ EOT
       # #####################################
       # # telegraf
       # #####################################
-      echo 
-      echo "$SPACER"
-      echo "telegraf"
-      echo "$SPACER"
-      echo 
+      printMessage "telegraf"  
+
       wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
       source /etc/lsb-release
       if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
@@ -633,7 +599,7 @@ EOT
 
       sourcefilename=$config_path/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
-      # shellcheck disable=SC2034 #used downstream by input dynamically set by terraform
+
       telegraf_conf_filename=/etc/telegraf/telegraf.conf
 
       if [ -f "$filename" ]
@@ -653,12 +619,6 @@ EOT
           ;;
   esac
 
-
-
-
-
-# shellcheck disable=SC2154 #input dynamically set by terraform
-#!/bin/bash
 
 echo "$SPACER"
 echo "Check Services"
@@ -685,7 +645,6 @@ fi
 
 echo "$SPACER"
 echo "Check status - sudo service td-agent-bit status"
-# shellcheck disable=SC2154 #used in downstream script
 echo "Config file location: ${td_agent_bit_filename}"
 echo 
 
@@ -703,15 +662,14 @@ else
 
   curlObserve "osqueryd is NOT running" "osqueryd" "FAILURE"
 
-  # shellcheck disable=SC2046,SC2005 #hangs script if not echoed
-  echo $(sudo service osqueryd status)
+  sudo service osqueryd status
 fi 
 echo "$SPACER"
 echo "Check status - sudo service osqueryd status"
-# shellcheck disable=SC2154 #used in downstream script
+
 echo "Config file location: ${osquery_conf_filename}"
-# shellcheck disable=SC2154 #used in downstream script
-echo "Flag file location: ${osquery_flag_filename}"
+
+echo "Flag file location: ${osquery_flags_filename}"
 echo 
 
 echo "$SPACER"
@@ -727,12 +685,11 @@ else
 
   curlObserve "telegraf is NOT running" "telegraf" "FAILURE"
 
-  # shellcheck disable=SC2046,SC2005 #hangs script if not echoed
-  echo $(sudo service telegraf status)
+  sudo service telegraf status
 fi 
 echo "$SPACER"
 echo "Check status - sudo service telegraf status"
-# shellcheck disable=SC2154 #set in upstream script
+
 echo "Config file location: ${telegraf_conf_filename}"
 echo 
 echo "$SPACER"
@@ -740,7 +697,6 @@ echo
 echo "$SPACER"
 echo "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
 
-# shellcheck disable=SC2154 #set in upstream script
 if [ "$config_files_clean" == TRUE ]; then
   removeConfigDirectory
 fi
