@@ -148,6 +148,9 @@ requiredInputs(){
       printf "***************************\n"
       printVariables
       printHelp
+      echo "$SPACER"
+      echo "$END_OUTPUT"
+      echo "$SPACER"
       exit 1
 
 }
