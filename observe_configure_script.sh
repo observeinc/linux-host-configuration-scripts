@@ -116,6 +116,9 @@ curlObserve(){
 }
 
 printHelp(){
+      echo "$SPACER"
+      echo "HELP CONTENT"
+      echo "$SPACER"
       printf "Required inputs\n"
       printf "Required --customer_id YOUR_CUSTOMERID \n"
       printf "Required --ingest_token YOUR_DATA_STREAM_TOKEN \n"
@@ -200,9 +203,6 @@ appgroup="UNSET"
 branch_input="main"
 
 if [ "$1" == "--help" ]; then
-echo "$SPACER"
-echo "Help - "
-echo "$SPACER"
   printHelp
   exit 0
 fi
