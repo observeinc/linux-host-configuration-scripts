@@ -1,8 +1,10 @@
 #!/bin/bash
+END_OUTPUT="END_OF_OUTPUT"
 
-cd ~ || exit
+cd ~ || exit && echo "$SPACER $END_OUTPUT $SPACER"
 
 config_file_directory="$HOME/observe_config_files"
+
 
 getConfigurationFiles(){
     local branch_replace="$1"
@@ -175,6 +177,8 @@ if [[ "$bail" == "$bailPosition" ]]; then
     echo " TEST EJECTION "
     echo "Position = $bailPosition"
     echo "$SPACER"
+    echo "$END_OUTPUT"
+    echo "$SPACER"
     echo "$SPACER"
     exit 0;
 fi
@@ -204,6 +208,9 @@ branch_input="main"
 
 if [ "$1" == "--help" ]; then
   printHelp
+  echo "$SPACER"
+  echo "$END_OUTPUT"
+  echo "$SPACER"
   exit 0
 fi
 
@@ -289,6 +296,9 @@ if ((validate_endpoint != 1 )); then
     echo "$SPACER"
     echo "Invalid value for customer_id or ingest_token"
     echo "$curl_endpoint"
+    echo "$SPACER"
+    echo "$END_OUTPUT"
+    echo "$SPACER"
     exit 1
 else
     echo "$SPACER"
@@ -319,7 +329,7 @@ getConfigurationFiles "$branch_input"
 
 echo "$SPACER"
 
-cd "$config_file_directory" || exit
+cd "$config_file_directory" || exit && echo "$SPACER $END_OUTPUT $SPACER"
 
 sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
 
@@ -683,6 +693,9 @@ EOT
       ################################################################################################
     *)
         echo "Unknown OS"
+        echo "$SPACER"
+        echo "$END_OUTPUT"
+        echo "$SPACER"
         exit 1;
           ;;
   esac
@@ -768,3 +781,7 @@ echo "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
 if [ "$config_files_clean" == TRUE ]; then
   removeConfigDirectory
 fi
+
+echo "$SPACER"
+echo "$END_OUTPUT"
+echo "$SPACER"
