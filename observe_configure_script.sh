@@ -139,8 +139,8 @@ printHelp(){
       printf "./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name collect.observe-staging.com --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP
       
       \n"
-      printf "--config_files_clean TRUE --ec2metadata TRUE --datacenter myCompanyDataCenter --appgroup myAppGroup\n"
-      printf "***************************\n"
+      echo "--config_files_clean TRUE --ec2metadata TRUE --datacenter myCompanyDataCenter --appgroup myAppGroup"
+      echo "***************************"
 }
 
 requiredInputs(){
@@ -157,9 +157,9 @@ requiredInputs(){
 }
 
 printVariables(){
-      printf "***************************\n"
-      printf "* VARIABLEs *\n"
-      printf "***************************\n"
+      echo "***************************"
+      echo "* VARIABLEs *"
+      echo "***************************"
       echo "customer_id: ${customer_id}"
       echo "ingest_token: ${ingest_token}"
       echo "observe_host_name: ${observe_host_name}"
@@ -170,7 +170,7 @@ printVariables(){
       echo "testeject: ${testeject}"
       echo "validate_endpoint: ${validate_endpoint}"
       echo "branch_input: ${branch_input}"
-      printf "***************************\n"
+      echo "***************************"
 }
 
 testEject(){
