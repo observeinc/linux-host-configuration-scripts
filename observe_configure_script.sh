@@ -132,7 +132,8 @@ printHelp(){
       printf "    controls fluentbit config for whether to use default ec2 metrics \n"
       printf "Optional --datacenter defaults to AWS\n"
       printf "Optional --appgroup id supplied sets value in fluentbit config\n"
-      printf "Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main}"
+      printf "Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
+      printf "Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
       printf "***************************\n"
       printf " Sample command:\n"
       printf "./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name collect.observe-staging.com --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP
@@ -167,6 +168,7 @@ printVariables(){
       echo "datacenter: ${datacenter}"
       echo "appgroup: ${appgroup}"
       echo "testeject: ${testeject}"
+      echo "validate_endpoint: ${validate_endpoint}"
       echo "branch_input: ${branch_input}"
       printf "***************************\n"
 }
@@ -208,6 +210,7 @@ datacenter="AWS"
 testeject="NO"
 appgroup="UNSET"
 branch_input="main"
+validate_endpoint="TRUE"
 
 if [ "$1" == "--help" ]; then
   printHelp
@@ -252,6 +255,9 @@ fi
         --branch_input)
           branch_input="$2"
           ;;
+        --validate_endpoint)
+          validate_endpoint="$2"
+          ;;
         *)
           
       esac
@@ -276,11 +282,9 @@ echo "ec2metadata: ${ec2metadata}"
 echo "datacenter: ${datacenter}"
 echo "appgroup: ${appgroup}"
 echo "testeject: ${testeject}"
+echo "validate_endpoint: ${validate_endpoint}"
+echo "branch_input: ${branch_input}"
 
-echo "$SPACER"
-echo "Validate customer_id / ingest token ..."
-echo "$SPACER"
-echo
 
 OBSERVE_ENVIRONMENT="$observe_host_name"
 
@@ -288,28 +292,36 @@ DEFAULT_OBSERVE_HOSTNAME="${HOSTNAME}"
 
 DEFAULT_OBSERVE_DATA_CENTER="$datacenter"
 
-curl_endpoint=$(curl https://"${OBSERVE_ENVIRONMENT}"/v1/http/script_validation \
--H "Authorization: Bearer ${customer_id} ${ingest_token}" \
--H "Content-type: application/json" \
--d "{\"data\": {  \"datacenter\": \"${DEFAULT_OBSERVE_DATA_CENTER}\",\"host\": \"${DEFAULT_OBSERVE_HOSTNAME}\",\"message\": \"validating customer id and token\", \"os\": \"${TERRAFORM_REPLACE_OS_VALUE}\", \"result\": \"SUCCESS\",  \"script_run\": \"${DEFAULT_OBSERVE_DATA_CENTER}\" ,  \"OBSERVE_TEST_RUN_KEY\": \"${OBSERVE_TEST_RUN_KEY}\"}}")
+if [ "$validate_endpoint" == TRUE ]; then
+    
+    echo "$SPACER"
+    echo "Validate customer_id / ingest token ..."
+    echo "$SPACER"
+    echo
 
- validate_endpoint=$(echo "$curl_endpoint" | grep -c -Po '(?<="ok":)(true)')
+    curl_endpoint=$(curl https://"${OBSERVE_ENVIRONMENT}"/v1/http/script_validation \
+    -H "Authorization: Bearer ${customer_id} ${ingest_token}" \
+    -H "Content-type: application/json" \
+    -d "{\"data\": {  \"datacenter\": \"${DEFAULT_OBSERVE_DATA_CENTER}\",\"host\": \"${DEFAULT_OBSERVE_HOSTNAME}\",\"message\": \"validating customer id and token\", \"os\": \"${TERRAFORM_REPLACE_OS_VALUE}\", \"result\": \"SUCCESS\",  \"script_run\": \"${DEFAULT_OBSERVE_DATA_CENTER}\" ,  \"OBSERVE_TEST_RUN_KEY\": \"${OBSERVE_TEST_RUN_KEY}\"}}")
 
-if ((validate_endpoint != 1 )); then
-    echo "$SPACER"
-    echo "Invalid value for customer_id or ingest_token"
-    echo "$curl_endpoint"
-    echo "$SPACER"
-    echo "$END_OUTPUT"
-    echo "$SPACER"
-    exit 1
-else
-    echo "$SPACER"
-    echo "Successfully validated customer_id and ingest_token"
+    validate_endpoint_result=$(echo "$curl_endpoint" | grep -c -Po '(?<="ok":)(true)')
+
+    if ((validate_endpoint_result != 1 )); then
+        echo "$SPACER"
+        echo "Invalid value for customer_id or ingest_token"
+        echo "$curl_endpoint"
+        echo "$SPACER"
+        echo "$END_OUTPUT"
+        echo "$SPACER"
+        exit 1
+    else
+        echo "$SPACER"
+        echo "Successfully validated customer_id and ingest_token"
+    fi
+
+    echo
+
 fi
-
-echo
-
 
 echo "$SPACER"
 echo "Values for configuration:"
