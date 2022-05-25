@@ -142,9 +142,9 @@ printHelp(){
 }
 
 requiredInputs(){
-      echo "***************************"
+      echo "$SPACER"
       echo "* Error: Invalid argument.*"
-      echo "***************************"
+      echo "$SPACER"
       printVariables
       printHelp
       echo "$SPACER"
@@ -155,20 +155,20 @@ requiredInputs(){
 }
 
 printVariables(){
-      echo "***************************"
-      echo "* VARIABLEs *"
-      echo "***************************"
-      echo "customer_id: ${customer_id}"
-      echo "ingest_token: ${ingest_token}"
-      echo "observe_host_name: ${observe_host_name}"
-      echo "config_files_clean: ${config_files_clean}"
-      echo "ec2metadata: ${ec2metadata}"
-      echo "datacenter: ${datacenter}"
-      echo "appgroup: ${appgroup}"
-      echo "testeject: ${testeject}"
-      echo "validate_endpoint: ${validate_endpoint}"
-      echo "branch_input: ${branch_input}"
-      echo "***************************"
+      echo "$SPACER"
+      echo "* VARIABLES *"
+      echo "$SPACER"
+      echo "customer_id: $customer_id"
+      echo "ingest_token: $ingest_token"
+      echo "observe_host_name: $observe_host_name"
+      echo "config_files_clean: $config_files_clean"
+      echo "ec2metadata: $ec2metadata"
+      echo "datacenter: $datacenter"
+      echo "appgroup: $appgroup"
+      echo "testeject: $testeject"
+      echo "validate_endpoint: $validate_endpoint"
+      echo "branch_input: $branch_input"
+      echo "$SPACER"
 }
 
 testEject(){
