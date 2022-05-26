@@ -1,4 +1,4 @@
-# Configuraton script for UBUNTU_20_04_LTS
+# Configuraton script for Linux
 
 ## What does it do
 Inputs: 
@@ -53,3 +53,6 @@ curl -H 'Cache-Control: no-cache, no-store' "https://raw.githubusercontent.com/o
 
 
 ```
+
+## Known Issues
+ec2-metadata - setting flag to TRUE causes td-agent-bit agent to crash 
