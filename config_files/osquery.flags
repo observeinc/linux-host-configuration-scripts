@@ -12,3 +12,6 @@
 --logger_rotate=true
 --logger_rotate_size=262144000
 --logger_rotate_max_files=3
+--config_plugin=filesystem
+--logger_plugin=filesystem
+--database_path=/var/osquery/osquery.db
