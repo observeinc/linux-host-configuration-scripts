@@ -49,4 +49,4 @@ Assumes existence of environment variables
 
 1. Run following script
 ```
-curl -H 'Cache-Control: no-cache, no-store' "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --customer_id "YOUR_CUSTOMERID" --ingest_token "YOUR_DATA_STREAM_TOKEN" --observe_host_name "collect.observeinc.com" --config_files_clean TRUE --ec2metadata TRUE --datacenter "MYDATACENTER" --appgroup "MYAPPGROUP"
+curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --customer_id "YOUR_CUSTOMERID" --ingest_token "YOUR_DATA_STREAM_TOKEN" --observe_host_name "collect.observeinc.com" --config_files_clean TRUE --ec2metadata TRUE --datacenter "MYDATACENTER" --appgroup "MYAPPGROUP"
