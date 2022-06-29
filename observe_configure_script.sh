@@ -201,7 +201,8 @@ echo "Validate inputs ..."
 
 customer_id=0
 ingest_token=0
-observe_host_name="collect.observeinc.com"
+observe_host_name_base="https://collect.observe.com/"
+# observe_host_name="collect.observeinc.com" 
 config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
@@ -209,6 +210,25 @@ testeject="NO"
 appgroup="UNSET"
 branch_input="main"
 validate_endpoint="TRUE"
+
+# check for properly formatted url input - assumes - https://collect.observe[anything]/
+# we can modify this rule to be specific as needed
+regex='^(https?)://collect.observe[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*\/'
+
+
+if [[ $observe_host_name_base =~ $regex ]]
+then 
+    echo "$SPACER"
+    echo "$observe_host_name_base IS valid"
+    echo "$SPACER"
+else
+    echo "$SPACER"
+    echo "$observe_host_name_base IS NOT valid - example valid input - https://collect.observe.com/"
+    echo "$SPACER"
+    exit 1
+fi
+
+observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
 if [ "$1" == "--help" ]; then
   printHelp
