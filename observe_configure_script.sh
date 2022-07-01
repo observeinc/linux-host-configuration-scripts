@@ -292,7 +292,7 @@ fi
       requiredInputs
     fi
 
-validateObserveHostName "$observe_host_name_base"
+validateObserveHostName $observe_host_name_base
 
 observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
