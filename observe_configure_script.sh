@@ -136,7 +136,7 @@ printHelp(){
       echo "Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
       echo "***************************"
       echo " Sample command:"
-      echo "./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name collect.observe-staging.com --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP"
+      echo "./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observe-staging.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP"
       echo "--config_files_clean TRUE --ec2metadata TRUE --datacenter myCompanyDataCenter --appgroup myAppGroup"
       echo "***************************"
 }
@@ -191,6 +191,26 @@ removeConfigDirectory() {
       rm -f -R "$config_file_directory"
 }
 
+validateObserveHostName () {
+  local url="$1"
+  # check for properly formatted url input - assumes - https://collect.observe[anything]/
+  # we can modify this rule to be specific as needed
+  regex='^(https?)://collect.observe[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*\/'
+
+
+  if [[ $url =~ $regex ]]
+  then 
+      echo "$SPACER"
+      echo "$url IS valid"
+      echo "$SPACER"
+  else
+      echo "$SPACER"
+      echo "$url IS NOT valid - example valid input - https://collect.observe.com/"
+      echo "$SPACER"
+      exit 1
+  fi
+}
+
 SPACER=$(generateSpacer)
 
 echo "$SPACER"
@@ -201,7 +221,8 @@ echo "Validate inputs ..."
 
 customer_id=0
 ingest_token=0
-observe_host_name="collect.observeinc.com"
+observe_host_name_base="https://collect.observe.com/"
+# observe_host_name="collect.observeinc.com" 
 config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
@@ -209,6 +230,10 @@ testeject="NO"
 appgroup="UNSET"
 branch_input="main"
 validate_endpoint="TRUE"
+
+
+
+
 
 if [ "$1" == "--help" ]; then
   printHelp
@@ -233,7 +258,7 @@ fi
           ingest_token="$2"
           ;;
         --observe_host_name)
-          observe_host_name="$2"
+          observe_host_name_base="$2"
           ;;
         --config_files_clean)
           config_files_clean="$2"
@@ -267,13 +292,14 @@ fi
       requiredInputs
     fi
 
+validateObserveHostName $observe_host_name_base
 
-
-
+observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
 echo "$SPACER"
 echo "customer_id: ${customer_id}"
 echo "ingest_token: ${ingest_token}"
+echo "observe_host_name_base: ${observe_host_name_base}"
 echo "observe_host_name: ${observe_host_name}"
 echo "config_files_clean: ${config_files_clean}"
 echo "ec2metadata: ${ec2metadata}"
