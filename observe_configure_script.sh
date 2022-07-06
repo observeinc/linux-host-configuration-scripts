@@ -254,10 +254,10 @@ includeFiletdAgent(){
 
         case ${module} in
             linux_host)
-              cp "$config_file_directory/observe-linux-host.conf" /etc/td-agent-bit/observe-linux-host.conf;
+              sudo cp "$config_file_directory/observe-linux-host.conf" /etc/td-agent-bit/observe-linux-host.conf;
               ;;
             jenkins)
-              cp "$config_file_directory/observe-jenkins.conf" /etc/td-agent-bit/observe-jenkins.conf;
+              sudo cp "$config_file_directory/observe-jenkins.conf" /etc/td-agent-bit/observe-jenkins.conf;
               ;;
             *)
               echo "includeFiletdAgent function failed"
