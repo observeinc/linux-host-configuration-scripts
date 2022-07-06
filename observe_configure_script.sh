@@ -67,6 +67,36 @@ getConfigurationFiles(){
       echo "$SPACER"    
     fi 
 
+    if [ ! -f "$config_file_directory/observe-linux-host.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-linux-host.conf" 
+      filename="$config_file_directory/observe-linux-host.conf"
+      
+      echo "$SPACER"
+      echo "filename = $filename"
+      echo "$SPACER"
+      echo "url = $url"
+      curl "$url" > "$filename"
+
+      echo "$SPACER"
+      echo "$filename created"
+      echo "$SPACER"    
+    fi 
+
+    if [ ! -f "$config_file_directory/observe-jenkins.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-jenkins.conf" 
+      filename="$config_file_directory/observe-jenkins.conf"
+      
+      echo "$SPACER"
+      echo "filename = $filename"
+      echo "$SPACER"
+      echo "url = $url"
+      curl "$url" > "$filename"
+
+      echo "$SPACER"
+      echo "$filename created"
+      echo "$SPACER"    
+    fi 
+
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.flags" 
       filename="$config_file_directory/osquery.flags"
@@ -134,6 +164,9 @@ printHelp(){
       echo "Optional --appgroup id supplied sets value in fluentbit config"
       echo "Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
       echo "Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
+      echo "Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf"
+      echo "    can be combined with jenkins flag which add a config to fluentbit or only jenkons flag which only installs fluent bit with configs"
+      echo "Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
       echo "***************************"
       echo " Sample command:"
       echo "./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observe-staging.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP"
@@ -168,6 +201,8 @@ printVariables(){
       echo "testeject: $testeject"
       echo "validate_endpoint: $validate_endpoint"
       echo "branch_input: $branch_input"
+      echo "module: $module"
+      echo "observe_jenkins_path: ${observe_jenkins_path}"
       echo "$SPACER"
 }
 
@@ -211,6 +246,70 @@ validateObserveHostName () {
   fi
 }
 
+includeFiletdAgent(){
+  # Process modules
+  IFS=',' read -a CONFS <<< "$module"
+  for i in "${CONFS[@]}"; do
+        echo "includeFiletdAgent - $i"
+
+        case ${i} in
+            linux_host)
+              sudo cp "$config_file_directory/observe-linux-host.conf" /etc/td-agent-bit/observe-linux-host.conf;
+              ;;
+            jenkins)
+              sudo cp "$config_file_directory/observe-jenkins.conf" /etc/td-agent-bit/observe-jenkins.conf;
+              ;;
+            *)
+              echo "includeFiletdAgent function failed - i = $i"
+              echo "$SPACER"
+              echo "$END_OUTPUT"
+              echo "$SPACER"
+              exit 1;
+              ;;
+        esac
+  done
+}
+
+setInstallFlags(){
+  # Process modules
+  echo "$SPACER"
+  echo "setInstallFlags - module=$module"
+  echo "$SPACER"
+
+  IFS=',' read -a CONFS <<< "$module"
+  for i in "${CONFS[@]}"; do
+        echo "setInstallFlags - $i"
+
+        case ${i} in
+            linux_host)
+            echo "setInstallFlags linux_host flags"
+              osqueryinstall="TRUE"
+              telegrafinstall="TRUE"
+              fluentbitinstall="TRUE"
+              ;;
+            jenkins)
+              fluentbitinstall="TRUE"
+              ;;
+            *)
+              echo "setInstallFlags function failed - i = $i"
+              echo "$SPACER"
+              echo "$END_OUTPUT"
+              echo "$SPACER"
+              exit 1;
+              ;;
+        esac
+  done
+}
+
+printMessage(){
+  local message="$1"
+  echo 
+  echo "$SPACER"
+  echo "$message"
+  echo "$SPACER"
+  echo 
+}
+
 SPACER=$(generateSpacer)
 
 echo "$SPACER"
@@ -230,9 +329,11 @@ testeject="NO"
 appgroup="UNSET"
 branch_input="main"
 validate_endpoint="TRUE"
-
-
-
+module="linux_host"
+osqueryinstall="FALSE"
+telegrafinstall="FALSE"
+fluentbitinstall="FALSE"
+observe_jenkins_path="/var/lib/jenkins/"
 
 
 if [ "$1" == "--help" ]; then
@@ -278,6 +379,9 @@ fi
         --branch_input)
           branch_input="$2"
           ;;
+        --module)
+          module="$2"
+          ;;
         --validate_endpoint)
           validate_endpoint="$2"
           ;;
@@ -291,6 +395,8 @@ fi
     if [ "$customer_id" == 0 ] || [ "$ingest_token" == 0 ]; then
       requiredInputs
     fi
+
+
 
 validateObserveHostName $observe_host_name_base
 
@@ -308,6 +414,14 @@ echo "appgroup: ${appgroup}"
 echo "testeject: ${testeject}"
 echo "validate_endpoint: ${validate_endpoint}"
 echo "branch_input: ${branch_input}"
+echo "module: ${module}"
+echo "observe_jenkins_path: ${observe_jenkins_path}"
+
+setInstallFlags
+
+printMessage "osqueryinstall = $osqueryinstall"
+printMessage "telegrafinstall = $telegrafinstall"
+printMessage "fluentbitinstall = $fluentbitinstall"
 
 
 OBSERVE_ENVIRONMENT="$observe_host_name"
@@ -368,7 +482,7 @@ getConfigurationFiles "$branch_input"
 
 echo "$SPACER"
 
-cd "$config_file_directory" || exit && echo "$SPACER $END_OUTPUT $SPACER"
+cd "$config_file_directory" || (exit && echo "$SPACER CONFIG FILE DIRECTORY PROBLEM - $(pwd) - $config_file_directory - $END_OUTPUT $SPACER")
 
 sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
 
@@ -379,6 +493,8 @@ sed -i "s/REPLACE_WITH_CUSTOMER_ID/${customer_id}/g" ./*
 sed -i "s/REPLACE_WITH_CUSTOMER_INGEST_TOKEN/${ingest_token}/g" ./*
 
 sed -i "s/REPLACE_WITH_OBSERVE_ENVIRONMENT/${OBSERVE_ENVIRONMENT}/g" ./*
+
+sed -i "s:REPLACE_WITH_OBSERVE_JENKINS_PATH:${observe_jenkins_path}:g" ./*
 
 if [ "$ec2metadata" == TRUE ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_EC2_OPTION//g" ./*
@@ -392,61 +508,65 @@ testEject "${testeject}" "EJECT2"
 
 # https://docs.observeinc.com/en/latest/content/integrations/linux/linux.html
 
-printMessage(){
-  local message="$1"
-  echo 
-  echo "$SPACER"
-  echo "$message"
-  echo "$SPACER"
-  echo 
-}
+
+
+#####################################
+# BASELINEINSTALL - START
+#####################################
 
 case ${OS} in
     amzn|amazonlinux)
+    
     echo "Amazon OS"
+
       #####################################
       # osquery
       #####################################
-      printMessage "osquery"
+      if [ "$osqueryinstall" == TRUE ]; then
 
-      curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
-      
-      sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
-      sudo yum-config-manager --enable osquery-s3-rpm-repo
-      sudo yum install osquery -y
-      sudo service osqueryd start 2>/dev/null || true
+        printMessage "osquery"
 
-
-      # ################
-      sourcefilename=$config_file_directory/osquery.conf
-      filename=/etc/osquery/osquery.conf
+        curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
+        
+        sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
+        sudo yum-config-manager --enable osquery-s3-rpm-repo
+        sudo yum install osquery -y
+        sudo service osqueryd start 2>/dev/null || true
 
 
-      osquery_conf_filename=/etc/osquery/osquery.conf
+        # ################
+        sourcefilename=$config_file_directory/osquery.conf
+        filename=/etc/osquery/osquery.conf
 
-      if [ -f "$filename" ]
-      then
-          sudo mv "$filename"  "$filename".OLD
+
+        osquery_conf_filename=/etc/osquery/osquery.conf
+
+        if [ -f "$filename" ]
+        then
+            sudo mv "$filename"  "$filename".OLD
+        fi
+
+        sudo cp "$sourcefilename" "$filename"
+
+        sourcefilename=$config_file_directory/osquery.flags
+        filename=/etc/osquery/osquery.flags
+        osquery_flags_filename=/etc/osquery/osquery.flags
+
+        if [ -f "$filename" ]
+        then
+            sudo mv "$filename"  "$filename".OLD
+        fi
+
+        sudo cp "$sourcefilename" "$filename"
+
+        sudo service osqueryd restart
+
       fi
-
-      sudo cp "$sourcefilename" "$filename"
-
-      sourcefilename=$config_file_directory/osquery.flags
-      filename=/etc/osquery/osquery.flags
-      osquery_flags_filename=/etc/osquery/osquery.flags
-
-      if [ -f "$filename" ]
-      then
-          sudo mv "$filename"  "$filename".OLD
-      fi
-
-      sudo cp "$sourcefilename" "$filename"
-
-      sudo service osqueryd restart
-
       # #####################################
       # # fluent
       # #####################################
+      if [ "$fluentbitinstall" == TRUE ]; then
+      
       printMessage "fluent"
 
 sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null << EOT
@@ -462,7 +582,10 @@ EOT
 
       sourcefilename=$config_file_directory/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
+      
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
+
+    
 
       if [ -f "$filename" ]
       then
@@ -471,11 +594,16 @@ EOT
 
       sudo cp "$sourcefilename" "$filename"
 
+      includeFiletdAgent
+
       sudo service td-agent-bit restart
 
+    fi
       # #####################################
       # # telegraf
       # #####################################
+      if [ "$telegrafinstall" == TRUE ]; then
+      
       printMessage "telegraf"
 
 sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null << EOT
@@ -503,58 +631,67 @@ EOT
 
       sudo service telegraf restart
 
+    fi
       ################################################################################################
       ################################################################################################
           ;;
 
+   ################################################################################################
+    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!#
+   ################################################################################################
+    # rhel|centos
+    #####################################
+    #####################################
     rhel|centos)
       echo "RHEL OS"
       #####################################
       # osquery
       #####################################
-      printMessage "osquery" 
+      if [ "$osqueryinstall" == TRUE ]; then
+        printMessage "osquery" 
 
-      sudo yum install yum-utils -y
+        sudo yum install yum-utils -y
 
-      curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
+        curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
 
-      sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
+        sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
 
-      sudo yum-config-manager --enable osquery-s3-rpm-repo
+        sudo yum-config-manager --enable osquery-s3-rpm-repo
 
-      sudo yum install osquery -y
+        sudo yum install osquery -y
 
 
-      # ################
-      sourcefilename=$config_file_directory/osquery.conf
-      filename=/etc/osquery/osquery.conf
+        # ################
+        sourcefilename=$config_file_directory/osquery.conf
+        filename=/etc/osquery/osquery.conf
 
-      osquery_conf_filename=/etc/osquery/osquery.conf
+        osquery_conf_filename=/etc/osquery/osquery.conf
 
-      if [ -f "$filename" ]
-      then
-          sudo mv "$filename"  "$filename".OLD
-      fi
+        if [ -f "$filename" ]
+        then
+            sudo mv "$filename"  "$filename".OLD
+        fi
 
-      sudo cp "$sourcefilename" "$filename"
+        sudo cp "$sourcefilename" "$filename"
 
-      sourcefilename=$config_file_directory/osquery.flags
-      filename=/etc/osquery/osquery.flags
-    
-      osquery_flags_filename=/etc/osquery/osquery.flags
+        sourcefilename=$config_file_directory/osquery.flags
+        filename=/etc/osquery/osquery.flags
+      
+        osquery_flags_filename=/etc/osquery/osquery.flags
 
-      if [ -f "$filename" ]
-      then
-          sudo mv "$filename"  "$filename".OLD
-      fi
+        if [ -f "$filename" ]
+        then
+            sudo mv "$filename"  "$filename".OLD
+        fi
 
-      sudo cp "$sourcefilename" "$filename"
+        sudo cp "$sourcefilename" "$filename"
 
-      sudo service osqueryd restart
-
+        sudo service osqueryd restart
+    fi 
       # #####################################
       # # fluent
       # #####################################
+      if [ "$fluentbitinstall" == TRUE ]; then
       printMessage "fluent" 
 
 cat << EOF | sudo tee /etc/yum.repos.d/td-agent-bit.repo
@@ -583,11 +720,15 @@ EOF
 
       sudo cp "$sourcefilename" "$filename"
 
+      includeFiletdAgent
+
       sudo service td-agent-bit restart
 
+    fi
       # #####################################
       # # telegraf
       # #####################################
+      if [ "$telegrafinstall" == TRUE ]; then
       printMessage "telegraf" 
 
 cat << EOF | sudo tee /etc/yum.repos.d/influxdb.repo
@@ -617,6 +758,7 @@ EOF
 
       sudo service telegraf restart
 
+    fi
       ################################################################################################
       ################################################################################################
           ;;
@@ -626,6 +768,8 @@ EOF
       #####################################
       # osquery
       #####################################
+      if [ "$osqueryinstall" == TRUE ]; then
+
       printMessage "osquery" 
 
       sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
@@ -668,9 +812,12 @@ EOT
 
       sudo service osqueryd restart
 
+      fi
+
       # #####################################
       # # fluent
       # #####################################
+      if [ "$fluentbitinstall" == TRUE ]; then
       printMessage "fluent"  
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
@@ -693,11 +840,15 @@ EOT
 
       sudo cp "$sourcefilename" "$filename"
 
+      includeFiletdAgent
+
       sudo service td-agent-bit restart
 
+    fi
       # #####################################
       # # telegraf
       # #####################################
+      if [ "$telegrafinstall" == TRUE ]; then
       printMessage "telegraf"  
 
       wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
@@ -727,6 +878,8 @@ EOT
       sudo cp "$sourcefilename" "$filename"
 
       sudo service telegraf restart
+
+      fi
           ;;
       ################################################################################################
       ################################################################################################
@@ -740,86 +893,98 @@ EOT
   esac
 
 
-echo "$SPACER"
-echo "Check Services"
-echo "$SPACER"
-echo 
-echo "$SPACER"
-echo "td-agent-bit status"
+if [ "$fluentbitinstall" == TRUE ]; then
+  echo "$SPACER"
+  echo "Check Services"
+  echo "$SPACER"
+  echo 
+  echo "$SPACER"
+  echo "td-agent-bit status"
 
-if systemctl is-active --quiet td-agent-bit; then
-  echo td-agent-bit is running
+  if systemctl is-active --quiet td-agent-bit; then
+    echo td-agent-bit is running
 
-  curlObserve "td-agent-bit is running" "td-agent-bit" "SUCCESS"
+    curlObserve "td-agent-bit is running" "td-agent-bit" "SUCCESS"
 
-else
-  echo td-agent-bit is NOT running
-  
-  curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
+  else
+    echo td-agent-bit is NOT running
+    
+    curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
 
-  sudo service td-agent-bit status
-fi 
-
-
+    sudo service td-agent-bit status
+  fi 
 
 
-echo "$SPACER"
-echo "Check status - sudo service td-agent-bit status"
-echo "Config file location: ${td_agent_bit_filename}"
-echo 
 
-echo "$SPACER"
 
-echo "osqueryd status"
+  echo "$SPACER"
+  echo "Check status - sudo service td-agent-bit status"
+  echo "Config file location: ${td_agent_bit_filename}"
+  echo 
 
-if systemctl is-active --quiet osqueryd; then
-  echo osqueryd is running
-
-curlObserve "osqueryd is running" "osqueryd" "SUCCESS"
-
-else
-  echo osqueryd is NOT running
-
-  curlObserve "osqueryd is NOT running" "osqueryd" "FAILURE"
-
-  sudo service osqueryd status
 fi 
 echo "$SPACER"
-echo "Check status - sudo service osqueryd status"
 
-echo "Config file location: ${osquery_conf_filename}"
+if [ "$osqueryinstall" == TRUE ]; then
+  echo "osqueryd status"
 
-echo "Flag file location: ${osquery_flags_filename}"
-echo 
+  if systemctl is-active --quiet osqueryd; then
+    echo osqueryd is running
 
-echo "$SPACER"
-echo "telegraf status"
+  curlObserve "osqueryd is running" "osqueryd" "SUCCESS"
 
-if systemctl is-active --quiet telegraf; then
-  echo telegraf is running
+  else
+    echo osqueryd is NOT running
 
-  curlObserve "telegraf is running" "telegraf" "SUCCESS"
+    curlObserve "osqueryd is NOT running" "osqueryd" "FAILURE"
 
-else
-  echo telegraf is NOT running
+    sudo service osqueryd status
+  fi 
+  echo "$SPACER"
+  echo "Check status - sudo service osqueryd status"
 
-  curlObserve "telegraf is NOT running" "telegraf" "FAILURE"
+  echo "Config file location: ${osquery_conf_filename}"
 
-  sudo service telegraf status
-fi 
-echo "$SPACER"
-echo "Check status - sudo service telegraf status"
+  echo "Flag file location: ${osquery_flags_filename}"
+  echo 
 
-echo "Config file location: ${telegraf_conf_filename}"
-echo 
-echo "$SPACER"
-echo 
-echo "$SPACER"
-echo "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
+fi
+
+if [ "$telegrafinstall" == TRUE ]; then
+    echo "$SPACER"
+    echo "telegraf status"
+
+    if systemctl is-active --quiet telegraf; then
+      echo telegraf is running
+
+      curlObserve "telegraf is running" "telegraf" "SUCCESS"
+
+    else
+      echo telegraf is NOT running
+
+      curlObserve "telegraf is NOT running" "telegraf" "FAILURE"
+
+      sudo service telegraf status
+    fi 
+    echo "$SPACER"
+    echo "Check status - sudo service telegraf status"
+
+    echo "Config file location: ${telegraf_conf_filename}"
+    echo 
+    echo "$SPACER"
+    echo 
+    echo "$SPACER"
+    echo "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
+fi
 
 if [ "$config_files_clean" == TRUE ]; then
   removeConfigDirectory
 fi
+
+
+#####################################
+# BASELINEINSTALL - END
+#####################################
 
 echo "$SPACER"
 echo "$END_OUTPUT"
