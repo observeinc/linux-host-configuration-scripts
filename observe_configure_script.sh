@@ -272,7 +272,9 @@ includeFiletdAgent(){
 
 setInstallFlags(){
   # Process modules
-  IFS=',' read -a CONFS <<< "$module"
+  echo "module =$module"
+  
+  IFS=',' read -ar CONFS <<< "$module"
   for i in "${CONFS[@]}"; do
         echo "setInstallFlags - $i"
 
