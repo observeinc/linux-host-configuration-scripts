@@ -465,17 +465,17 @@ echo "$SPACER"
 
 cd "$config_file_directory" || exit && echo "$SPACER $END_OUTPUT $SPACER"
 
-sed -i '' "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
+sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
 
-sed -i '' "s/REPLACE_WITH_HOSTNAME/${DEFAULT_OBSERVE_HOSTNAME}/g" ./*
+sed -i "s/REPLACE_WITH_HOSTNAME/${DEFAULT_OBSERVE_HOSTNAME}/g" ./*
 
-sed -i '' "s/REPLACE_WITH_CUSTOMER_ID/${customer_id}/g" ./*
+sed -i "s/REPLACE_WITH_CUSTOMER_ID/${customer_id}/g" ./*
 
-sed -i '' "s/REPLACE_WITH_CUSTOMER_INGEST_TOKEN/${ingest_token}/g" ./*
+sed -i "s/REPLACE_WITH_CUSTOMER_INGEST_TOKEN/${ingest_token}/g" ./*
 
-sed -i '' "s/REPLACE_WITH_OBSERVE_ENVIRONMENT/${OBSERVE_ENVIRONMENT}/g" ./*
+sed -i "s/REPLACE_WITH_OBSERVE_ENVIRONMENT/${OBSERVE_ENVIRONMENT}/g" ./*
 
-sed -i '' "s:REPLACE_WITH_OBSERVE_JENKINS_PATH:${observe_jenkins_path}:g" ./*
+sed -i "s:REPLACE_WITH_OBSERVE_JENKINS_PATH:${observe_jenkins_path}:g" ./*
 
 if [ "$ec2metadata" == TRUE ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_EC2_OPTION//g" ./*
