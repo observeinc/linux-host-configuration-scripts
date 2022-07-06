@@ -136,6 +136,7 @@ printHelp(){
       echo "Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
       echo "Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf"
       echo "    can be combined with jenkins flag which add a config to fluentbit or only jenkons flag which only installs fluent bit with configs"
+      echo "Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
       echo "***************************"
       echo " Sample command:"
       echo "./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observe-staging.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP"
@@ -171,6 +172,7 @@ printVariables(){
       echo "validate_endpoint: $validate_endpoint"
       echo "branch_input: $branch_input"
       echo "module: $module"
+      echo "observe_jenkins_path: ${observe_jenkins_path}"
       echo "$SPACER"
 }
 
@@ -287,6 +289,7 @@ module="linux_host"
 osqueryinstall="FALSE"
 telegrafinstall="FALSE"
 fluentbitinstall="FALSE"
+observe_jenkins_path="/var/lib/jenkins/"
 
 
 if [ "$1" == "--help" ]; then
@@ -368,6 +371,7 @@ echo "testeject: ${testeject}"
 echo "validate_endpoint: ${validate_endpoint}"
 echo "branch_input: ${branch_input}"
 echo "module: ${module}"
+echo "observe_jenkins_path: ${observe_jenkins_path}"
 
 setInstallFlags
 
@@ -440,6 +444,8 @@ sed -i "s/REPLACE_WITH_CUSTOMER_ID/${customer_id}/g" ./*
 sed -i "s/REPLACE_WITH_CUSTOMER_INGEST_TOKEN/${ingest_token}/g" ./*
 
 sed -i "s/REPLACE_WITH_OBSERVE_ENVIRONMENT/${OBSERVE_ENVIRONMENT}/g" ./*
+
+sed -i "s/REPLACE_WITH_OBSERVE_JENKINS_PATH/${observe_jenkins_path}/g" ./*
 
 if [ "$ec2metadata" == TRUE ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_EC2_OPTION//g" ./*
