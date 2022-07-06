@@ -280,7 +280,7 @@ setInstallFlags(){
   for i in "${CONFS[@]}"; do
         echo "setInstallFlags - $i"
 
-        case ${module} in
+        case ${i} in
             linux_host)
             echo "Setting "
               osqueryinstall="TRUE"
