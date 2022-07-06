@@ -272,7 +272,9 @@ includeFiletdAgent(){
 
 setInstallFlags(){
   # Process modules
-  echo "module =$module"
+  echo "$SPACER"
+  echo "setInstallFlags - module=$module"
+  echo "$SPACER"
 
   IFS=',' read -ar CONFS <<< "$module"
   for i in "${CONFS[@]}"; do
@@ -280,6 +282,7 @@ setInstallFlags(){
 
         case ${module} in
             linux_host)
+            echo "Setting "
               osqueryinstall="TRUE"
               telegrafinstall="TRUE"
               fluentbitinstall="TRUE"
