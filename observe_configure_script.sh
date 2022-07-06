@@ -298,6 +298,15 @@ setInstallFlags(){
   done
 }
 
+printMessage(){
+  local message="$1"
+  echo 
+  echo "$SPACER"
+  echo "$message"
+  echo "$SPACER"
+  echo 
+}
+
 SPACER=$(generateSpacer)
 
 echo "$SPACER"
@@ -407,6 +416,11 @@ echo "observe_jenkins_path: ${observe_jenkins_path}"
 
 setInstallFlags
 
+printMessage "osqueryinstall = $osqueryinstall"
+printMessage "telegrafinstall = $telegrafinstall"
+printMessage "fluentbitinstall = $fluentbitinstall"
+
+
 OBSERVE_ENVIRONMENT="$observe_host_name"
 
 DEFAULT_OBSERVE_HOSTNAME="${HOSTNAME}"
@@ -465,7 +479,7 @@ getConfigurationFiles "$branch_input"
 
 echo "$SPACER"
 
-cd "$config_file_directory" || exit && echo "$SPACER CONFIG FILE DIRECTORY PROBLEM - $(pwd) - $config_file_directory - $END_OUTPUT $SPACER"
+cd "$config_file_directory" || (exit && echo "$SPACER CONFIG FILE DIRECTORY PROBLEM - $(pwd) - $config_file_directory - $END_OUTPUT $SPACER")
 
 sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
 
@@ -491,14 +505,7 @@ testEject "${testeject}" "EJECT2"
 
 # https://docs.observeinc.com/en/latest/content/integrations/linux/linux.html
 
-printMessage(){
-  local message="$1"
-  echo 
-  echo "$SPACER"
-  echo "$message"
-  echo "$SPACER"
-  echo 
-}
+
 
 #####################################
 # BASELINEINSTALL - START
