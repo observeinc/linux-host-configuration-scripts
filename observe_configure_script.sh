@@ -276,13 +276,13 @@ setInstallFlags(){
   echo "setInstallFlags - module=$module"
   echo "$SPACER"
 
-  IFS=',' read -ar CONFS <<< "$module"
+  IFS=',' read -a CONFS <<< "$module"
   for i in "${CONFS[@]}"; do
         echo "setInstallFlags - $i"
 
         case ${i} in
             linux_host)
-            echo "Setting "
+            echo "setInstallFlags linux_host flags"
               osqueryinstall="TRUE"
               telegrafinstall="TRUE"
               fluentbitinstall="TRUE"
