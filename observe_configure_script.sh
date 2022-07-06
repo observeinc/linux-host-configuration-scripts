@@ -274,7 +274,7 @@ setInstallFlags(){
   # Process modules
   IFS=',' read -a CONFS <<< "$module"
   for i in "${CONFS[@]}"; do
-        echo "includeFiletdAgent - $i"
+        echo "setInstallFlags - $i"
 
         case ${module} in
             linux_host)
@@ -386,7 +386,7 @@ fi
 
 validateObserveHostName $observe_host_name_base
 
-observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
+observe_host_name=$(echo "$observe_host_name_base" | sed 's|^[^/]*//||' -e 's|/.*$||')
 
 echo "$SPACER"
 echo "customer_id: ${customer_id}"
