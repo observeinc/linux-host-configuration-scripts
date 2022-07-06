@@ -273,7 +273,7 @@ includeFiletdAgent(){
 setInstallFlags(){
   # Process modules
   echo "module =$module"
-  
+
   IFS=',' read -ar CONFS <<< "$module"
   for i in "${CONFS[@]}"; do
         echo "setInstallFlags - $i"
@@ -465,7 +465,7 @@ getConfigurationFiles "$branch_input"
 
 echo "$SPACER"
 
-cd "$config_file_directory" || exit && echo "$SPACER $END_OUTPUT $SPACER"
+cd "$config_file_directory" || exit && echo "$SPACER CONFIG FILE DIRECTORY PROBLEM - $config_file_directory - $END_OUTPUT $SPACER"
 
 sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
 
