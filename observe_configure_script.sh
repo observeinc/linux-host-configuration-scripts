@@ -291,7 +291,7 @@ setInstallFlags(){
               fluentbitinstall="TRUE"
               ;;
             *)
-              echo "setInstallFlags function failed"
+              echo "setInstallFlags function failed - i = $i"
               echo "$SPACER"
               echo "$END_OUTPUT"
               echo "$SPACER"
