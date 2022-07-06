@@ -260,7 +260,7 @@ includeFiletdAgent(){
               sudo cp "$config_file_directory/observe-jenkins.conf" /etc/td-agent-bit/observe-jenkins.conf;
               ;;
             *)
-              echo "includeFiletdAgent function failed"
+              echo "includeFiletdAgent function failed - i = $i"
               echo "$SPACER"
               echo "$END_OUTPUT"
               echo "$SPACER"
