@@ -67,6 +67,36 @@ getConfigurationFiles(){
       echo "$SPACER"    
     fi 
 
+    if [ ! -f "$config_file_directory/observe-linux-host.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-linux-host.conf" 
+      filename="$config_file_directory/observe-linux-host.conf"
+      
+      echo "$SPACER"
+      echo "filename = $filename"
+      echo "$SPACER"
+      echo "url = $url"
+      curl "$url" > "$filename"
+
+      echo "$SPACER"
+      echo "$filename created"
+      echo "$SPACER"    
+    fi 
+
+    if [ ! -f "$config_file_directory/observe-jenkins.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-jenkins.conf" 
+      filename="$config_file_directory/observe-jenkins.conf"
+      
+      echo "$SPACER"
+      echo "filename = $filename"
+      echo "$SPACER"
+      echo "url = $url"
+      curl "$url" > "$filename"
+
+      echo "$SPACER"
+      echo "$filename created"
+      echo "$SPACER"    
+    fi 
+
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.flags" 
       filename="$config_file_directory/osquery.flags"
