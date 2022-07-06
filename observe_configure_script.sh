@@ -134,6 +134,8 @@ printHelp(){
       echo "Optional --appgroup id supplied sets value in fluentbit config"
       echo "Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
       echo "Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
+      echo "Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf"
+      echo "    can be combined with jenkins flag which add a config to fluentbit or only jenkons flag which only installs fluent bit with configs"
       echo "***************************"
       echo " Sample command:"
       echo "./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observe-staging.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP"
@@ -168,6 +170,7 @@ printVariables(){
       echo "testeject: $testeject"
       echo "validate_endpoint: $validate_endpoint"
       echo "branch_input: $branch_input"
+      echo "module: $module"
       echo "$SPACER"
 }
 
@@ -364,6 +367,7 @@ echo "appgroup: ${appgroup}"
 echo "testeject: ${testeject}"
 echo "validate_endpoint: ${validate_endpoint}"
 echo "branch_input: ${branch_input}"
+echo "module: ${module}"
 
 setInstallFlags
 
