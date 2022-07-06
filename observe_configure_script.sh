@@ -252,7 +252,7 @@ includeFiletdAgent(){
   for i in "${CONFS[@]}"; do
         echo "includeFiletdAgent - $i"
 
-        case ${module} in
+        case ${i} in
             linux_host)
               sudo cp "$config_file_directory/observe-linux-host.conf" /etc/td-agent-bit/observe-linux-host.conf;
               ;;
