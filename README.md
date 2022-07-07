@@ -1,11 +1,8 @@
 # Configuraton script for Linux
+## Assumptions: 
+- Assumes user running script can use passwordless sudo
 
 ## What does it do
-Inputs: 
-Assumes existence of environment variables
---customer_id $OBSERVE_CUSTOMER_ID 
---ingest_token $OBSERVE_DATASTREAM_TOKEN 
-
 - Creates a config_files directory in home of logged in user
 
 - Downloads configuration files from this git repository
@@ -23,30 +20,34 @@ Assumes existence of environment variables
 
 1. Login to machine via ssh
 
-1. Script flags
-    * --customer_id = your observe customer id - REQUIRED
-    * --ingest_token = your data stream ingest token from ui - REQUIRED
-    * --observe_host_name = host endpoint used in config files - OPTIONAL - defaults to collect.observeinc.com
-    * --config_files_clean = TRUE/FALSE whether to delete directory created for downloading config files - OPTIONAL - defaults to FALSE
-    * --ec2metadata = TRUE/FALSE whether to add ec2 filter section to td-agent-bit.conf file - OPTIONAL - defaults to FALSE
-        ```
-        [FILTER]
-            Name aws
-            Match *
-            imds_version v1
-            az true
-            ec2_instance_id true
-            ec2_instance_type true
-            account_id true
-            hostname true
-            vpc_id true
-        ```
-    * --datacenter = value to use for datacenter in td-agent-bit.conf and telegraf.conf files - OPTIONAL - defaults to AWS
-    * --appgroup = value to use for appgroup record in td-agent-bit.conf file  - OPTIONAL - defaults to null
+1. Run script with flag values set  
+  
 
+ 
+Run --help command for list of flags and options
 
+``` curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --help ```
 
-
-1. Run following script
-```
-curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --customer_id "YOUR_CUSTOMERID" --ingest_token "YOUR_DATA_STREAM_TOKEN" --observe_host_name "collect.observeinc.com" --config_files_clean TRUE --ec2metadata TRUE --datacenter "MYDATACENTER" --appgroup "MYAPPGROUP"
+###########################################
+## HELP CONTENT
+###########################################
+### Required inputs
+- Required --customer_id YOUR_OBSERVE_CUSTOMERID 
+- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN 
+## Optional inputs
+- Optional --observe_host_name - Defaults to https://collect.observe.com/ 
+- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE 
+    controls whether to delete created config_files temp directory
+- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE 
+    controls fluentbit config for whether to use default ec2 metrics 
+- Optional --datacenter defaults to AWS
+- Optional --appgroup id supplied sets value in fluentbit config
+- Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main
+- Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE
+- Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf
+    can be combined with jenkins flag which add a config to fluentbit or only jenkons flag which only installs fluent bit with configs
+- Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs
+***************************
+### Sample command:
+``` ./observe_configure_script.sh --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observe-staging.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP --config_files_clean TRUE --ec2metadata TRUE --datacenter myCompanyDataCenter --appgroup myAppGroup```
+***************************
