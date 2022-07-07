@@ -20,11 +20,13 @@
 
 1. Login to machine via ssh
 
-1. Script flags
- 
-    Run --help command for list of flags and options
+1. Run script with flag values set  
+  
 
-    ``` curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --help ```
+ 
+Run --help command for list of flags and options
+
+``` curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --help ```
 
 ###########################################
 ## HELP CONTENT
