@@ -155,7 +155,7 @@ printHelp(){
       echo "- Required --customer_id YOUR_OBSERVE_CUSTOMERID "
       echo "- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN "
       echo "## Optional inputs"
-      echo "- Optional --observe_host_name - Defaults to https://collect.observe.com/ "
+      echo "- Optional --observe_host_name - Defaults to https://collect.observeinc.com/ "
       echo "- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE "
       echo "    controls whether to delete created config_files temp directory"
       echo "- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE "
@@ -239,7 +239,7 @@ validateObserveHostName () {
       echo "$SPACER"
   else
       echo "$SPACER"
-      echo "$url IS NOT valid - example valid input - https://collect.observe.com/"
+      echo "$url IS NOT valid - example valid input - https://collect.observeinc.com/"
       echo "$SPACER"
       exit 1
   fi
@@ -319,7 +319,7 @@ echo "Validate inputs ..."
 
 customer_id=0
 ingest_token=0
-observe_host_name_base="https://collect.observe.com/"
+observe_host_name_base="https://collect.observeinc.com/"
 # observe_host_name="collect.observeinc.com" 
 config_files_clean="FALSE"
 ec2metadata="FALSE"
