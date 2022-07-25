@@ -169,7 +169,7 @@ printHelp(){
       echo "- Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
       echo "***************************"
       echo "### Sample command:"
-      echo "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observe-staging.com/ --config_files_clean TRUE --datacenter MYDATACENTER --appgroup MYAPPGROUP --config_files_clean TRUE --ec2metadata TRUE --datacenter myCompanyDataCenter --appgroup myAppGroup\`\`\`"
+      echo "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
       echo "***************************"
 }
 
