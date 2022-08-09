@@ -13,19 +13,19 @@ getConfigurationFiles(){
     if [ ! -d "$config_file_directory" ]; then
       mkdir "$config_file_directory"
       echo "$SPACER $config_file_directory CREATED $SPACER"
-    else 
+    else
       rm -f "${config_file_directory:?}"/*
       echo "$SPACER"
-      echo "$config_file_directory DELETED" 
+      echo "$config_file_directory DELETED"
       echo "$SPACER"
       ls "$config_file_directory"
       echo "$SPACER"
     fi
 
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.conf" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.conf"
       filename="$config_file_directory/osquery.conf"
-      
+
       echo "$SPACER"
       echo "filename = $filename"
       echo "$SPACER"
@@ -34,13 +34,13 @@ getConfigurationFiles(){
 
       echo "$SPACER"
       echo "$filename created"
-      echo "$SPACER"    
-    fi 
+      echo "$SPACER"
+    fi
 
     if [ ! -f "$config_file_directory/telegraf.conf" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/telegraf.conf" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/telegraf.conf"
       filename="$config_file_directory/telegraf.conf"
-      
+
       echo "$SPACER"
       echo "filename = $filename"
       echo "$SPACER"
@@ -49,13 +49,13 @@ getConfigurationFiles(){
 
       echo "$SPACER"
       echo "$filename created"
-      echo "$SPACER"    
-    fi 
+      echo "$SPACER"
+    fi
 
     if [ ! -f "$config_file_directory/td-agent-bit.conf" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/td-agent-bit.conf" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/td-agent-bit.conf"
       filename="$config_file_directory/td-agent-bit.conf"
-      
+
       echo "$SPACER"
       echo "filename = $filename"
       echo "$SPACER"
@@ -64,13 +64,13 @@ getConfigurationFiles(){
 
       echo "$SPACER"
       echo "$filename created"
-      echo "$SPACER"    
-    fi 
+      echo "$SPACER"
+    fi
 
     if [ ! -f "$config_file_directory/observe-linux-host.conf" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-linux-host.conf" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-linux-host.conf"
       filename="$config_file_directory/observe-linux-host.conf"
-      
+
       echo "$SPACER"
       echo "filename = $filename"
       echo "$SPACER"
@@ -79,13 +79,13 @@ getConfigurationFiles(){
 
       echo "$SPACER"
       echo "$filename created"
-      echo "$SPACER"    
-    fi 
+      echo "$SPACER"
+    fi
 
     if [ ! -f "$config_file_directory/observe-jenkins.conf" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-jenkins.conf" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-jenkins.conf"
       filename="$config_file_directory/observe-jenkins.conf"
-      
+
       echo "$SPACER"
       echo "filename = $filename"
       echo "$SPACER"
@@ -94,13 +94,13 @@ getConfigurationFiles(){
 
       echo "$SPACER"
       echo "$filename created"
-      echo "$SPACER"    
-    fi 
+      echo "$SPACER"
+    fi
 
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
-      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.flags" 
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.flags"
       filename="$config_file_directory/osquery.flags"
-      
+
       echo "$SPACER"
       echo "filename = $filename"
       echo "$SPACER"
@@ -109,7 +109,7 @@ getConfigurationFiles(){
 
       echo "$SPACER"
       echo "$filename created"
-      echo "$SPACER"    
+      echo "$SPACER"
     fi
 }
 
@@ -233,7 +233,7 @@ validateObserveHostName () {
 
 
   if [[ $url =~ $regex ]]
-  then 
+  then
       echo "$SPACER"
       echo "$url IS valid"
       echo "$SPACER"
@@ -302,11 +302,11 @@ setInstallFlags(){
 
 printMessage(){
   local message="$1"
-  echo 
+  echo
   echo "$SPACER"
   echo "$message"
   echo "$SPACER"
-  echo 
+  echo
 }
 
 SPACER=$(generateSpacer)
@@ -320,7 +320,7 @@ echo "Validate inputs ..."
 customer_id=0
 ingest_token=0
 observe_host_name_base="https://collect.observeinc.com/"
-# observe_host_name="collect.observeinc.com" 
+# observe_host_name="collect.observeinc.com"
 config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
@@ -385,7 +385,7 @@ fi
           validate_endpoint="$2"
           ;;
         *)
-          
+
       esac
       shift
       shift
@@ -397,7 +397,7 @@ fi
 
 
 
-validateObserveHostName $observe_host_name_base
+validateObserveHostName "$observe_host_name_base"
 
 observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
@@ -430,7 +430,7 @@ DEFAULT_OBSERVE_HOSTNAME="${HOSTNAME}"
 DEFAULT_OBSERVE_DATA_CENTER="$datacenter"
 
 if [ "$validate_endpoint" == TRUE ]; then
-    
+
     echo "$SPACER"
     echo "Validate customer_id / ingest token ..."
     echo "$SPACER"
@@ -464,13 +464,13 @@ echo "$SPACER"
 echo "Values for configuration:"
 echo "$SPACER"
 echo "    Environment:  $OBSERVE_ENVIRONMENT"
-echo 
+echo
 echo "    Data Center:  $DEFAULT_OBSERVE_DATA_CENTER"
-echo 
+echo
 echo "    Hostname:  $DEFAULT_OBSERVE_HOSTNAME"
-echo 
+echo
 echo "    Customer ID:  $customer_id"
-echo 
+echo
 echo "    Customer Ingest Token:  $ingest_token"
 
 testEject "${testeject}" "EJECT1"
@@ -515,7 +515,7 @@ testEject "${testeject}" "EJECT2"
 
 case ${OS} in
     amzn|amazonlinux)
-    
+
     echo "Amazon OS"
 
       #####################################
@@ -526,7 +526,7 @@ case ${OS} in
         printMessage "osquery"
 
         curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
-        
+
         sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
         sudo yum-config-manager --enable osquery-s3-rpm-repo
         sudo yum install osquery -y
@@ -565,7 +565,7 @@ case ${OS} in
       # # fluent
       # #####################################
       if [ "$fluentbitinstall" == TRUE ]; then
-      
+
       printMessage "fluent"
 
 sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null << EOT
@@ -581,10 +581,10 @@ EOT
 
       sourcefilename=$config_file_directory/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
-      
+
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
 
-    
+
 
       if [ -f "$filename" ]
       then
@@ -602,7 +602,7 @@ EOT
       # # telegraf
       # #####################################
       if [ "$telegrafinstall" == TRUE ]; then
-      
+
       printMessage "telegraf"
 
 sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null << EOT
@@ -613,12 +613,12 @@ enabled = 1
 gpgcheck = 1
 gpgkey = https://repos.influxdata.com/influxdb.key
 EOT
-      
+
       sudo yum install telegraf -y
 
       sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
-      
+
       telegraf_conf_filename=/etc/telegraf/telegraf.conf
 
       if [ -f "$filename" ]
@@ -647,7 +647,7 @@ EOT
       # osquery
       #####################################
       if [ "$osqueryinstall" == TRUE ]; then
-        printMessage "osquery" 
+        printMessage "osquery"
 
         sudo yum install yum-utils -y
 
@@ -675,7 +675,7 @@ EOT
 
         sourcefilename=$config_file_directory/osquery.flags
         filename=/etc/osquery/osquery.flags
-      
+
         osquery_flags_filename=/etc/osquery/osquery.flags
 
         if [ -f "$filename" ]
@@ -686,12 +686,12 @@ EOT
         sudo cp "$sourcefilename" "$filename"
 
         sudo service osqueryd restart
-    fi 
+    fi
       # #####################################
       # # fluent
       # #####################################
       if [ "$fluentbitinstall" == TRUE ]; then
-      printMessage "fluent" 
+      printMessage "fluent"
 
 cat << EOF | sudo tee /etc/yum.repos.d/td-agent-bit.repo
 [td-agent-bit]
@@ -728,7 +728,7 @@ EOF
       # # telegraf
       # #####################################
       if [ "$telegrafinstall" == TRUE ]; then
-      printMessage "telegraf" 
+      printMessage "telegraf"
 
 cat << EOF | sudo tee /etc/yum.repos.d/influxdb.repo
 [influxdb]
@@ -769,7 +769,7 @@ EOF
       #####################################
       if [ "$osqueryinstall" == TRUE ]; then
 
-      printMessage "osquery" 
+      printMessage "osquery"
 
       sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
 
@@ -817,7 +817,7 @@ EOT
       # # fluent
       # #####################################
       if [ "$fluentbitinstall" == TRUE ]; then
-      printMessage "fluent"  
+      printMessage "fluent"
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
 
@@ -829,7 +829,7 @@ EOT
 
       sourcefilename=$config_file_directory/td-agent-bit.conf
       filename=/etc/td-agent-bit/td-agent-bit.conf
- 
+
       td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
 
       if [ -f "$filename" ]
@@ -848,7 +848,7 @@ EOT
       # # telegraf
       # #####################################
       if [ "$telegrafinstall" == TRUE ]; then
-      printMessage "telegraf"  
+      printMessage "telegraf"
 
       wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
           #shellcheck disable=SC1091
@@ -896,7 +896,7 @@ if [ "$fluentbitinstall" == TRUE ]; then
   echo "$SPACER"
   echo "Check Services"
   echo "$SPACER"
-  echo 
+  echo
   echo "$SPACER"
   echo "td-agent-bit status"
 
@@ -907,11 +907,11 @@ if [ "$fluentbitinstall" == TRUE ]; then
 
   else
     echo td-agent-bit is NOT running
-    
+
     curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
 
     sudo service td-agent-bit status
-  fi 
+  fi
 
 
 
@@ -919,9 +919,9 @@ if [ "$fluentbitinstall" == TRUE ]; then
   echo "$SPACER"
   echo "Check status - sudo service td-agent-bit status"
   echo "Config file location: ${td_agent_bit_filename}"
-  echo 
+  echo
 
-fi 
+fi
 echo "$SPACER"
 
 if [ "$osqueryinstall" == TRUE ]; then
@@ -938,14 +938,14 @@ if [ "$osqueryinstall" == TRUE ]; then
     curlObserve "osqueryd is NOT running" "osqueryd" "FAILURE"
 
     sudo service osqueryd status
-  fi 
+  fi
   echo "$SPACER"
   echo "Check status - sudo service osqueryd status"
 
   echo "Config file location: ${osquery_conf_filename}"
 
   echo "Flag file location: ${osquery_flags_filename}"
-  echo 
+  echo
 
 fi
 
@@ -964,14 +964,14 @@ if [ "$telegrafinstall" == TRUE ]; then
       curlObserve "telegraf is NOT running" "telegraf" "FAILURE"
 
       sudo service telegraf status
-    fi 
+    fi
     echo "$SPACER"
     echo "Check status - sudo service telegraf status"
 
     echo "Config file location: ${telegraf_conf_filename}"
-    echo 
+    echo
     echo "$SPACER"
-    echo 
+    echo
     echo "$SPACER"
     echo "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
 fi

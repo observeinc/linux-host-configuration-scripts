@@ -1,5 +1,5 @@
 # Configuraton script for Linux
-## Assumptions: 
+## Assumptions:
 - Assumes user running script can use passwordless sudo
 
 ## What does it do
@@ -20,10 +20,8 @@
 
 1. Login to machine via ssh
 
-1. Run script with flag values set  
-  
+2. Run script with flag values set
 
- 
 Run --help command for list of flags and options
 
 ``` curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --help ```
@@ -32,14 +30,14 @@ Run --help command for list of flags and options
 ## HELP CONTENT
 ###########################################
 ### Required inputs
-- Required --customer_id YOUR_OBSERVE_CUSTOMERID 
-- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN 
+- Required --customer_id YOUR_OBSERVE_CUSTOMERID
+- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN
 ## Optional inputs
-- Optional --observe_host_name - Defaults to https://collect.observe.com/ 
-- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE 
-    controls whether to delete created config_files temp directory
-- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE 
-    controls fluentbit config for whether to use default ec2 metrics 
+- Optional --observe_host_name - Defaults to https://collect.observe.com/
+- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE
+    - controls whether to delete created config_files temp directory
+- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE
+    - controls fluentbit config for whether to use default ec2 metrics
 - Optional --datacenter defaults to AWS
 - Optional --appgroup id supplied sets value in fluentbit config
 - Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main
