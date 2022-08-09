@@ -141,7 +141,7 @@ curlObserve(){
   local result="$3"
 
   curl https://"${OBSERVE_ENVIRONMENT}"/v1/http/script_validation/"${path_suffix}" \
-  -H "Authorization: Bearer ${customer_id} ${ingest_token}" \
+  -H "Authorization: Bearer ${ingest_token}" \
   -H "Content-type: application/json" \
   -d "{\"data\": {\"datacenter\": \"${DEFAULT_OBSERVE_DATA_CENTER}\", \"host\": \"${DEFAULT_OBSERVE_HOSTNAME}\",\"result\": \"${result}\",\"message\": \"${message}\", \"os\": \"${TERRAFORM_REPLACE_OS_VALUE}\" }}"
 
@@ -155,11 +155,11 @@ printHelp(){
       echo "- Required --customer_id YOUR_OBSERVE_CUSTOMERID "
       echo "- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN "
       echo "## Optional inputs"
-      echo "- Optional --observe_host_name - Defaults to https://collect.observeinc.com/ "
+      echo "- Optional --observe_host_name - Defaults to https://<YOUR_OBSERVE_CUSTOMERID>.collect.observeinc.com/ "
       echo "- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE "
-      echo "    controls whether to delete created config_files temp directory"
+      echo "    - controls whether to delete created config_files temp directory"
       echo "- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE "
-      echo "    controls fluentbit config for whether to use default ec2 metrics "
+      echo "    - controls fluentbit config for whether to use default ec2 metrics "
       echo "- Optional --datacenter defaults to AWS"
       echo "- Optional --appgroup id supplied sets value in fluentbit config"
       echo "- Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
@@ -169,7 +169,7 @@ printHelp(){
       echo "- Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
       echo "***************************"
       echo "### Sample command:"
-      echo "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
+      echo "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://<YOUR_CUSTOMERID>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
       echo "***************************"
 }
 
@@ -227,9 +227,9 @@ removeConfigDirectory() {
 
 validateObserveHostName () {
   local url="$1"
-  # check for properly formatted url input - assumes - https://collect.observe[anything]/
+  # check for properly formatted url input - assumes - https://<customer-id>.collect.observe[anything]/
   # we can modify this rule to be specific as needed
-  regex='^(https?)://collect.observe[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*\/'
+  regex='^(https?)://[0-9]+.collect.observe[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*\/'
 
 
   if [[ $url =~ $regex ]]
@@ -239,7 +239,7 @@ validateObserveHostName () {
       echo "$SPACER"
   else
       echo "$SPACER"
-      echo "$url IS NOT valid - example valid input - https://collect.observeinc.com/"
+      echo "$url IS NOT valid - example valid input - https://123456789012.collect.observeinc.com/"
       echo "$SPACER"
       exit 1
   fi
@@ -319,8 +319,7 @@ echo "Validate inputs ..."
 
 customer_id=0
 ingest_token=0
-observe_host_name_base="https://collect.observeinc.com/"
-# observe_host_name="collect.observeinc.com"
+observe_host_name_base=
 config_files_clean="FALSE"
 ec2metadata="FALSE"
 datacenter="AWS"
@@ -395,7 +394,10 @@ fi
       requiredInputs
     fi
 
-
+# Custruct the per-customer-id ingest host name.
+if [ -z "$observe_host_name_base" ]; then
+  observe_host_name_base="https://${customer_id}.collect.observeinc.com/"
+fi
 
 validateObserveHostName "$observe_host_name_base"
 
@@ -437,7 +439,7 @@ if [ "$validate_endpoint" == TRUE ]; then
     echo
 
     curl_endpoint=$(curl https://"${OBSERVE_ENVIRONMENT}"/v1/http/script_validation \
-    -H "Authorization: Bearer ${customer_id} ${ingest_token}" \
+    -H "Authorization: Bearer ${ingest_token}" \
     -H "Content-type: application/json" \
     -d "{\"data\": {  \"datacenter\": \"${DEFAULT_OBSERVE_DATA_CENTER}\",\"host\": \"${DEFAULT_OBSERVE_HOSTNAME}\",\"message\": \"validating customer id and token\", \"os\": \"${TERRAFORM_REPLACE_OS_VALUE}\", \"result\": \"SUCCESS\",  \"script_run\": \"${DEFAULT_OBSERVE_DATA_CENTER}\" ,  \"OBSERVE_TEST_RUN_KEY\": \"${OBSERVE_TEST_RUN_KEY}\"}}")
 
@@ -486,8 +488,6 @@ cd "$config_file_directory" || (exit && echo "$SPACER CONFIG FILE DIRECTORY PROB
 sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
 
 sed -i "s/REPLACE_WITH_HOSTNAME/${DEFAULT_OBSERVE_HOSTNAME}/g" ./*
-
-sed -i "s/REPLACE_WITH_CUSTOMER_ID/${customer_id}/g" ./*
 
 sed -i "s/REPLACE_WITH_CUSTOMER_INGEST_TOKEN/${ingest_token}/g" ./*
 
