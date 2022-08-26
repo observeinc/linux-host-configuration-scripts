@@ -33,7 +33,7 @@ Run --help command for list of flags and options
 - Required --customer_id YOUR_OBSERVE_CUSTOMERID
 - Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN
 ## Optional inputs
-- Optional --observe_host_name - Defaults to https://collect.observe.com/
+- Optional --observe_host_name - Defaults to https://<YOUR_OBSERVE_CUSTOMERID>.collect.observe.com/
 - Optional --config_files_clean TRUE or FALSE - Defaults to FALSE
     - controls whether to delete created config_files temp directory
 - Optional --ec2metadata TRUE or FALSE - Defaults to FALSE
@@ -47,5 +47,5 @@ Run --help command for list of flags and options
 - Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs
 ***************************
 ### Sample command:
-``` curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP```
+``` curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://<YOUR_CUSTOMERID>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP```
 ***************************
