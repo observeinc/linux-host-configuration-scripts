@@ -383,6 +383,9 @@ fi
         --validate_endpoint)
           validate_endpoint="$2"
           ;;
+        --observe_jenkins_path)
+          observe_jenkins_path="$2"
+          ;;
         *)
 
       esac
