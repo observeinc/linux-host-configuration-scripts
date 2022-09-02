@@ -611,7 +611,7 @@ EOT
 sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null << EOT
 [influxdb]
 name = InfluxDB Repository - RHEL
-baseurl = https://repos.influxdata.com/rhel/7/x86_64/stable/
+baseurl = https://repos.influxdata.com/rhel/7/\$basearch/stable/
 enabled = 1
 gpgcheck = 1
 gpgkey = https://repos.influxdata.com/influxdb.key
