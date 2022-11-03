@@ -5,6 +5,10 @@ cd ~ || exit && echo "$SPACER $END_OUTPUT $SPACER"
 
 config_file_directory="$HOME/observe_config_files"
 
+log ()
+{
+    echo "`date` $1" | sudo tee -a "/tmp/observe-install.log"
+}
 
 getConfigurationFiles(){
     local branch_replace="$1"
@@ -12,104 +16,119 @@ getConfigurationFiles(){
     SPACER=$(generateSpacer)
     if [ ! -d "$config_file_directory" ]; then
       mkdir "$config_file_directory"
-      echo "$SPACER $config_file_directory CREATED $SPACER"
+      log "$SPACER $config_file_directory CREATED $SPACER"
     else
       rm -f "${config_file_directory:?}"/*
-      echo "$SPACER"
-      echo "$config_file_directory DELETED"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$config_file_directory DELETED"
+      log "$SPACER"
       ls "$config_file_directory"
-      echo "$SPACER"
+      log "$SPACER"
     fi
 
     if [ ! -f "$config_file_directory/osquery.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.conf"
       filename="$config_file_directory/osquery.conf"
 
-      echo "$SPACER"
-      echo "filename = $filename"
-      echo "$SPACER"
-      echo "url = $url"
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER"
-      echo "$filename created"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
     fi
 
     if [ ! -f "$config_file_directory/telegraf.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/telegraf.conf"
       filename="$config_file_directory/telegraf.conf"
 
-      echo "$SPACER"
-      echo "filename = $filename"
-      echo "$SPACER"
-      echo "url = $url"
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER"
-      echo "$filename created"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
     fi
 
     if [ ! -f "$config_file_directory/td-agent-bit.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/td-agent-bit.conf"
       filename="$config_file_directory/td-agent-bit.conf"
 
-      echo "$SPACER"
-      echo "filename = $filename"
-      echo "$SPACER"
-      echo "url = $url"
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER"
-      echo "$filename created"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
     fi
 
     if [ ! -f "$config_file_directory/observe-linux-host.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-linux-host.conf"
       filename="$config_file_directory/observe-linux-host.conf"
 
-      echo "$SPACER"
-      echo "filename = $filename"
-      echo "$SPACER"
-      echo "url = $url"
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER"
-      echo "$filename created"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
     fi
 
     if [ ! -f "$config_file_directory/observe-jenkins.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-jenkins.conf"
       filename="$config_file_directory/observe-jenkins.conf"
 
-      echo "$SPACER"
-      echo "filename = $filename"
-      echo "$SPACER"
-      echo "url = $url"
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER"
-      echo "$filename created"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
     fi
 
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.flags"
       filename="$config_file_directory/osquery.flags"
 
-      echo "$SPACER"
-      echo "filename = $filename"
-      echo "$SPACER"
-      echo "url = $url"
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
       curl "$url" > "$filename"
 
-      echo "$SPACER"
-      echo "$filename created"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
+    fi
+
+    if [ ! -f "$config_file_directory/observe-installer.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-installer.conf"
+      filename="$config_file_directory/observe-installer.conf"
+
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
+      curl "$url" > "$filename"
+
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
     fi
 }
 
@@ -148,75 +167,76 @@ curlObserve(){
 }
 
 printHelp(){
-      echo "$SPACER"
-      echo "## HELP CONTENT"
-      echo "$SPACER"
-      echo "### Required inputs"
-      echo "- Required --customer_id YOUR_OBSERVE_CUSTOMERID "
-      echo "- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN "
-      echo "## Optional inputs"
-      echo "- Optional --observe_host_name - Defaults to https://<YOUR_OBSERVE_CUSTOMERID>.collect.observeinc.com/ "
-      echo "- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE "
-      echo "    - controls whether to delete created config_files temp directory"
-      echo "- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE "
-      echo "    - controls fluentbit config for whether to use default ec2 metrics "
-      echo "- Optional --datacenter defaults to AWS"
-      echo "- Optional --appgroup id supplied sets value in fluentbit config"
-      echo "- Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
-      echo "- Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
-      echo "- Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf"
-      echo "    can be combined with jenkins flag which add a config to fluentbit or only jenkons flag which only installs fluent bit with configs"
-      echo "- Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
-      echo "***************************"
-      echo "### Sample command:"
-      echo "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://<YOUR_CUSTOMERID>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
-      echo "***************************"
+      log "$SPACER"
+      log "## HELP CONTENT"
+      log "$SPACER"
+      log "### Required inputs"
+      log "- Required --customer_id YOUR_OBSERVE_CUSTOMERID "
+      log "- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN "
+      log "## Optional inputs"
+      log "- Optional --observe_host_name - Defaults to https://<YOUR_OBSERVE_CUSTOMERID>.collect.observeinc.com/ "
+      log "- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE "
+      log "    - controls whether to delete created config_files temp directory"
+      log "- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE "
+      log "    - controls fluentbit config for whether to use default ec2 metrics "
+      log "- Optional --datacenter defaults to AWS"
+      log "- Optional --appgroup id supplied sets value in fluentbit config"
+      log "- Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
+      log "- Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
+      log "- Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf"
+      log "    can be combined with jenkins flag which add a config to fluentbit or only jenkons flag which only installs fluent bit with configs"
+      log "- Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
+      log "- Optional --custom_fluentbit_config add an additional configuration file for fluentbit"
+      log "***************************"
+      log "### Sample command:"
+      log "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://<YOUR_CUSTOMERID>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
+      log "***************************"
 }
 
 requiredInputs(){
-      echo "$SPACER"
-      echo "* Error: Invalid argument.*"
-      echo "$SPACER"
+      log "$SPACER"
+      log "* Error: Invalid argument.*"
+      log "$SPACER"
       printVariables
       printHelp
-      echo "$SPACER"
-      echo "$END_OUTPUT"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$END_OUTPUT"
+      log "$SPACER"
       exit 1
 
 }
 
 printVariables(){
-      echo "$SPACER"
-      echo "* VARIABLES *"
-      echo "$SPACER"
-      echo "customer_id: $customer_id"
-      echo "ingest_token: $ingest_token"
-      echo "observe_host_name: $observe_host_name"
-      echo "config_files_clean: $config_files_clean"
-      echo "ec2metadata: $ec2metadata"
-      echo "datacenter: $datacenter"
-      echo "appgroup: $appgroup"
-      echo "testeject: $testeject"
-      echo "validate_endpoint: $validate_endpoint"
-      echo "branch_input: $branch_input"
-      echo "module: $module"
-      echo "observe_jenkins_path: ${observe_jenkins_path}"
-      echo "$SPACER"
+      log "$SPACER"
+      log "* VARIABLES *"
+      log "$SPACER"
+      log "customer_id: $customer_id"
+      log "ingest_token: $ingest_token"
+      log "observe_host_name: $observe_host_name"
+      log "config_files_clean: $config_files_clean"
+      log "ec2metadata: $ec2metadata"
+      log "datacenter: $datacenter"
+      log "appgroup: $appgroup"
+      log "testeject: $testeject"
+      log "validate_endpoint: $validate_endpoint"
+      log "branch_input: $branch_input"
+      log "module: $module"
+      log "observe_jenkins_path: ${observe_jenkins_path}"
+      log "$SPACER"
 }
 
 testEject(){
 local bail="$1"
 local bailPosition="$2"
 if [[ "$bail" == "$bailPosition" ]]; then
-    echo "$SPACER"
-    echo "$SPACER"
-    echo " TEST EJECTION "
-    echo "Position = $bailPosition"
-    echo "$SPACER"
-    echo "$END_OUTPUT"
-    echo "$SPACER"
-    echo "$SPACER"
+    log "$SPACER"
+    log "$SPACER"
+    log " TEST EJECTION "
+    log "Position = $bailPosition"
+    log "$SPACER"
+    log "$END_OUTPUT"
+    log "$SPACER"
+    log "$SPACER"
     exit 0;
 fi
 }
@@ -234,13 +254,13 @@ validateObserveHostName () {
 
   if [[ $url =~ $regex ]]
   then
-      echo "$SPACER"
-      echo "$url IS valid"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$url IS valid"
+      log "$SPACER"
   else
-      echo "$SPACER"
-      echo "$url IS NOT valid - example valid input - https://123456789012.collect.observeinc.com/"
-      echo "$SPACER"
+      log "$SPACER"
+      log "$url IS NOT valid - example valid input - https://123456789012.collect.observeinc.com/"
+      log "$SPACER"
       exit 1
   fi
 }
@@ -249,7 +269,9 @@ includeFiletdAgent(){
   # Process modules
   IFS=',' read -a CONFS <<< "$module"
   for i in "${CONFS[@]}"; do
-        echo "includeFiletdAgent - $i"
+        log "includeFiletdAgent - $i"
+
+        sudo cp "$config_file_directory/observe-installer.conf" /etc/td-agent-bit/observe-installer.conf;
 
         case ${i} in
             linux_host)
@@ -259,29 +281,35 @@ includeFiletdAgent(){
               sudo cp "$config_file_directory/observe-jenkins.conf" /etc/td-agent-bit/observe-jenkins.conf;
               ;;
             *)
-              echo "includeFiletdAgent function failed - i = $i"
-              echo "$SPACER"
-              echo "$END_OUTPUT"
-              echo "$SPACER"
+              log "includeFiletdAgent function failed - i = $i"
+              log "$SPACER"
+              log "$END_OUTPUT"
+              log "$SPACER"
               exit 1;
               ;;
         esac
   done
+
+  #install custome config if exists
+  if ! [ -z ${custom_fluentbit_config}]
+  then
+    sudo cp ${custom_fluentbit_config} /etc/td-agent-bit/observe-custom-config.conf
+  fi
 }
 
 setInstallFlags(){
   # Process modules
-  echo "$SPACER"
-  echo "setInstallFlags - module=$module"
-  echo "$SPACER"
+  log "$SPACER"
+  log "setInstallFlags - module=$module"
+  log "$SPACER"
 
   IFS=',' read -a CONFS <<< "$module"
   for i in "${CONFS[@]}"; do
-        echo "setInstallFlags - $i"
+        log "setInstallFlags - $i"
 
         case ${i} in
             linux_host)
-            echo "setInstallFlags linux_host flags"
+            log "setInstallFlags linux_host flags"
               osqueryinstall="TRUE"
               telegrafinstall="TRUE"
               fluentbitinstall="TRUE"
@@ -290,10 +318,10 @@ setInstallFlags(){
               fluentbitinstall="TRUE"
               ;;
             *)
-              echo "setInstallFlags function failed - i = $i"
-              echo "$SPACER"
-              echo "$END_OUTPUT"
-              echo "$SPACER"
+              log "setInstallFlags function failed - i = $i"
+              log "$SPACER"
+              log "$END_OUTPUT"
+              log "$SPACER"
               exit 1;
               ;;
         esac
@@ -302,20 +330,20 @@ setInstallFlags(){
 
 printMessage(){
   local message="$1"
-  echo
-  echo "$SPACER"
-  echo "$message"
-  echo "$SPACER"
-  echo
+  log
+  log "$SPACER"
+  log "$message"
+  log "$SPACER"
+  log
 }
 
 SPACER=$(generateSpacer)
 
-echo "$SPACER"
-echo "Script starting ..."
+log "$SPACER"
+log "Script starting ..."
 
-echo "$SPACER"
-echo "Validate inputs ..."
+log "$SPACER"
+log "Validate inputs ..."
 
 customer_id=0
 ingest_token=0
@@ -336,9 +364,9 @@ observe_jenkins_path="/var/lib/jenkins/"
 
 if [ "$1" == "--help" ]; then
   printHelp
-  echo "$SPACER"
-  echo "$END_OUTPUT"
-  echo "$SPACER"
+  log "$SPACER"
+  log "$END_OUTPUT"
+  log "$SPACER"
   exit 0
 fi
 
@@ -386,6 +414,9 @@ fi
         --observe_jenkins_path)
           observe_jenkins_path="$2"
           ;;
+        --custom_fluentbit_config)
+          custom_fluentbit_config="$2"
+          ;;
         *)
 
       esac
@@ -406,20 +437,21 @@ validateObserveHostName "$observe_host_name_base"
 
 observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
 
-echo "$SPACER"
-echo "customer_id: ${customer_id}"
-echo "ingest_token: ${ingest_token}"
-echo "observe_host_name_base: ${observe_host_name_base}"
-echo "observe_host_name: ${observe_host_name}"
-echo "config_files_clean: ${config_files_clean}"
-echo "ec2metadata: ${ec2metadata}"
-echo "datacenter: ${datacenter}"
-echo "appgroup: ${appgroup}"
-echo "testeject: ${testeject}"
-echo "validate_endpoint: ${validate_endpoint}"
-echo "branch_input: ${branch_input}"
-echo "module: ${module}"
-echo "observe_jenkins_path: ${observe_jenkins_path}"
+log "$SPACER"
+log "customer_id: ${customer_id}"
+log "ingest_token: ${ingest_token}"
+log "observe_host_name_base: ${observe_host_name_base}"
+log "observe_host_name: ${observe_host_name}"
+log "config_files_clean: ${config_files_clean}"
+log "ec2metadata: ${ec2metadata}"
+log "datacenter: ${datacenter}"
+log "appgroup: ${appgroup}"
+log "testeject: ${testeject}"
+log "validate_endpoint: ${validate_endpoint}"
+log "branch_input: ${branch_input}"
+log "module: ${module}"
+log "observe_jenkins_path: ${observe_jenkins_path}"
+log "custom_fluentbit_config: ${custom_fluentbit_config}"
 
 setInstallFlags
 
@@ -436,10 +468,10 @@ DEFAULT_OBSERVE_DATA_CENTER="$datacenter"
 
 if [ "$validate_endpoint" == TRUE ]; then
 
-    echo "$SPACER"
-    echo "Validate customer_id / ingest token ..."
-    echo "$SPACER"
-    echo
+    log "$SPACER"
+    log "Validate customer_id / ingest token ..."
+    log "$SPACER"
+    log
 
     curl_endpoint=$(curl https://"${OBSERVE_ENVIRONMENT}"/v1/http/script_validation \
     -H "Authorization: Bearer ${ingest_token}" \
@@ -449,44 +481,44 @@ if [ "$validate_endpoint" == TRUE ]; then
     validate_endpoint_result=$(echo "$curl_endpoint" | grep -c -Po '(?<="ok":)(true)')
 
     if ((validate_endpoint_result != 1 )); then
-        echo "$SPACER"
-        echo "Invalid value for customer_id or ingest_token"
-        echo "$curl_endpoint"
-        echo "$SPACER"
-        echo "$END_OUTPUT"
-        echo "$SPACER"
+        log "$SPACER"
+        log "Invalid value for customer_id or ingest_token"
+        log "$curl_endpoint"
+        log "$SPACER"
+        log "$END_OUTPUT"
+        log "$SPACER"
         exit 1
     else
-        echo "$SPACER"
-        echo "Successfully validated customer_id and ingest_token"
+        log "$SPACER"
+        log "Successfully validated customer_id and ingest_token"
     fi
 
-    echo
+    log
 
 fi
 
-echo "$SPACER"
-echo "Values for configuration:"
-echo "$SPACER"
-echo "    Environment:  $OBSERVE_ENVIRONMENT"
-echo
-echo "    Data Center:  $DEFAULT_OBSERVE_DATA_CENTER"
-echo
-echo "    Hostname:  $DEFAULT_OBSERVE_HOSTNAME"
-echo
-echo "    Customer ID:  $customer_id"
-echo
-echo "    Customer Ingest Token:  $ingest_token"
+log "$SPACER"
+log "Values for configuration:"
+log "$SPACER"
+log "    Environment:  $OBSERVE_ENVIRONMENT"
+log
+log "    Data Center:  $DEFAULT_OBSERVE_DATA_CENTER"
+log
+log "    Hostname:  $DEFAULT_OBSERVE_HOSTNAME"
+log
+log "    Customer ID:  $customer_id"
+log
+log "    Customer Ingest Token:  $ingest_token"
 
 testEject "${testeject}" "EJECT1"
 
-echo "$SPACER"
+log "$SPACER"
 
 getConfigurationFiles "$branch_input"
 
-echo "$SPACER"
+log "$SPACER"
 
-cd "$config_file_directory" || (exit && echo "$SPACER CONFIG FILE DIRECTORY PROBLEM - $(pwd) - $config_file_directory - $END_OUTPUT $SPACER")
+cd "$config_file_directory" || (exit && log "$SPACER CONFIG FILE DIRECTORY PROBLEM - $(pwd) - $config_file_directory - $END_OUTPUT $SPACER")
 
 sed -i "s/REPLACE_WITH_DATACENTER/${DEFAULT_OBSERVE_DATA_CENTER}/g" ./*
 
@@ -519,7 +551,7 @@ testEject "${testeject}" "EJECT2"
 case ${OS} in
     amzn|amazonlinux)
 
-    echo "Amazon OS"
+    log "Amazon OS"
 
       #####################################
       # osquery
@@ -534,7 +566,7 @@ case ${OS} in
         sudo yum-config-manager --enable osquery-s3-rpm-repo
         sudo yum install osquery -y
         sudo service osqueryd start 2>/dev/null || true
-
+        sudo systemctl enable osqueryd
 
         # ################
         sourcefilename=$config_file_directory/osquery.conf
@@ -599,6 +631,7 @@ EOT
       includeFiletdAgent
 
       sudo service td-agent-bit restart
+      sudo systemctl enable td-agent-bit
 
     fi
       # #####################################
@@ -645,7 +678,7 @@ EOT
     #####################################
     #####################################
     rhel|centos)
-      echo "RHEL OS"
+      log "RHEL OS"
       #####################################
       # osquery
       #####################################
@@ -689,6 +722,7 @@ EOT
         sudo cp "$sourcefilename" "$filename"
 
         sudo service osqueryd restart
+        sudo systemctl enable osqueryd
     fi
       # #####################################
       # # fluent
@@ -725,6 +759,7 @@ EOF
       includeFiletdAgent
 
       sudo service td-agent-bit restart
+      sudo systemctl enable td-agent-bit
 
     fi
       # #####################################
@@ -766,7 +801,7 @@ EOF
           ;;
 
     ubuntu)
-      echo "UBUNTU OS"
+      log "UBUNTU OS"
       #####################################
       # osquery
       #####################################
@@ -813,6 +848,7 @@ EOT
       sudo cp "$sourcefilename" "$filename"
 
       sudo service osqueryd restart
+      
 
       fi
 
@@ -824,7 +860,7 @@ EOT
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
 
-      echo deb https://packages.fluentbit.io/ubuntu/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
+      log deb https://packages.fluentbit.io/ubuntu/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
 
       sudo apt-get update
       sudo apt-get install -y td-agent-bit
@@ -845,6 +881,7 @@ EOT
       includeFiletdAgent
 
       sudo service td-agent-bit restart
+      sudo systemctl enable td-agent-bit
 
     fi
       # #####################################
@@ -886,30 +923,30 @@ EOT
       ################################################################################################
       ################################################################################################
     *)
-        echo "Unknown OS"
-        echo "$SPACER"
-        echo "$END_OUTPUT"
-        echo "$SPACER"
+        log "Unknown OS"
+        log "$SPACER"
+        log "$END_OUTPUT"
+        log "$SPACER"
         exit 1;
           ;;
   esac
 
 
 if [ "$fluentbitinstall" == TRUE ]; then
-  echo "$SPACER"
-  echo "Check Services"
-  echo "$SPACER"
-  echo
-  echo "$SPACER"
-  echo "td-agent-bit status"
+  log "$SPACER"
+  log "Check Services"
+  log "$SPACER"
+  log
+  log "$SPACER"
+  log "td-agent-bit status"
 
   if systemctl is-active --quiet td-agent-bit; then
-    echo td-agent-bit is running
+    log td-agent-bit is running
 
     curlObserve "td-agent-bit is running" "td-agent-bit" "SUCCESS"
 
   else
-    echo td-agent-bit is NOT running
+    log td-agent-bit is NOT running
 
     curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
 
@@ -919,64 +956,64 @@ if [ "$fluentbitinstall" == TRUE ]; then
 
 
 
-  echo "$SPACER"
-  echo "Check status - sudo service td-agent-bit status"
-  echo "Config file location: ${td_agent_bit_filename}"
-  echo
+  log "$SPACER"
+  log "Check status - sudo service td-agent-bit status"
+  log "Config file location: ${td_agent_bit_filename}"
+  log
 
 fi
-echo "$SPACER"
+log "$SPACER"
 
 if [ "$osqueryinstall" == TRUE ]; then
-  echo "osqueryd status"
+  log "osqueryd status"
 
   if systemctl is-active --quiet osqueryd; then
-    echo osqueryd is running
+    log osqueryd is running
 
   curlObserve "osqueryd is running" "osqueryd" "SUCCESS"
 
   else
-    echo osqueryd is NOT running
+    log osqueryd is NOT running
 
     curlObserve "osqueryd is NOT running" "osqueryd" "FAILURE"
 
     sudo service osqueryd status
   fi
-  echo "$SPACER"
-  echo "Check status - sudo service osqueryd status"
+  log "$SPACER"
+  log "Check status - sudo service osqueryd status"
 
-  echo "Config file location: ${osquery_conf_filename}"
+  log "Config file location: ${osquery_conf_filename}"
 
-  echo "Flag file location: ${osquery_flags_filename}"
-  echo
+  log "Flag file location: ${osquery_flags_filename}"
+  log
 
 fi
 
 if [ "$telegrafinstall" == TRUE ]; then
-    echo "$SPACER"
-    echo "telegraf status"
+    log "$SPACER"
+    log "telegraf status"
 
     if systemctl is-active --quiet telegraf; then
-      echo telegraf is running
+      log telegraf is running
 
       curlObserve "telegraf is running" "telegraf" "SUCCESS"
 
     else
-      echo telegraf is NOT running
+      log telegraf is NOT running
 
       curlObserve "telegraf is NOT running" "telegraf" "FAILURE"
 
       sudo service telegraf status
     fi
-    echo "$SPACER"
-    echo "Check status - sudo service telegraf status"
+    log "$SPACER"
+    log "Check status - sudo service telegraf status"
 
-    echo "Config file location: ${telegraf_conf_filename}"
-    echo
-    echo "$SPACER"
-    echo
-    echo "$SPACER"
-    echo "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
+    log "Config file location: ${telegraf_conf_filename}"
+    log
+    log "$SPACER"
+    log
+    log "$SPACER"
+    log "Datacenter value:  ${DEFAULT_OBSERVE_DATA_CENTER}"
 fi
 
 if [ "$config_files_clean" == TRUE ]; then
@@ -988,6 +1025,6 @@ fi
 # BASELINEINSTALL - END
 #####################################
 
-echo "$SPACER"
-echo "$END_OUTPUT"
-echo "$SPACER"
+log "$SPACER"
+log "$END_OUTPUT"
+log "$SPACER"
