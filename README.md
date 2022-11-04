@@ -45,6 +45,7 @@ Run --help command for list of flags and options
 - Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf
     can be combined with jenkins flag which add a config to fluentbit or only jenkons flag which only installs fluent bit with configs
 - Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs
+- Optional --custom_fluentbit_config used to include an additional fluentbit configuration, if needed.
 ***************************
 ### Sample command:
 ``` curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://<YOUR_CUSTOMERID>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP```

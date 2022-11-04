@@ -848,7 +848,7 @@ EOT
       sudo cp "$sourcefilename" "$filename"
 
       sudo service osqueryd restart
-      
+      sudo systemctl enable osqueryd
 
       fi
 
