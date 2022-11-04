@@ -860,7 +860,7 @@ EOT
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
 
-      log deb https://packages.fluentbit.io/ubuntu/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
+      echo deb https://packages.fluentbit.io/ubuntu/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
 
       sudo apt-get update
       sudo apt-get install -y td-agent-bit
