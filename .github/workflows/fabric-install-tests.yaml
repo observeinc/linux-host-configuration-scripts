@@ -100,6 +100,9 @@ jobs:
             echo "THIS_REPO_BRANCH=${{ github.ref }}" >> $GITHUB_ENV
           fi
 
+          # value for resource names
+          echo "TF_VAR_WORKFLOW_MATRIX_VALUE=${{ matrix.test_groups }}" >> $GITHUB_ENV
+
           # This variable tells code it running on CI server
           echo "TF_VAR_CI=$CI" >> $GITHUB_ENV
 
@@ -143,7 +146,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
-          aws-region: ${{ secrets.TF_VAR_REGION }}
+          aws-region: ${{ env.TF_VAR_REGION }}
 
       - name: Test AWS CLI
         run: |
