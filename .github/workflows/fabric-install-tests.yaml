@@ -141,7 +141,7 @@ jobs:
         with:
           terraform_wrapper: false
 
-      # AWS Login
+      # AWS Login 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -166,21 +166,6 @@ jobs:
 
       - name: 'Test gcloud CLI'
         run: 'gcloud info'
-
-      # Azure Login
-      # az ad sp create-for-rbac --name "ArthurGithubActionsLinuxHostTest" --role contributor --scopes /subscriptions/2b514e36-3a9b-4c89-ad51-4bdcab22e84f --sdk-auth
-      # https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Clinux#use-the-azure-login-action-with-a-service-principal-secret
-      # - name: Log in with Azure
-      #   uses: azure/login@v1
-      #   with:
-      #     creds: '${{ secrets.AZURE_CREDENTIALS }}'
-
-      # - name: Test Azure CLI
-      #   uses: azure/CLI@v1
-      #   with:
-      #     azcliversion: 2.0.72
-      #     inlineScript: |
-      #         az account show
 
       - name: terraform override
         run: |
