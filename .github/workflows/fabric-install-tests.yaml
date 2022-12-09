@@ -141,7 +141,7 @@ jobs:
         with:
           terraform_wrapper: false
 
-      # AWS Login - new role
+      # AWS Login - orig role
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
