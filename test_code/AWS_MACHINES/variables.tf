@@ -1,0 +1,115 @@
+# your local key path (assumes it exists) - this will allow you to access ec2 instances
+variable "PUBLIC_KEY_PATH" {
+  description = "Public key path"
+  nullable    = true
+  default     = null
+}
+
+variable "PRIVATE_KEY_PATH" {
+  description = "Private key path"
+  nullable    = true
+  default     = null
+}
+
+# where to deploy
+variable "REGION" {
+  default     = "us-west-2"
+  description = "Where resources will be deployed"
+}
+
+# appended to resource names so you can find your stuff
+variable "name_format" {
+  description = "Common prefix for resource names"
+}
+
+
+variable "BASE_TAGS" {
+  description = "base resource tags"
+  type        = map(string)
+  default = {
+    owner        = "Observe"
+    createdBy    = "terraform"
+    team         = "content"
+    purpose      = "test auto configuration script"
+    git_repo_url = "https://github.com/observeinc/linux-host-configuration-scripts"
+  }
+}
+
+variable "USE_BRANCH_NAME" {
+  default     = "main"
+  description = "git repository branch to use"
+}
+
+variable "CI" {
+  type        = bool
+  default     = false
+  description = "This variable is set to true by github actions to tell us we are running in ci"
+}
+
+
+variable "PUBLIC_KEY" {
+  description = "This value comes from a variable in github actions"
+  nullable    = true
+  default     = null
+}
+
+variable "AWS_MACHINE_CONFIGS" {
+
+  description = "variables for supported OS"
+  default = {
+
+    UBUNTU_20_04_LTS = {
+      # ami used in testing
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-0892d3c7ee96c0bf7"
+      ami_description   = "Canonical, Ubuntu, 20.04 LTS, amd64 focal image build on 2021-11-29"
+      default_user      = "ubuntu"
+      sleep             = 120
+      user_data = "user_data/aptbased.sh"
+    }
+
+    UBUNTU_18_04_LTS = {
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-0cfa91bdbc3be780c"
+      ami_description   = "Canonical, Ubuntu, 18.04 LTS, amd64 bionic image build on 2022-04-11"
+      default_user      = "ubuntu"
+      sleep             = 120
+      user_data = "user_data/aptbased.sh"
+    }
+
+    AMAZON_LINUX_2 = {
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-02b92c281a4d3dc79"
+      ami_description   = "Amazon Linux 2 Kernel 5.10 AMI 2.0.20220419.0 x86_64 HVM gp2"
+      default_user      = "ec2-user"
+      sleep             = 60
+      user_data = "user_data/aptbased.sh"
+    }
+
+    RHEL_8_4_0 = {
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-0b28dfc7adc325ef4"
+      ami_description   = "Red Hat Enterprise Linux 8 (HVM), SSD Volume Type"
+      default_user      = "ec2-user"
+      sleep             = 120
+      user_data = "user_data/yumbased.sh"
+    }
+
+    CENT_OS_7 = {
+      # https://wiki.centos.org/Cloud/AWS
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-0686851c4e7b1a8e1"
+      ami_description   = "CentOS 7.9.2009 x86_64 ami-0686851c4e7b1a8e1"
+      default_user      = "centos"
+      sleep             = 120
+      user_data = "user_data/yumbased.sh"
+    }
+  }
+}
+
+variable "AWS_MACHINE_FILTER" {
+  description = "This is used as filter agains AWS_MACHINE_CONFIGS in main.tf - if set to true then all values"
+  default = "UBUNTU_18_04_LTS"
+}
+
+
