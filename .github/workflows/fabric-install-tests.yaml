@@ -30,6 +30,7 @@ on:
     branches:    
       - 'test/**'
   pull_request:
+
   schedule:
     # only runs on default branch
     # * is a special character in YAML so you have to quote this string
