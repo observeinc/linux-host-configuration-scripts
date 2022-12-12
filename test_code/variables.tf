@@ -14,3 +14,9 @@ variable "PRIVATE_KEY_PATH" {
   nullable    = true
   default     = null
 }
+
+variable "CI" {
+  type        = bool
+  default     = false
+  description = "This variable is set to true by github actions to tell us we are running in ci"
+}
