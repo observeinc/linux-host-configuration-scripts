@@ -124,7 +124,7 @@ locals {
 
 resource "google_compute_firewall" "fw_rules" {
   for_each = local.compute_instances
-  name     = replace(format(var.name_format, "${lower(each.key)}-fw",local.str_f, local.str_r))
+  name     = replace(format(var.name_format, "${lower(each.key)}-fw"),local.str_f, local.str_r)
   network  = "default"
   project  = var.project_id
 
