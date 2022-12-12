@@ -1,6 +1,6 @@
 variable "WORKFLOW_MATRIX_VALUE" {
   description = "Uses value for naming resources"
-  default = "base"
+  default     = "base"
 }
 
 variable "PUBLIC_KEY_PATH" {

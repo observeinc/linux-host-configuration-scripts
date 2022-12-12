@@ -65,7 +65,7 @@ variable "AWS_MACHINE_CONFIGS" {
       ami_description   = "Canonical, Ubuntu, 20.04 LTS, amd64 focal image build on 2021-11-29"
       default_user      = "ubuntu"
       sleep             = 120
-      user_data = "user_data/aptbased.sh"
+      user_data         = "user_data/aptbased.sh"
     }
 
     UBUNTU_18_04_LTS = {
@@ -74,7 +74,7 @@ variable "AWS_MACHINE_CONFIGS" {
       ami_description   = "Canonical, Ubuntu, 18.04 LTS, amd64 bionic image build on 2022-04-11"
       default_user      = "ubuntu"
       sleep             = 120
-      user_data = "user_data/aptbased.sh"
+      user_data         = "user_data/aptbased.sh"
     }
 
     AMAZON_LINUX_2 = {
@@ -83,7 +83,7 @@ variable "AWS_MACHINE_CONFIGS" {
       ami_description   = "Amazon Linux 2 Kernel 5.10 AMI 2.0.20220419.0 x86_64 HVM gp2"
       default_user      = "ec2-user"
       sleep             = 60
-      user_data = "user_data/aptbased.sh"
+      user_data         = "user_data/aptbased.sh"
     }
 
     RHEL_8_4_0 = {
@@ -92,7 +92,7 @@ variable "AWS_MACHINE_CONFIGS" {
       ami_description   = "Red Hat Enterprise Linux 8 (HVM), SSD Volume Type"
       default_user      = "ec2-user"
       sleep             = 120
-      user_data = "user_data/yumbased.sh"
+      user_data         = "user_data/yumbased.sh"
     }
 
     CENT_OS_7 = {
@@ -102,14 +102,14 @@ variable "AWS_MACHINE_CONFIGS" {
       ami_description   = "CentOS 7.9.2009 x86_64 ami-0686851c4e7b1a8e1"
       default_user      = "centos"
       sleep             = 120
-      user_data = "user_data/yumbased.sh"
+      user_data         = "user_data/yumbased.sh"
     }
   }
 }
 
 variable "AWS_MACHINE_FILTER" {
   description = "This is used as filter agains AWS_MACHINE_CONFIGS in main.tf - if set to true then all values"
-  default = "UBUNTU_18_04_LTS"
+  default     = "UBUNTU_18_04_LTS"
 }
 
 
