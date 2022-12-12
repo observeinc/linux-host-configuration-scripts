@@ -67,6 +67,7 @@ jobs:
       TERRAFORM_RUN_DESTROY: true
       FAIL_FIRST_TEST: false
       FAIL_SECOND_TEST: false
+      WORK_DIR: test_code
 
 
       # TF_LOG: DEBUG
@@ -201,28 +202,28 @@ jobs:
           }
 
           EOF
-        working-directory: "linux_host_script_test"
+        working-directory: ${{ env.WORK_DIR }}
 
 
       - name: terraform version
         run: |
           terraform version
-        working-directory: "linux_host_script_test"
+        working-directory: ${{ env.WORK_DIR }}
 
       - name: terraform init
         run: |
           terraform init
-        working-directory: "linux_host_script_test"
+        working-directory: ${{ env.WORK_DIR }}
 
       - name: terraform validate
         run: |
           terraform validate
-        working-directory: "linux_host_script_test"
+        working-directory: ${{ env.WORK_DIR }}
 
       - name: terraform apply
         run: |
           terraform apply -auto-approve
-        working-directory: "linux_host_script_test"
+        working-directory: ${{ env.WORK_DIR }}
 
       # set config.ini
       - name: create config file
@@ -233,7 +234,7 @@ jobs:
             domain = ${{ secrets.STAGE_DOMAIN }}
             datastream_token = ${{ secrets.STAGE_DATASTREAM_TOKEN }}
           EOF
-        working-directory: "linux_host_script_test/python_scripts"
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       # # Run tests
       # - name: python script
@@ -270,7 +271,7 @@ jobs:
           if ${{ env.TERRAFORM_RUN_DESTROY == 'true' }}; then
             terraform destroy -auto-approve
           fi
-        working-directory: "linux_host_script_test"
+        working-directory: ${{ env.WORK_DIR }}
 
       - name: Fail Check
         if: ${{ env.TEST_RESULT == 'FAIL' }} 
