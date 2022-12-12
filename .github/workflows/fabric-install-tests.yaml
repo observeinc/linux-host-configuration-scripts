@@ -157,9 +157,9 @@ jobs:
           role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
           aws-region: ${{ env.TF_VAR_REGION }}
 
-      - name: Test AWS CLI
-        run: |
-            aws account get-contact-information 
+      # - name: Test AWS CLI
+      #   run: |
+      #       aws account get-contact-information 
 
       # GCP Login
       # This is key generated in GCP console for service account
