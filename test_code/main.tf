@@ -1,5 +1,5 @@
 locals {
-  name_format = var.CI == true ? "gha-linux-host-test-${var.WORKFLOW_MATRIX_VALUE}-%s" : "linux-host-test-%s"
+  name_format = var.CI == true ? "gha-lht-${var.WORKFLOW_MATRIX_VALUE}-%s" : "linux-host-test-%s"
 }
 
 module "aws_machines" {
