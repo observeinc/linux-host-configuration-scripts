@@ -47,7 +47,7 @@ locals {
 }
 
 resource "google_service_account" "compute" {
-  account_id   = format(var.name_format, "sa")
+  account_id   = format(lower(replace(var.name_format, local.str_f, local.str_r)), "sa")
   display_name = "Service Account for compute resources"
   project      = var.project_id
 }
