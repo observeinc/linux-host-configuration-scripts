@@ -16,3 +16,19 @@ module "aws_machines" {
     aws = aws
   }
 }
+
+module "gcp_machines" {
+  source             = "./GCP_MACHINES"
+  public_key_path    = var.PUBLIC_KEY_PATH
+  PRIVATE_KEY_PATH   = var.PRIVATE_KEY_PATH
+  region             = "us-west1"
+  zone               = "a"
+  name_format        = local.name_format
+  GCP_COMPUTE_FILTER = []
+  CI                 = var.CI
+  PUBLIC_KEY         = var.PUBLIC_KEY
+
+  providers = {
+    google = google
+  }
+}
