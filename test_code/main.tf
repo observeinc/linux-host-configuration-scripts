@@ -11,7 +11,6 @@ module "aws_machines" {
   AWS_MACHINE_FILTER = true
   CI                 = var.CI
   PUBLIC_KEY         = var.PUBLIC_KEY
-  SANITY_OVERRIDE    = var.SANITY_OVERRIDE
 
   providers = {
     aws = aws
