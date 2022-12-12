@@ -20,3 +20,9 @@ variable "CI" {
   default     = false
   description = "This variable is set to true by github actions to tell us we are running in ci"
 }
+
+variable "PUBLIC_KEY" {
+  description = "Public key var for running in ci"
+  nullable    = true
+  default     = null
+}
