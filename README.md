@@ -1,3 +1,4 @@
+![Pass/Fail Tests - AWS/Azure/GCP](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/fabric-install-tests.yaml/badge.svg?branch=main)
 # Configuraton script for Linux
 ## Assumptions:
 - Assumes user running script can use passwordless sudo
