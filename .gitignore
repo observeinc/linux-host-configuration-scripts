@@ -3,3 +3,7 @@
 override.tf
 *.tfvars
 .terraform*
+tf_hosts.json
+__pycache__
+/test_code/python_scripts/file_outputs
+*.ini
