@@ -75,7 +75,7 @@ resource "google_compute_instance" "instances" {
   # instance for each value in map
   for_each = local.compute_instances
 
-  name         = format(var.name_format, "instance-${lower(replace(each.key, local.str_f, local.str_r))}")
+  name         = replace(format(var.name_format, "instance-${lower(each.key)}", local.str_f, local.str_r)
   project      = var.project_id
   machine_type = each.value.machine_type
   zone         = "${var.region}-${var.zone}"
