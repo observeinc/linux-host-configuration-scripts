@@ -15,7 +15,7 @@ jobs:
       # you can opt out of ci-tests scheduled by adding a list of "jobs" ids for the 
       # tests that you want to skip, like so...
       # skip: '{"jobs": ["conventional-commits", "single-commit"]}'
-      skip: '{"jobs": ["single-commit"]}'
+      skip: '{"jobs": ["single-commit", "preCommitMinVersions"]}'
 
   pre-commits:
     uses: observeinc/.github/.github/workflows/terraform-observe_pre-commit.yaml@main
