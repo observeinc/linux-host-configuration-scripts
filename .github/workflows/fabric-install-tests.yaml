@@ -236,32 +236,32 @@ jobs:
           EOF
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
-      # # Run tests
-      # - name: python script
-      #   run: |
-      #     # create output directory for archive files
-      #     mkdir file_outputs
+      # Run tests
+      - name: python script
+        run: |
+          # create output directory for archive files
+          mkdir file_outputs
 
-      #     # install dependencies
-      #     pip3 install -r requirements.txt
+          # install dependencies
+          pip3 install -r requirements.txt
 
-      #     # run tests 
-      #     fab test -a ${{ env.FAIL_FIRST_TEST }}
-      #   working-directory: "linux_host_script_test/python_scripts"
+          # run tests 
+          fab test -a ${{ env.FAIL_FIRST_TEST }}
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
-      # - name: Retry tests
-      #   if: ${{ env.TEST_RESULT == 'FAIL' }} 
-      #   run: |
-      #     # run tests
-      #     fab test -a ${{ env.FAIL_SECOND_TEST }}
-      #   working-directory: "linux_host_script_test/python_scripts" 
+      - name: Retry tests
+        if: ${{ env.TEST_RESULT == 'FAIL' }} 
+        run: |
+          # run tests
+          fab test -a ${{ env.FAIL_SECOND_TEST }}
+        working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 
-      # - name: Archive test results
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: file_outputs
-      #     path: "/home/runner/work/content-eng-test-linux-host-configuration-scripts/content-eng-test-linux-host-configuration-scripts/linux_host_script_test/python_scripts/"
-      #     retention-days: 5
+      - name: Archive test results
+        uses: actions/upload-artifact@v3
+        with:
+          name: file_outputs
+          path: "/home/runner/work/content-eng-test-linux-host-configuration-scripts/content-eng-test-linux-host-configuration-scripts/linux_host_script_test/python_scripts/"
+          retention-days: 5
 
       - name: terraform destroy
         if: always()
