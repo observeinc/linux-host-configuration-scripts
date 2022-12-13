@@ -1,4 +1,6 @@
+# tflint-ignore: terraform_naming_convention
 variable "GCP_MACHINE_CONFIGS" {
+  type        = map(any)
   description = "variable for what compute instances to create"
   default = {
     #https://cloud.google.com/compute/docs/images/os-details#ubuntu_lts
@@ -64,12 +66,14 @@ variable "GCP_MACHINE_CONFIGS" {
   }
 }
 
+# tflint-ignore: terraform_naming_convention
 variable "GCP_COMPUTE_FILTER" {
   type        = list(any)
   description = "list of compute instances to filter"
   default     = ["UBUNTU_20_04_LTS"]
   # default     = ["UBUNTU_18_04_LTS", "UBUNTU_20_04_LTS", "RHEL_8"]
 }
+
 
 variable "project_id" {
   type        = string
@@ -84,13 +88,15 @@ variable "public_key_path" {
   type        = string
 }
 
+# tflint-ignore: terraform_naming_convention
 variable "PRIVATE_KEY_PATH" {
   description = "Private key path"
   nullable    = true
   type        = string
 }
 variable "region" {
-  type = string
+  type        = string
+  description = "GCP region"
 }
 
 variable "zone" {
@@ -103,14 +109,17 @@ variable "name_format" {
   description = "name prefix"
 }
 
+# tflint-ignore: terraform_naming_convention
 variable "CI" {
   type        = bool
   default     = false
   description = "switch for running in ci"
 }
 
+# tflint-ignore: terraform_naming_convention
 variable "PUBLIC_KEY" {
   description = "switch for running in ci"
   nullable    = true
   default     = null
+  type        = string
 }

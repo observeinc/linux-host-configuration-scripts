@@ -2,3 +2,4 @@
 *scratch*
 override.tf
 *.tfvars
+.terraform*

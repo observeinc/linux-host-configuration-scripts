@@ -3,10 +3,10 @@ locals {
 }
 
 module "aws_machines" {
-  source             = "./AWS_MACHINES"
-  PUBLIC_KEY_PATH    = var.PUBLIC_KEY_PATH
-  PRIVATE_KEY_PATH   = var.PRIVATE_KEY_PATH
-  REGION             = "us-west-2"
+  source           = "./AWS_MACHINES"
+  PUBLIC_KEY_PATH  = var.PUBLIC_KEY_PATH
+  PRIVATE_KEY_PATH = var.PRIVATE_KEY_PATH
+  # REGION             = "us-west-2"
   name_format        = local.name_format
   AWS_MACHINE_FILTER = true
   CI                 = var.CI
