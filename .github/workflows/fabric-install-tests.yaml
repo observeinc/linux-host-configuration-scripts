@@ -260,7 +260,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: file_outputs
-          path: "/home/runner/work/content-eng-test-linux-host-configuration-scripts/content-eng-test-linux-host-configuration-scripts/linux_host_script_test/python_scripts/"
+          path: "/home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/"
           retention-days: 5
 
       - name: terraform destroy
