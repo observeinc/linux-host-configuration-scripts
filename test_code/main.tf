@@ -32,3 +32,17 @@ module "gcp_machines" {
     google = google
   }
 }
+
+module "azure_machines" {
+  source               = "./AZURE_MACHINES"
+  public_key_path      = var.PUBLIC_KEY_PATH
+  PRIVATE_KEY_PATH     = var.PRIVATE_KEY_PATH
+  location             = "West US 3"
+  name_format          = local.name_format
+  AZURE_COMPUTE_FILTER = ["UBUNTU_18_04_LTS", "UBUNTU_20_04_LTS", "UBUNTU_22_04_LTS", "RHEL_8", "CENTOS_8"]
+  CI                   = var.CI
+  PUBLIC_KEY           = var.PUBLIC_KEY
+  providers = {
+    azurerm = azurerm
+  }
+}
