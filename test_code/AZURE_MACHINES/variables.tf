@@ -1,5 +1,7 @@
+# tflint-ignore: terraform_naming_convention
 variable "AZURE_MACHINE_CONFIGS" {
   description = "variable for what compute instances to create"
+  type        = map(any)
   default = {
     # https://az-vm-image.info/
     # https://learn.microsoft.com/en-us/azure/virtual-machines/linux/cli-ps-findimage
@@ -88,6 +90,7 @@ variable "AZURE_MACHINE_CONFIGS" {
   }
 }
 
+# tflint-ignore: terraform_naming_convention
 variable "AZURE_COMPUTE_FILTER" {
   type        = list(any)
   description = "list of compute instances to filter"
@@ -95,11 +98,11 @@ variable "AZURE_COMPUTE_FILTER" {
   # default     = ["UBUNTU_18_04_LTS", "UBUNTU_20_04_LTS", "RHEL_8"]
 }
 
-variable "project_id" {
-  type        = string
-  description = "GCP Project"
-  default     = "content-eng-linux-host-test"
-}
+# variable "project_id" {
+#   type        = string
+#   description = "GCP Project"
+#   default     = "content-eng-linux-host-test"
+# }
 
 variable "public_key_path" {
   description = "Public key path"
@@ -108,6 +111,7 @@ variable "public_key_path" {
   type        = string
 }
 
+# tflint-ignore: terraform_naming_convention
 variable "PRIVATE_KEY_PATH" {
   description = "Private key path"
   nullable    = true
@@ -124,18 +128,19 @@ variable "name_format" {
   description = "name prefix"
 }
 
-
+# tflint-ignore: terraform_naming_convention
 variable "CI" {
   type        = bool
   default     = false
   description = "switch for running in ci"
 }
 
-
+# tflint-ignore: terraform_naming_convention
 variable "PUBLIC_KEY" {
   description = "switch for running in ci"
   nullable    = true
   default     = null
+  type        = string
 }
 
 
