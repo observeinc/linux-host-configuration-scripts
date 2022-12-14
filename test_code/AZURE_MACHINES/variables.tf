@@ -8,12 +8,12 @@ variable "AZURE_MACHINE_CONFIGS" {
     # https://learn.microsoft.com/en-us/azure/virtual-machines/linux/endorsed-distros
     # az vm image list -p canonical -o table --all | grep 22_04-lts    
     UBUNTU_22_04_LTS = {
-      recreate       = "changethistorecreate1"
-      machine_type   = "Standard_DS1_v2"
-      description    = "Ubuntu 22_04 LTS"
-      default_user   = "ubuntu"
-      wait           = "120"
-      user_data_file = "ubuntu_user_data.sh"
+      recreate     = "changethistorecreate1"
+      machine_type = "Standard_DS1_v2"
+      description  = "Ubuntu 22_04 LTS"
+      default_user = "ubuntu"
+      wait         = "120"
+      user_data    = "user_data/aptbased.sh"
       source_image_reference = {
         publisher = "Canonical"
         offer     = "0001-com-ubuntu-server-jammy"
@@ -24,12 +24,12 @@ variable "AZURE_MACHINE_CONFIGS" {
     }
 
     UBUNTU_20_04_LTS = {
-      recreate       = "changethistorecreate1"
-      machine_type   = "Standard_DS1_v2"
-      description    = "Ubuntu 20_04 LTS"
-      default_user   = "ubuntu"
-      wait           = "120"
-      user_data_file = "ubuntu_user_data.sh"
+      recreate     = "changethistorecreate1"
+      machine_type = "Standard_DS1_v2"
+      description  = "Ubuntu 20_04 LTS"
+      default_user = "ubuntu"
+      wait         = "120"
+      user_data    = "user_data/aptbased.sh"
       source_image_reference = {
         publisher = "Canonical"
         offer     = "0001-com-ubuntu-server-focal"
@@ -40,13 +40,13 @@ variable "AZURE_MACHINE_CONFIGS" {
     }
 
     UBUNTU_18_04_LTS = {
-      recreate       = "changethistorecreate1"
-      machine_type   = "Standard_DS1_v2"
-      description    = "Ubuntu 18_04 LTS"
-      default_user   = "ubuntu"
-      wait           = "120"
-      user_data_file = "ubuntu_user_data.sh"
-      sleep          = 120
+      recreate     = "changethistorecreate1"
+      machine_type = "Standard_DS1_v2"
+      description  = "Ubuntu 18_04 LTS"
+      default_user = "ubuntu"
+      wait         = "120"
+      user_data    = "user_data/aptbased.sh"
+      sleep        = 120
       source_image_reference = {
         publisher = "Canonical"
         offer     = "UbuntuServer"
@@ -56,12 +56,12 @@ variable "AZURE_MACHINE_CONFIGS" {
     }
     # az vm image list -p redhat -o table --all | grep 8  
     RHEL_8 = {
-      recreate       = "changethistorecreate1"
-      machine_type   = "Standard_DS1_v2"
-      description    = "Red Hat Enterprise Linux 8"
-      default_user   = "redhat"
-      wait           = "300"
-      user_data_file = "rhel_user_data.sh"
+      recreate     = "changethistorecreate1"
+      machine_type = "Standard_DS1_v2"
+      description  = "Red Hat Enterprise Linux 8"
+      default_user = "redhat"
+      wait         = "300"
+      user_data    = "user_data/yumbased.sh"
       source_image_reference = {
         publisher = "RedHat"
         offer     = "RHEL"
@@ -72,12 +72,12 @@ variable "AZURE_MACHINE_CONFIGS" {
     }
 
     CENTOS_8 = {
-      recreate       = "changethistorecreate1"
-      machine_type   = "Standard_DS1_v2"
-      description    = "CentOS Stream 8"
-      default_user   = "centos"
-      wait           = "120"
-      user_data_file = "rhel_user_data.sh"
+      recreate     = "changethistorecreate1"
+      machine_type = "Standard_DS1_v2"
+      description  = "CentOS Stream 8"
+      default_user = "centos"
+      wait         = "120"
+      user_data    = "user_data/yumbased.sh"
       source_image_reference = {
         publisher = "OpenLogic"
         offer     = "CentOS-LVM"

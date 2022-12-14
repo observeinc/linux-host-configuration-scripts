@@ -101,7 +101,7 @@ resource "google_compute_instance" "instances" {
     google-monitoring-enabled = true
   }
 
-  metadata_startup_script = file(each.value.user_data_file)
+  metadata_startup_script = file(each.value.user_data)
 
   service_account {
     # Google recommends custom service accounts that have cloud-platform scope and permissions granted via IAM Roles.

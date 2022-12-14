@@ -43,6 +43,8 @@ resource "azurerm_linux_virtual_machine" "linux_host_test" {
     sku       = each.value.source_image_reference.sku
     version   = each.value.source_image_reference.version
   }
+
+  custom_data = filebase64(each.value.user_data)
 }
 
 
