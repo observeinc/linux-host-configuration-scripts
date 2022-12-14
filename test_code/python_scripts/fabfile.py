@@ -388,10 +388,7 @@ def doTest(options, t):
         )
 
         # run command on remote machine
-        result = connect.run(
-            options["commands"][cmd],
-            hide=True,
-        )
+        result = connect.run(options["commands"][cmd], hide=True, timeout=300)
 
         # format string for results
         msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
