@@ -102,7 +102,7 @@ def ciSumFile(sumfile, agg_result):
 
         # open both files
         with open(sumfile, "r") as firstfile, open(gha_sum_file, "w") as secondfile:
-
+            secondfile.seek(0)
             # read content from first file
             for line in firstfile:
                 # write content to second file
@@ -122,6 +122,7 @@ def test(
     runTerraformDestroy="false",
     runTerraformOutput="true",
     failMe="false",
+    outPutTitleAppend="1",
 ):
     """Run a test of install script"""
     if runTerraform == "true":
@@ -265,6 +266,7 @@ def test(
             sum_file = f"{folder_name}/small_result.md"
 
             with open(sum_file, "w+") as sumfile:
+                sumfile.write(f"# TEST RUN {outPutTitleAppend}\n")
                 for key in small_result:
                     sumfile.write(f"### {key}\n")
                     sumfile.write(f"| Command      | Result |\n")
