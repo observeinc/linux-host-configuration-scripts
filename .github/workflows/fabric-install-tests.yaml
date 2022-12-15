@@ -254,14 +254,15 @@ jobs:
         run: |
           # run tests
           fab test -a ${{ env.FAIL_SECOND_TEST }}
+          rm config.ini
         working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 
       - name: Archive test results
         uses: actions/upload-artifact@v3
         with:
           name: file_outputs
-          path: "/home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/"
-          retention-days: 5
+          path: "/home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/file_outputs/"
+          retention-days: 1
 
       - name: terraform destroy
         if: always()
