@@ -263,24 +263,62 @@ def test(
                         print(test_pass_message)
                         small_result[key][cmd] = test_results[key][cmd]
 
-            sum_file = f"{folder_name}/small_result.md"
+            sum_pass_file = f"{folder_name}/small_pass_result.md"
+            sum_fail_file = f"{folder_name}/small_fail_result.md"
+            sum_temp_file = f"{folder_name}/small_temp_result.md"
 
             with open(sum_file, "w+") as sumfile:
                 sumfile.write(f"# TEST RUN {outPutTitleAppend}\n")
+
                 for key in small_result:
-                    sumfile.write(f"### {key}\n")
-                    sumfile.write(f"| Command      | Result |\n")
-                    sumfile.write(f"| ----------- | ----------- |\n")
-                    for cmd in small_result[key]:
+                    failed_test_in_key = False
 
-                        cell_value = "NA"
-                        if test_fail_message in small_result[key][cmd]:
-                            cell_value = f'<span style="color:red">***{test_fail_message}***</span>'
+                    with open(sum_temp_file, "w+") as sumtempfile:
 
-                        if test_pass_message in small_result[key][cmd]:
-                            cell_value = f'<span style="color:green">***{test_pass_message}***</span>'
+                        sumtempfile.write(f"### {key}\n")
+                        sumtempfile.write(f"| Command      | Result |\n")
+                        sumtempfile.write(f"| ----------- | ----------- |\n")
+                        for cmd in small_result[key]:
 
-                        sumfile.write(f"| {cmd} | {cell_value} |\n")
+                            cell_value = "NA"
+                            if test_fail_message in small_result[key][cmd]:
+                                failed_test_in_key = True
+                                cell_value = f'<span style="color:red">***{test_fail_message}***</span>'
+
+                            if test_pass_message in small_result[key][cmd]:
+                                cell_value = f'<span style="color:green">***{test_pass_message}***</span>'
+
+                            sumtempfile.write(f"| {cmd} | {cell_value} |\n")
+
+                            # open both files
+
+                        if failed_test_in_key == True:
+
+                            with open(sum_fail_file, "a+") as failfile:
+                                failfile.seek(0)
+                                # read content from first file
+                                for line in sumtempfile:
+                                    # write content to second file
+                                    failfile.write(line)
+                        else:
+                            with open(sum_pass_file, "a+") as passfile:
+                                passfile.seek(0)
+                                # read content from first file
+                                for line in sumtempfile:
+                                    # write content to second file
+                                    passfile.write(line)
+
+                with open(sum_fail_file, "a+") as failfile:
+                    failfile.seek(0)
+                    for line in failfile:
+                        # write content to second file
+                        sumfile.write(line)
+
+                with open(sum_pass_file, "a+") as passfile:
+                    passfile.seek(0)
+                    for line in passfile:
+                        # write content to second file
+                        sumfile.write(line)
 
             ciSumFile(sum_file, agg_result)
 
