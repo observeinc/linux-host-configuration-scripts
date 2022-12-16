@@ -69,9 +69,9 @@ resource "google_project_iam_member" "compute" {
 
 resource "google_compute_instance" "instances" {
 
-  depends_on = [
-    google_compute_firewall.fw_rules,
-  ]
+  # depends_on = [
+  #   google_compute_firewall.fw_rules,
+  # ]
   # instance for each value in map
   for_each = local.compute_instances
 
