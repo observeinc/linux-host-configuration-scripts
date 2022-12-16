@@ -11,7 +11,7 @@ variable "PUBLIC_KEY_PATH" {
   type        = string
   description = "Public key path"
   nullable    = true
-  default     = null
+  default     = "~/.ssh/id_rsa_ec2.pub"
 }
 
 # tflint-ignore: terraform_naming_convention
