@@ -308,13 +308,13 @@ def test(
                                     # write content to second file
                                     passfile.write(line)
 
-                with open(sum_fail_file, "a+") as failfile:
+                with open(sum_fail_file, "r") as failfile:
                     failfile.seek(0)
                     for line in failfile:
                         # write content to second file
                         sumfile.write(line)
 
-                with open(sum_pass_file, "a+") as passfile:
+                with open(sum_pass_file, "r") as passfile:
                     passfile.seek(0)
                     for line in passfile:
                         # write content to second file
