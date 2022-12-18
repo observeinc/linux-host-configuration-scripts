@@ -87,4 +87,4 @@ def set_custom_vars(inputs={}):
     env_file = os.getenv("GITHUB_ENV")
 
     for key in inputs:
-        print("{key} = {inputs[key]}")
+        print("key = {key}")
