@@ -143,25 +143,12 @@ jobs:
         with:
           terraform_wrapper: false
 
-      - name: Set env as secret
-        env:
-          MY_VAL: ${{ secrets.THUNDERDOME_AWS_ROLE }}
-        run: |
-          import os
-          for q in (os.getenv("MY_VAL")):
-            print(q,end=" ")
-        shell: python
-
       # AWS Login - orig role
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
           aws-region: ${{ env.TF_VAR_REGION }}
-
-      # - name: Test AWS CLI
-      #   run: |
-      #       aws account get-contact-information 
 
       # GCP Login
       # This is key generated in GCP console for service account
@@ -224,7 +211,7 @@ jobs:
               aws = aws
             }
           }
-          'EOF'
+          EOF
         working-directory: ${{ env.WORK_DIR }}
         
       - name: terraform version
