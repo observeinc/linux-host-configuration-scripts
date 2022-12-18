@@ -80,6 +80,12 @@ jobs:
           echo "fail_first_test=${{ github.event.inputs.fail_first_test }}"
           echo "fail_second_test=${{ github.event.inputs.fail_second_test }}"
 
+      - name: Set variables
+        run: |
+          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(inputs=\"${{ github.event.inputs }}\")"
+
+
+
       - name: Set variables based on inputs
         if: github.event.inputs.terraform_run_destroy != ''
         run: |
@@ -135,7 +141,6 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
-          # ref: universal
           ref: ${{ env.THIS_REPO_BRANCH }}
 
       - name: Setup Terraform

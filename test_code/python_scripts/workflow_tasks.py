@@ -2,8 +2,6 @@
 
 import os
 
-# env_file = os.getenv("GITHUB_ENV")
-
 
 def tf_override_file(test_group="", override_file_path="../override.tf"):
 
@@ -83,3 +81,10 @@ def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
                 datastream_token = {token}
             """
         )
+
+
+def set_custom_vars(inputs={}):
+    env_file = os.getenv("GITHUB_ENV")
+
+    for key in inputs:
+        print("{key} = {inputs[key]}")
