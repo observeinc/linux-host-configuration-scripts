@@ -6,7 +6,7 @@ locals {
 
 /* Locally generated private key*/
 resource "aws_key_pair" "ec2key" {
-  key_name   = format(var.name_format, "_publicKey")
+  key_name   = format(var.name_format, "publicKey")
   public_key = (var.CI) ? var.PUBLIC_KEY : file(var.PUBLIC_KEY_PATH)
 
   tags = merge(
