@@ -165,69 +165,14 @@ jobs:
       - name: 'Test gcloud CLI'
         run: 'gcloud info'
 
-      - name: tf over
+      - name: terraform files
         run: |
           python3 -c "from workflow_tasks import tf_override_file; tf_override_file(test_group=\"${{ matrix.test_groups }}\")"
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
-      - name:  check
-        run: |
-          cat override.tf
-        working-directory: ${{ env.WORK_DIR }}
-      # - name: terraform override
-      #   run: |
-      #     cat <<EOF > override.tf 
-      #     # https://www.terraform.io/language/files/override
-      #     terraform {
-      #       backend "s3" {
-      #         bucket = "thunderdome-terraform-state"
-      #         region = "us-west-2"
-      #         key    = "content-eng/gha/aws/linuxhost_${{ matrix.test_groups }}"
-      #       }
-      #     }
+          python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"aws_machines\")"
 
-      #     provider "aws" {
-      #       region = "us-west-2"
-      #     }
-
-      #     provider "google" {
-      #     }
-
-      #     provider "azurerm" {
-      #       features {}
-      #     }
-
-      #     EOF
-      #   working-directory: ${{ env.WORK_DIR }}
-
-      - name: terraform main.tf
-        run: |
-          cat <<'EOF' > main.tf 
-          locals {
-            name_format = var.CI == true ? "gha-lht-${var.WORKFLOW_MATRIX_VALUE}-%s" : "linux-host-test-%s"
-          }
-
-          module "aws_machines" {
-            source           = "./AWS_MACHINES"
-            PUBLIC_KEY_PATH  = var.PUBLIC_KEY_PATH
-            PRIVATE_KEY_PATH = var.PRIVATE_KEY_PATH
-            name_format        = local.name_format
-            AWS_MACHINE_FILTER = true
-            CI                 = var.CI
-            PUBLIC_KEY         = var.PUBLIC_KEY
-
-            providers = {
-              aws = aws
-            }
-          }
-          EOF
-
-          cat <<'EOF' > outputs.tf
-            output "fab_host_all" {
-              value = module.aws_machines.fab_hosts
-            }
-          EOF
-        working-directory: ${{ env.WORK_DIR }}
+          python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"aws_machines\")"
+        working-directory: ${{ env.WORK_DIR }}/python_scripts"
         
       - name: terraform version
         run: |

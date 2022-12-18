@@ -31,3 +31,42 @@ def tf_override_file(test_group="", override_file_path="../override.tf"):
             }}
         """
         )
+
+
+def tf_main_file(module="", main_file_path="../main.tf"):
+
+    with open(main_file_path, "w+") as myfile:
+        if module == "aws_machines":
+            myfile.write(
+                f"""
+                locals {{
+                    name_format = var.CI == true ? "gha-lht-${{var.WORKFLOW_MATRIX_VALUE}}-%s" : "linux-host-test-%s"
+                }}
+
+                module "aws_machines" {{
+                    source           = "./AWS_MACHINES"
+                    PUBLIC_KEY_PATH  = var.PUBLIC_KEY_PATH
+                    PRIVATE_KEY_PATH = var.PRIVATE_KEY_PATH
+                    name_format        = local.name_format
+                    AWS_MACHINE_FILTER = true
+                    CI                 = var.CI
+                    PUBLIC_KEY         = var.PUBLIC_KEY
+
+                    providers = {{
+                    aws = aws
+                    }}
+                }}
+                """
+            )
+
+
+def tf_output_file(module="", output_file_path="../outputs.tf"):
+
+    with open(output_file_path, "w+") as myfile:
+        myfile.write(
+            f"""
+            output "fab_host_all" {{
+                value = module.{module}.fab_hosts
+                }}
+            """
+        )
