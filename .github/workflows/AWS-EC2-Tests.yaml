@@ -175,27 +175,27 @@ jobs:
 
           python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ secrets.STAGE_CUSTOMER_ID }}\", domain=\"${{ secrets.STAGE_DOMAIN }}\", token=\"${{ secrets.STAGE_DATASTREAM_TOKEN }}\")"
 
-        working-directory: ${{ env.WORK_DIR }}/python_scripts"
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
         
       - name: terraform version
         run: |
           terraform version
-        working-directory: ${{ env.WORK_DIR }}
+        working-directory: "${{ env.WORK_DIR }}"
 
       - name: terraform init
         run: |
           terraform init
-        working-directory: ${{ env.WORK_DIR }}
+        working-directory: "${{ env.WORK_DIR }}"
 
       - name: terraform validate
         run: |
           terraform validate
-        working-directory: ${{ env.WORK_DIR }}
+        working-directory: "${{ env.WORK_DIR }}"
 
       - name: terraform apply
         run: |
           terraform apply -auto-approve
-        working-directory: ${{ env.WORK_DIR }}
+        working-directory: "${{ env.WORK_DIR }}"
 
       # Run tests
       - name: python script
@@ -239,7 +239,7 @@ jobs:
           if ${{ env.TERRAFORM_RUN_DESTROY == 'true' }}; then
             terraform destroy -auto-approve
           fi
-        working-directory: ${{ env.WORK_DIR }}
+        working-directory: "${{ env.WORK_DIR }}"
 
       - name: Fail Check
         if: ${{ env.TEST_RESULT == 'FAIL' }} 
