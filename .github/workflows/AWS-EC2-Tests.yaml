@@ -234,7 +234,6 @@ jobs:
       - name: terraform destroy
         if: always()
         run: |
-          rm config.ini
           echo "Value of input ${{ env.TERRAFORM_RUN_DESTROY == 'true' }}"
           
           if ${{ env.TERRAFORM_RUN_DESTROY == 'true' }}; then
