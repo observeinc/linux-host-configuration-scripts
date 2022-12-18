@@ -4,8 +4,11 @@ org=observeinc
 repo=linux-host-configuration-scripts
 
 # Get workflow IDs with status "disabled_manually"
-workflow_ids=($(gh api repos/$org/$repo/actions/workflows | jq '.workflows[] | select(.["state"] | contains("disabled_manually")) | .id'))
+# gh api repos/$org/$repo/actions/workflows | jq '.workflows[]'
+# gh api repos/$org/$repo/actions/runs
 
+workflow_ids=($(gh api repos/$org/$repo/actions/workflows | jq '.workflows[] | select(.["state"] | contains("active")) | .id'))
+# workflow_ids=($(gh api repos/$org/$repo/actions/workflows | jq '.workflows[] | select(.["state"] | contains("disabled_manually")) | .id'))
 for workflow_id in "${workflow_ids[@]}"
 do
   echo "Listing runs for the workflow ID $workflow_id"
