@@ -167,7 +167,7 @@ jobs:
 
       - name: tf over
         run: |
-          python -c "from workflow_tasks import tf_override_file; tf_override_file(test_group="${{ matrix.test_groups }}")"
+          python3 -c "from workflow_tasks import tf_override_file; tf_override_file(test_group=\"${{ matrix.test_groups }}\")"
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name:  check

@@ -5,7 +5,7 @@ import os
 # env_file = os.getenv("GITHUB_ENV")
 
 
-def tf_override_file(test_group, override_file_path="../overide.tf"):
+def tf_override_file(test_group="", override_file_path="../override.tf"):
 
     with open(override_file_path, "w+") as myfile:
         myfile.write(
