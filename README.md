@@ -1,4 +1,4 @@
-![Pass/Fail Tests - AWS](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/fabric-install-tests-aws.yaml/badge.svg?branch=main)
+![Pass/Fail Tests - AWS](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/fabric-install-tests-aws.yaml/badge.svg?branch=main) - AWS EC2
 
 ![Pass/Fail Tests - Azure](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/fabric-install-tests-azure.yaml/badge.svg?branch=main)
 
