@@ -1,4 +1,4 @@
-run-name: AWS-EC2 ${{ github.event_name }} by @${{ github.actor }}
+run-name: ${{ matrix.test_cloud }} - ${{ github.event_name }} by @${{ github.actor }}
 # name: Fabric Build
 on: 
   workflow_dispatch:
@@ -43,6 +43,7 @@ jobs:
       max-parallel: 30
       fail-fast: false
       matrix:
+        test_cloud: ['AWS']
         test_groups: ['base_defaults']
     runs-on: ubuntu-latest
     permissions:
@@ -173,7 +174,7 @@ jobs:
             backend "s3" {
               bucket = "thunderdome-terraform-state"
               region = "us-west-2"
-              key    = "content-eng/gha/aws/linuxhost_${{ matrix.test_groups }}"
+              key    = "content-eng/gha/${{ matrix.test_cloud }}/linuxhost_${{ matrix.test_groups }}"
             }
           }
 
