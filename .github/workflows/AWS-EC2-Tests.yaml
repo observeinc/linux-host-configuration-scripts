@@ -233,6 +233,12 @@ jobs:
           path: "/home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/file_outputs/"
           retention-days: 1
 
+      - name: delete ini
+        if: always()
+        run: |
+          rm config.ini
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+
       - name: terraform destroy
         if: always()
         run: |
