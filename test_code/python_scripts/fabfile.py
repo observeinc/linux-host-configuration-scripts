@@ -266,6 +266,7 @@ def test(
             sum_pass_file = f"{folder_name}/small_pass_result.md"
             sum_fail_file = f"{folder_name}/small_fail_result.md"
             sum_temp_file = f"{folder_name}/small_temp_result.md"
+            sum_file = f"{folder_name}/small_result.md"
 
             with open(sum_file, "w+") as sumfile:
                 sumfile.write(f"# TEST RUN {outPutTitleAppend}\n")
