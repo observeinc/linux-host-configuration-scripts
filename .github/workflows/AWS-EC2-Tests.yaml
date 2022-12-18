@@ -212,6 +212,12 @@ jobs:
             }
           }
           EOF
+
+          cat <<'EOF' > outputs.tf
+            output "fab_host_all" {
+              value = module.aws_machines.fab_hosts
+            }
+          EOF
         working-directory: ${{ env.WORK_DIR }}
         
       - name: terraform version
