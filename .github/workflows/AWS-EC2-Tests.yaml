@@ -80,12 +80,6 @@ jobs:
           echo "fail_first_test=${{ github.event.inputs.fail_first_test }}"
           echo "fail_second_test=${{ github.event.inputs.fail_second_test }}"
 
-      - name: Set variables
-        run: |
-          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(inputs=${{ github.event.inputs }})"
-
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
-
       - name: Set variables based on inputs
         if: github.event.inputs.terraform_run_destroy != ''
         run: |
@@ -170,6 +164,12 @@ jobs:
       - name: 'Test gcloud CLI'
         run: 'gcloud info'
 
+      - name: Set variables
+        run: |
+          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(inputs=${{ github.event.inputs }})"
+
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+        
       - name: terraform and config files
         run: |
           python3 -c "from workflow_tasks import tf_override_file; tf_override_file(test_group=\"${{ matrix.test_groups }}\")"
