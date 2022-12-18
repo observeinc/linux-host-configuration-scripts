@@ -206,7 +206,7 @@ jobs:
 
       - name: terraform main.tf
         run: |
-          cat <<EOF > main.tf 
+          cat <<'EOF' > main.tf 
           locals {
             name_format = var.CI == true ? "gha-lht-${var.WORKFLOW_MATRIX_VALUE}-%s" : "linux-host-test-%s"
           }
@@ -215,7 +215,6 @@ jobs:
             source           = "./AWS_MACHINES"
             PUBLIC_KEY_PATH  = var.PUBLIC_KEY_PATH
             PRIVATE_KEY_PATH = var.PRIVATE_KEY_PATH
-            # REGION             = "us-west-2"
             name_format        = local.name_format
             AWS_MACHINE_FILTER = true
             CI                 = var.CI
@@ -225,7 +224,7 @@ jobs:
               aws = aws
             }
           }
-          EOF
+          'EOF'
         working-directory: ${{ env.WORK_DIR }}
         
       - name: terraform version
