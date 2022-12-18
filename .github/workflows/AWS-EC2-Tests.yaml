@@ -111,7 +111,7 @@ jobs:
           # This variable gets just the branch name without url stuff
           echo "GIT_HUB_SHORT_BRANCH_NAME=${GITHUB_BRANCH##*/}" >> $GITHUB_ENV
 
-          # Create directory for keys and set premissions
+          # Create directory for keys and set permissions
           mkdir "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
           # variable for private key which is required for CI server to login to machines
@@ -165,13 +165,16 @@ jobs:
       - name: 'Test gcloud CLI'
         run: 'gcloud info'
 
-      - name: terraform files
+      - name: terraform and config files
         run: |
           python3 -c "from workflow_tasks import tf_override_file; tf_override_file(test_group=\"${{ matrix.test_groups }}\")"
 
           python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"aws_machines\")"
 
           python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"aws_machines\")"
+
+          python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ secrets.STAGE_CUSTOMER_ID }}\", domain=\"${{ secrets.STAGE_DOMAIN }}\", token=\"${{ secrets.STAGE_DATASTREAM_TOKEN }}\")"
+
         working-directory: ${{ env.WORK_DIR }}/python_scripts"
         
       - name: terraform version
@@ -193,17 +196,6 @@ jobs:
         run: |
           terraform apply -auto-approve
         working-directory: ${{ env.WORK_DIR }}
-
-      # set config.ini
-      - name: create config file
-        run: |
-          cat <<EOF > config.ini 
-          [arthur-stage-tenant]
-            customer_id = ${{ secrets.STAGE_CUSTOMER_ID }}
-            domain = ${{ secrets.STAGE_DOMAIN }}
-            datastream_token = ${{ secrets.STAGE_DATASTREAM_TOKEN }}
-          EOF
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       # Run tests
       - name: python script
