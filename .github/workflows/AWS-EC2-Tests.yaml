@@ -1,4 +1,4 @@
-run-name: ${{ matrix.test_cloud }} - ${{ github.event_name }} by @${{ github.actor }}
+run-name: AWS EC2 - ${{ github.event_name }} by @${{ github.actor }}
 # name: Fabric Build
 on: 
   workflow_dispatch:
@@ -43,7 +43,6 @@ jobs:
       max-parallel: 30
       fail-fast: false
       matrix:
-        test_cloud: ['AWS']
         test_groups: ['base_defaults']
     runs-on: ubuntu-latest
     permissions:
@@ -166,31 +165,40 @@ jobs:
       - name: 'Test gcloud CLI'
         run: 'gcloud info'
 
-      - name: terraform override
+      - name: tf over
         run: |
-          cat <<EOF > override.tf 
-          # https://www.terraform.io/language/files/override
-          terraform {
-            backend "s3" {
-              bucket = "thunderdome-terraform-state"
-              region = "us-west-2"
-              key    = "content-eng/gha/${{ matrix.test_cloud }}/linuxhost_${{ matrix.test_groups }}"
-            }
-          }
+          python -c "from workflow_tasks import tf_overide_file;function(${{ matrix.test_groups }})"
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
-          provider "aws" {
-            region = "us-west-2"
-          }
-
-          provider "google" {
-          }
-
-          provider "azurerm" {
-            features {}
-          }
-
-          EOF
+      - name:  check
+        run: |
+          cat override.tf
         working-directory: ${{ env.WORK_DIR }}
+      # - name: terraform override
+      #   run: |
+      #     cat <<EOF > override.tf 
+      #     # https://www.terraform.io/language/files/override
+      #     terraform {
+      #       backend "s3" {
+      #         bucket = "thunderdome-terraform-state"
+      #         region = "us-west-2"
+      #         key    = "content-eng/gha/aws/linuxhost_${{ matrix.test_groups }}"
+      #       }
+      #     }
+
+      #     provider "aws" {
+      #       region = "us-west-2"
+      #     }
+
+      #     provider "google" {
+      #     }
+
+      #     provider "azurerm" {
+      #       features {}
+      #     }
+
+      #     EOF
+      #   working-directory: ${{ env.WORK_DIR }}
 
       - name: terraform main.tf
         run: |
