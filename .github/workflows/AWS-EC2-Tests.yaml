@@ -173,7 +173,7 @@ jobs:
             backend "s3" {
               bucket = "thunderdome-terraform-state"
               region = "us-west-2"
-              key    = "content-eng/gha/linuxhost_${{ matrix.test_groups }}"
+              key    = "content-eng/gha/aws/linuxhost_${{ matrix.test_groups }}"
             }
           }
 
