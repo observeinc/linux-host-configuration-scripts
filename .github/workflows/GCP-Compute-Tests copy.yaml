@@ -1,4 +1,4 @@
-run-name: AWS EC2 - ${{ github.event_name }} by @${{ github.actor }}
+run-name: GCP Compute - ${{ github.event_name }} by @${{ github.actor }}
 # name: Fabric Build
 on: 
   workflow_dispatch:
@@ -166,11 +166,11 @@ jobs:
 
       - name: terraform and config files
         run: |
-          python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"aws\", test_group=\"${{ matrix.test_groups }}\")"
+          python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"gcp\", test_group=\"${{ matrix.test_groups }}\")"
 
-          python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"aws_machines\")"
+          python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"gcp_machines\")"
 
-          python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"aws_machines\")"
+          python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"gcp_machines\")"
 
           python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ secrets.STAGE_CUSTOMER_ID }}\", domain=\"${{ secrets.STAGE_DOMAIN }}\", token=\"${{ secrets.STAGE_DATASTREAM_TOKEN }}\")"
 
