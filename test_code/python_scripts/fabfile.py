@@ -95,21 +95,23 @@ def ciSumFile(sumfile, agg_result):
     # Check if script executing in GitHub Actions
     am_i_in_ci = os.getenv("CI")
 
+    gha_sum_file = "file_outputs/summaryfile.md"
+    env_file = "file_outputs/envfile.md"
     # Set TEST_RESULT environment variable in GitHub Actions
     if am_i_in_ci == "true":
         env_file = os.getenv("GITHUB_ENV")
         gha_sum_file = os.getenv("GITHUB_STEP_SUMMARY")
 
-        # open both files
-        with open(sumfile, "r") as firstfile, open(gha_sum_file, "w") as secondfile:
-            secondfile.seek(0)
-            # read content from first file
-            for line in firstfile:
-                # write content to second file
-                secondfile.write(line)
+    # open both files
+    with open(sumfile, "r") as firstfile, open(gha_sum_file, "w") as secondfile:
+        secondfile.seek(0)
+        # read content from first file
+        for line in firstfile:
+            # write content to second file
+            secondfile.write(line)
 
-        with open(env_file, "a") as myfile:
-            myfile.write(f"TEST_RESULT={agg_result}")
+    with open(env_file, "a") as myfile:
+        myfile.write(f"TEST_RESULT={agg_result}")
 
 
 @task
@@ -293,29 +295,39 @@ def test(
 
                             # open both files
 
-                        if failed_test_in_key == True:
+                    if failed_test_in_key == True:
 
-                            with open(sum_fail_file, "a+") as failfile:
-                                failfile.seek(0)
-                                print("write failfile")
-                                # read content from first file
-                                for line in sumtempfile:
-                                    # write content to second file
-                                    failfile.write(line)
-                        else:
-                            with open(sum_pass_file, "a+") as passfile:
-                                passfile.seek(0)
-                                print("write passfile")
-                                # read content from first file
-                                for line in sumtempfile:
-                                    # write content to second file
-                                    passfile.write(line)
+                        with open(sum_fail_file, "a+") as failfile, open(
+                            sum_temp_file, "r"
+                        ) as sumtempfile:
+                            failfile.seek(0)
+                            print("write failfile")
+                            # read content from first file
+                            for line in sumtempfile:
+                                print("templine")
+                                print(line)
+                                # write content to second file
+                                failfile.write(line)
+                    else:
+                        with open(sum_pass_file, "a+") as passfile, open(
+                            sum_temp_file, "r"
+                        ) as sumtempfile:
+                            passfile.seek(0)
+                            print("write passfile")
+                            # read content from first file
+                            for line in sumtempfile:
+                                print("templine")
+                                print(line)
+                                # write content to second file
+                                passfile.write(line)
 
                 print("read failfile")
                 if os.path.exists(sum_fail_file):
                     with open(sum_fail_file, "r") as failfile:
                         failfile.seek(0)
                         for line in failfile:
+                            print("line")
+                            print(line)
                             # write content to second file
 
                             sumfile.write(line)
@@ -327,6 +339,8 @@ def test(
 
                         for line in passfile:
                             # write content to second file
+                            print("line")
+                            print(line)
                             sumfile.write(line)
 
             ciSumFile(sum_file, agg_result)
