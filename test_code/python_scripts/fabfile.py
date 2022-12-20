@@ -14,20 +14,6 @@ from fabric import task
 
 import logging
 
-logging.basicConfig(level=logging.INFO)
-
-# Level
-
-# DEBUG - Detailed information, typically of interest only when diagnosing problems
-
-# INFO - Confirmation that things are working as expected.
-
-# WARNING - An indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
-
-# ERROR - Due to a more serious problem, the software has not been able to perform some function.
-
-# CRITICAL - A serious error, indicating that the program itself may be unable to continue running.
-
 
 def getObserveConfig(config, environment):
     """Fetches config file"""
@@ -60,31 +46,22 @@ def getCurlCommand(options):
     return f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {YOUR_CUSTOMERID} --ingest_token {YOUR_DATA_STREAM_TOKEN} --observe_host_name https://{YOUR_CUSTOMERID}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} '
 
 
-# @task
-# def hello(ctx, fileName="world"):
-#     with open("hosts.json") as json_file:
-#         hosts = json.load(json_file)
-
-#         for key in hosts:
-#             print(hosts[key]["connect_kwargs"]["key_filename"])
-
-#         run("ls")
-#         run("whoami")
-#         print("Hello %s!" % fileName)
-
 # your "parallelness"
 pool_size = 20
 pool = Pool(pool_size)
 
 # folder to write files to
-folder_name = "file_outputs"
+outputs_folder_name = "file_outputs"
+
+logs_folder_name = "log_outputs"
+
 
 # files
-tf_apply_error_output = f"python_scripts/{folder_name}/tf_apply_error.txt"
-tf_destroy_error_output = f"python_scripts/{folder_name}/tf_destroy_error.txt"
-tf_apply_output = f"python_scripts/{folder_name}/tf_apply.txt"
-tf_destroy_output = f"python_scripts/{folder_name}/tf_destroy.txt"
-test_results_file_name = f"{folder_name}/test_results.json"
+tf_apply_error_output = f"python_scripts/{outputs_folder_name}/tf_apply_error.txt"
+tf_destroy_error_output = f"python_scripts/{outputs_folder_name}/tf_destroy_error.txt"
+tf_apply_output = f"python_scripts/{outputs_folder_name}/tf_apply.txt"
+tf_destroy_output = f"python_scripts/{outputs_folder_name}/tf_destroy.txt"
+test_results_file_name = f"{outputs_folder_name}/test_results.json"
 
 test_fail_message = "FAIL"
 test_pass_message = "PASS"
@@ -92,40 +69,30 @@ test_pass_message = "PASS"
 
 def folderCleanup():
     """Clean out file ouputs on each run"""
-    files = glob.glob(f"{folder_name}/*")
+    files = glob.glob(f"{outputs_folder_name}/*")
     for f in files:
         os.remove(f)
 
 
 def terraformOutput(fileName="tf_hosts.json"):
-    """Run terraform ouput command"""
+    """Run terraform output command"""
     # run output to file that is read by test
     os.system(
         f"cd ../; terraform output -json | jq -r '.fab_host_all.value' > python_scripts/{fileName}"
     )
 
 
-def ciSumFile(sumfile, agg_result):
-    # Check if script executing in GitHub Actions
-    am_i_in_ci = os.getenv("CI")
+seperator = "################################"
 
-    gha_sum_file = "file_outputs/summaryfile.md"
-    env_file = "file_outputs/envfile.md"
-    # Set TEST_RESULT environment variable in GitHub Actions
-    if am_i_in_ci == "true":
-        env_file = os.getenv("GITHUB_ENV")
-        gha_sum_file = os.getenv("GITHUB_STEP_SUMMARY")
 
-    # open both files
-    with open(sumfile, "r") as firstfile, open(gha_sum_file, "w") as secondfile:
-        secondfile.seek(0)
-        # read content from first file
-        for line in firstfile:
-            # write content to second file
-            secondfile.write(line)
-
-    with open(env_file, "a") as myfile:
-        myfile.write(f"TEST_RESULT={agg_result}")
+def log_file_name(path_pattern):
+    """
+    Naive (slow) version of next_path
+    """
+    i = 1
+    while os.path.exists(path_pattern % i):
+        i += 1
+    return path_pattern % i
 
 
 @task
@@ -139,38 +106,72 @@ def test(
     runTerraformOutput="true",
     failMe="false",
     outPutTitleAppend="1",
+    log_level="INFO",
 ):
     """Run a test of install script"""
+
+    # Level
+    ## DEBUG - Detailed information, typically of interest only when diagnosing problems
+    ## INFO - Confirmation that things are working as expected.
+    ## WARNING - An indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
+    ## ERROR - Due to a more serious problem, the software has not been able to perform some function.
+    ## CRITICAL - A serious error, indicating that the program itself may be unable to continue running.
+
+    log_levels = {}
+    log_levels["DEBUG"] = logging.DEBUG
+    log_levels["INFO"] = logging.INFO
+    log_levels["WARNING"] = logging.WARNING
+    log_levels["ERROR"] = logging.ERROR
+    log_levels["CRITICAL"] = logging.CRITICAL
+
+    log_path_pattern = f"{logs_folder_name}/test-log-%s.log"
+    log_path = log_file_name(log_path_pattern)
+
+    logging.basicConfig(
+        filename=log_path,
+        encoding="utf-8",
+        level=log_levels[log_level],
+    )
+
+    logging.info(seperator)
+    logging.info("STARTING...")  # will print a message to the console
+
+    logging.info("log_level = %s", log_level)
+
     # delete files from last run
     folderCleanup()
+
     if runTerraform == "true":
         try:
             # run terraform appy to create infrastructure
-            print("#######################################")
-            print("Running terraform apply ...")
-            print()
-            print(f"Error output written to {tf_apply_error_output}")
-            print(f"Standard output written to {tf_apply_output}")
-            print("#######################################")
-            print()
+            logging.info(seperator)
+            logging.info("Running terraform apply ...")
+
+            logging.info(f"Error output written to {tf_apply_error_output}")
+            logging.info(f"Standard output written to {tf_apply_output}")
+            logging.info(seperator)
+
             os.system(
                 f'cd ../; export TF_LOG="ERROR"; terraform apply -auto-approve 2> {tf_apply_error_output} 1> {tf_apply_output}'
             )
 
-            print("Terraform apply complete")
-            print()
+            logging.info("Terraform apply complete")
+
             # Give compute instances a minute (TODO - Move this into test runs as different os vary - can it be deterministic?)
-            print(f"Wait {sleep} seconds for machines to instantiate ...")
+            logging.info(f"Wait {sleep} seconds for machines to instantiate ...")
             time.sleep(sleep)
 
         except Exception as e:
-            print("Terraform Flamed")
-            print(e.message)
-            print(e.args)
-            print(f"Error output written to {tf_apply_error_output}")
+            logging.error("Terraform Flamed")  # will print a message to the console
+            logging.error(e.message)
+            logging.error(e.args)
+            logging.error(f"Error output written to {tf_apply_error_output}")
             exit()
 
     try:
+        logging.info(f"Wait {sleep} seconds for machines to instantiate ...")
+        time.sleep(sleep)
+
         if runTerraformOutput == "true":
             terraformOutput(fileName)
         # open output
@@ -187,8 +188,6 @@ def test(
                 test_results[key]["public_ssh_link"] = hosts[key]["public_ssh_link"]
 
                 sleep = 1
-                if runTerraform == "true":
-                    sleep = hosts[key]["sleep"]
 
                 ec2metadata = "FALSE"
                 datacenter = "FAB_DC"
@@ -219,8 +218,6 @@ def test(
                     }
                 )
 
-                # ls_cmd = "ls"
-
                 # multitask pool - call doTest with parameters
                 pool.apply_async(
                     doTest,
@@ -240,6 +237,7 @@ def test(
                             },
                             "key": key,
                             "sleep": sleep,
+                            "log_level": log_level,
                         },
                         test_results,
                     ),
@@ -249,205 +247,267 @@ def test(
             pool.close()
             pool.join()
 
+            small_result = {}
+
+            logging.debug(seperator)
+            logging.debug("##### test_results #######")
+            logging.debug(seperator)
+            logging.debug(json.dumps(test_results, indent=4))
+            logging.debug(seperator)
+
+            # loop test results and detrmine if overall pass or fail
             # analyze results
             agg_result = test_pass_message
+            agg_result = process_result(test_results, small_result, failMe)
 
-            if failMe == "true":
-                agg_result = "FAIL"
+            # file for producing markdown output for github actions
+            sum_file = f"{outputs_folder_name}/small_result.md"
 
-            small_result = {}
-            fail_result = {}
+            write_to_local_summary_results_file(
+                sum_file, small_result, outPutTitleAppend
+            )
 
-            # for key in test_results:
-            #     print(key)
-            #     for key2 in test_results[key]:
-            #         print(key2)
-            #         print(test_results[key][key2])
+            write_agg_results_to_gitHubActions_environment_variable(agg_result)
 
-            logging.debug("##########################")
-            logging.debug("##### test_results #######")
-            logging.debug("##########################")
-            logging.debug(test_results)
-            logging.debug("##########################")
+            write_results_to_gitHubActions_summary_file(sum_file)
 
-            for key in test_results:
-                small_result[key] = {}
-                fail_result[key] = {}
+            logging.info(seperator)
+            logging.info("########### TEST RESULTS ##############")
+            logging.info(seperator)
+            logging.info("###########  AGGREGATE   ##############")
+            logging.info(agg_result)
 
-                for cmd in test_results[key]:
-                    print(cmd)
-                    print(test_results[key][cmd])
-                    logging.warning("Watch out!")  # will print a message to the console
-                    logging.info("I told you so")  # will not print anything
-                    if test_fail_message in test_results[key][cmd]:
-                        print(test_fail_message)
-                        agg_result = test_fail_message
-                        print("agg_result = %s", agg_result)
-                        small_result[key][cmd] = test_results[key][cmd]
-                        fail_result[key][cmd] = test_results[key][cmd]
-                    if test_pass_message in test_results[key][cmd]:
-                        print(test_pass_message)
-                        small_result[key][cmd] = test_results[key][cmd]
+            logging.info(json.dumps(small_result, indent=4))
 
-            sum_pass_file = f"{folder_name}/small_pass_result.md"
-            sum_fail_file = f"{folder_name}/small_fail_result.md"
-            sum_temp_file = f"{folder_name}/small_temp_result.md"
-            sum_file = f"{folder_name}/small_result.md"
-
-            with open(sum_file, "w+") as sumfile:
-                sumfile.write(f"# TEST RUN {outPutTitleAppend}\n")
-
-                for key in small_result:
-                    failed_test_in_key = False
-
-                    with open(sum_temp_file, "w+") as sumtempfile:
-
-                        sumtempfile.write(f"### {key}\n")
-                        sumtempfile.write(f"| Command      | Result |\n")
-                        sumtempfile.write(f"| ----------- | ----------- |\n")
-                        for cmd in small_result[key]:
-
-                            cell_value = "NA"
-                            if test_fail_message in small_result[key][cmd]:
-                                failed_test_in_key = True
-                                cell_value = f'<span style="color:red">***{test_fail_message}***</span>'
-
-                            if test_pass_message in small_result[key][cmd]:
-                                cell_value = f'<span style="color:green">***{test_pass_message}***</span>'
-
-                            sumtempfile.write(f"| {cmd} | {cell_value} |\n")
-
-                            # open both files
-
-                    if failed_test_in_key == True:
-
-                        with open(sum_fail_file, "a+") as failfile, open(
-                            sum_temp_file, "r"
-                        ) as sumtempfile:
-                            failfile.seek(0)
-                            print("write failfile")
-                            # read content from first file
-                            for line in sumtempfile:
-                                print("fail templine")
-                                print(line)
-                                # write content to second file
-                                failfile.write(line)
-                    else:
-                        with open(sum_pass_file, "a+") as passfile, open(
-                            sum_temp_file, "r"
-                        ) as sumtempfile:
-                            passfile.seek(0)
-                            print("write passfile")
-                            # read content from first file
-                            for line in sumtempfile:
-                                print("templine")
-                                print(line)
-                                # write content to second file
-                                passfile.write(line)
-
-                print("read failfile")
-                if os.path.exists(sum_fail_file):
-                    with open(sum_fail_file, "r") as failfile:
-                        failfile.seek(0)
-                        for line in failfile:
-                            print("line")
-                            print(line)
-                            # write content to second file
-
-                            sumfile.write(line)
-
-                print("read passfile")
-                if os.path.exists(sum_pass_file):
-                    with open(sum_pass_file, "r") as passfile:
-                        passfile.seek(0)
-
-                        for line in passfile:
-                            # write content to second file
-                            print("line")
-                            print(line)
-                            sumfile.write(line)
-
-            ciSumFile(sum_file, agg_result)
-
-            # print results
-            pp = pprint.PrettyPrinter(indent=4)
-            print()
-            print("#######################################")
-            print("########### TEST RESULTS ##############")
-            print("#######################################")
-            print("###########  AGGREGATE   ##############")
-            print(agg_result)
-            print()
-            pp.pprint(small_result)
-            print()
-            print("###########  DETAIL   ##############")
-            pp.pprint(test_results)
-            print()
-            print("#######################################")
-            print("#######################################")
-            print("#######################################")
-            print()
+            logging.debug("###########  DETAIL   ##############")
+            logging.debug(json.dumps(test_results, indent=4))
+            logging.debug(seperator)
+            logging.debug(seperator)
+            logging.debug(seperator)
 
             # write results to file
-            with open(test_results_file_name, "w") as file:
-                json_string = json.dumps(
-                    test_results, default=lambda o: o.__dict__, sort_keys=True, indent=2
-                )
-                file.write(json_string)
-                file.close()
+            write_test_results_to_file(test_results_file_name, test_results)
+
     except Exception as e:
-        print("Tests Flamed")
-        print(e)
-        sum_file = f"{folder_name}/no_result.md"
+        logging.error(seperator)
+        logging.error("Tests Flamed")
+        logging.error(e)
+        sum_file = f"{outputs_folder_name}/no_result.md"
+        logging.error(seperator)
 
         with open(sum_file, "w+") as myfile:
             myfile.write(f"### Test Run Error\n")
             myfile.write(f"{e}")
 
-        ciSumFile(sum_file, "FAIL")
+        write_agg_results_to_gitHubActions_environment_variable("FAIL")
+
+        write_results_to_gitHubActions_summary_file(sum_file)
 
     finally:
         if runTerraform == "true" and runTerraformDestroy == "true":
-            print("Running terraform destroy ...")
-            print()
-            print(f"Error output written to {tf_destroy_error_output}")
-            print(f"Standard output written to {tf_destroy_output}")
+            logging.info("Running terraform destroy ...")
+
+            logging.info(f"Error output written to {tf_destroy_error_output}")
+            logging.info(f"Standard output written to {tf_destroy_output}")
             os.system(
                 f'cd ../; export TF_LOG="ERROR"; terraform destroy -auto-approve 2> {tf_destroy_error_output} 1> {tf_destroy_output}'
             )
-        print()
-        print("Done")
+
+        logging.info(seperator)
+        logging.info("FINISHED")  # will print a message to the console
 
 
-# def tt():
-#     test = {}
-#     test["key"] = {}
-#     test["key"]["cmdo"] = ""
-#     test["key"]["cmdo0"] = ""
-#     # test["key"].append({"cmd1": "FAIL"})
-#     # test["key"].append({"cmd2": "FAIL"})
+################
+################
+def write_agg_results_to_gitHubActions_environment_variable(agg_result):
+    """Write to environment variable file"""
+    # Check if script executing in GitHub Actions
+    am_i_in_ci = os.getenv("CI")
 
-#     # ttt(test, "key")
-#     print(test)
+    # file paths for local development
+    env_file = "file_outputs/envfile.md"
+
+    if am_i_in_ci == "true":
+        env_file = os.getenv("GITHUB_ENV")
+
+    # Set TEST_RESULT environment variable in GitHub Actions
+    with open(env_file, "a") as environmentFile:
+        environmentFile.write(f"TEST_RESULT={agg_result}")
 
 
-# def ttt(t, key):
-#     t[key].append({"test": "fred"})
+################
+################
+def write_results_to_gitHubActions_summary_file(sumfile):
+    # Check if script executing in GitHub Actions
+    am_i_in_ci = os.getenv("CI")
+
+    # file paths for local development
+    gha_sum_file = "file_outputs/summaryfile.md"
+
+    if am_i_in_ci == "true":
+        gha_sum_file = os.getenv("GITHUB_STEP_SUMMARY")
+
+    # open both files
+    with open(sumfile, "r") as localSummaryFile, open(
+        gha_sum_file, "w"
+    ) as gitHubActionsSummaryFile:
+        gitHubActionsSummaryFile.seek(0)
+        # read content from first file
+        for line in localSummaryFile:
+            # write content to second file
+            gitHubActionsSummaryFile.write(line)
 
 
+################
+################
+def process_result(test_results, small_result, failMe):
+    """Process test reslts"""
+    logging.info(seperator)
+    logging.info("STARTING process_result...")  # will print a message to the console
+
+    agg_result = test_pass_message
+
+    # loop test results
+    for key in test_results:
+        # add key to result dictionary
+        small_result[key] = {}
+
+        for cmd in test_results[key]:
+            logging.info("Command = %s", cmd)
+            logging.info("Result = %s", test_results[key][cmd])
+
+            # if fail set agg results to fail
+            if test_fail_message in test_results[key][cmd]:
+                logging.info(test_fail_message)
+                agg_result = test_fail_message
+                logging.info("agg_result = %s", agg_result)
+            # add result to dictionary
+            small_result[key][cmd] = test_results[key][cmd]
+
+    if failMe == "true":
+        agg_result = "FAIL"
+
+    logging.info(seperator)
+    logging.info("FINISHED process_result")  # will print a message to the console
+    return agg_result
+
+
+################
+################
+def write_test_results_to_file(test_results_file_name, test_results):
+    # write results to file
+    with open(test_results_file_name, "w") as file:
+        json_string = json.dumps(
+            test_results, default=lambda o: o.__dict__, sort_keys=True, indent=2
+        )
+        file.write(json_string)
+        file.close()
+
+
+################
+################
+def write_to_local_summary_results_file(sum_file, small_result, outPutTitleAppend):
+    # File for pass results
+    sum_pass_file = f"{outputs_folder_name}/small_pass_result.md"
+    # File for fail results
+    sum_fail_file = f"{outputs_folder_name}/small_fail_result.md"
+    # Temp file for determining pass or fail
+    sum_temp_file = f"{outputs_folder_name}/small_temp_result.md"
+
+    # open summary file for writing (create if not exists)
+    with open(sum_file, "w+") as sumfile:
+        # may have multiple test runs
+        sumfile.write(f"# TEST RUN {outPutTitleAppend}\n")
+
+        # loop small results
+        for key in small_result:
+            failed_test_in_key = False
+
+            with open(sum_temp_file, "w+") as sumtempfile:
+
+                sumtempfile.write(f"### {key}\n")
+                sumtempfile.write(f"| Command      | Result |\n")
+                sumtempfile.write(f"| ----------- | ----------- |\n")
+                for cmd in small_result[key]:
+
+                    cell_value = "NA"
+                    if test_fail_message in small_result[key][cmd]:
+                        failed_test_in_key = True
+                        cell_value = (
+                            f'<span style="color:red">***{test_fail_message}***</span>'
+                        )
+
+                    if test_pass_message in small_result[key][cmd]:
+                        cell_value = f'<span style="color:green">***{test_pass_message}***</span>'
+
+                    sumtempfile.write(f"| {cmd} | {cell_value} |\n")
+
+                    # open both files
+
+            if failed_test_in_key == True:
+
+                with open(sum_fail_file, "a+") as failfile, open(
+                    sum_temp_file, "r"
+                ) as sumtempfile:
+                    failfile.seek(0)
+                    logging.debug("write failfile")
+                    # read content from first file
+                    for line in sumtempfile:
+                        logging.debug("fail templine")
+                        logging.debug(line)
+                        # write content to second file
+                        failfile.write(line)
+            else:
+                with open(sum_pass_file, "a+") as passfile, open(
+                    sum_temp_file, "r"
+                ) as sumtempfile:
+                    passfile.seek(0)
+                    logging.debug("write passfile")
+                    # read content from first file
+                    for line in sumtempfile:
+                        logging.debug("pass templine")
+                        logging.debug(line)
+                        # write content to second file
+                        passfile.write(line)
+
+        logging.info("read failfile")
+        if os.path.exists(sum_fail_file):
+            with open(sum_fail_file, "r") as failfile:
+                failfile.seek(0)
+                for line in failfile:
+                    logging.info("fail line")
+                    logging.info(line)
+                    # write content to second file
+
+                    sumfile.write(line)
+
+        logging.info("read passfile")
+        if os.path.exists(sum_pass_file):
+            with open(sum_pass_file, "r") as passfile:
+                passfile.seek(0)
+
+                for line in passfile:
+                    # write content to second file
+                    logging.info("pass line")
+                    logging.info(line)
+                    sumfile.write(line)
+
+
+################
+################
 def doTest(options, t):
     """Run test with options"""
     key = options["key"]
 
     # info
-    print(
+    logging.info(
         f"""
         #######################################
         {key}
         Running commands ...
         #######################################"""
     )
-    print("Before connect")
+    logging.info("Connecting to %s...", key)
 
     # create connect object for current machine
     connect = Connection(
@@ -456,14 +516,14 @@ def doTest(options, t):
         connect_kwargs=options["connect_kwargs"],
     )
 
-    print("Ater connect")
+    logging.info("Connection Success %s", key)
 
     for cmd in options["commands"]:
         # default to fail so failed connections aren't ignored
         t[key][cmd] = test_fail_message
 
         # info
-        print(
+        logging.debug(
             f"""
             #######################################
             {key}
@@ -476,9 +536,13 @@ def doTest(options, t):
             #######################################"""
         )
 
-        print("")
         # run command on remote machine
-        result = connect.run(options["commands"][cmd], hide=True, timeout=300)
+        hide_run_output = True
+        if options["log_level"] == "DEBUG":
+            hide_run_output = False
+        result = connect.run(
+            options["commands"][cmd], hide=hide_run_output, timeout=300
+        )
 
         # format string for results
         msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
@@ -494,3 +558,15 @@ def doTest(options, t):
             f.write(msg.format(result))
             f.close()
             t[key][cmd] = file_name
+
+
+# def tt():
+#     test = {}
+#     test["key"] = {}
+#     test["key"]["cmdo"] = ""
+#     test["key"]["cmdo0"] = ""
+#     # test["key"].append({"cmd1": "FAIL"})
+#     # test["key"].append({"cmd2": "FAIL"})
+
+#     # ttt(test, "key")
+#     print(test)
