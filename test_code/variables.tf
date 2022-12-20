@@ -11,14 +11,14 @@ variable "PUBLIC_KEY_PATH" {
   type        = string
   description = "Public key path"
   nullable    = true
-  default     = "~/.ssh/id_rsa_ec2.pub"
+  default     = "/Users/arthur/.ssh/id_rsa_ec2.pub"
 }
 
 # tflint-ignore: terraform_naming_convention
 variable "PRIVATE_KEY_PATH" {
   description = "Private key path - only needed for github actions runs"
   nullable    = true
-  default     = null
+  default     = "/Users/arthur/.ssh/id_rsa_ec2"
   type        = string
 }
 
