@@ -8,11 +8,25 @@ import pprint
 import os
 import glob
 import time
+
 from fabric import Connection
 from fabric import task
 
-# import logging
-# logging.basicConfig(level=logging.DEBUG)
+import logging
+
+logging.basicConfig(level=logging.INFO)
+
+# Level
+
+# DEBUG - Detailed information, typically of interest only when diagnosing problems
+
+# INFO - Confirmation that things are working as expected.
+
+# WARNING - An indication that something unexpected happened, or indicative of some problem in the near future (e.g. ‘disk space low’). The software is still working as expected.
+
+# ERROR - Due to a more serious problem, the software has not been able to perform some function.
+
+# CRITICAL - A serious error, indicating that the program itself may be unable to continue running.
 
 
 def getObserveConfig(config, environment):
@@ -250,15 +264,25 @@ def test(
             #         print(key2)
             #         print(test_results[key][key2])
 
+            logging.debug("##########################")
+            logging.debug("##### test_results #######")
+            logging.debug("##########################")
+            logging.debug(test_results)
+            logging.debug("##########################")
+
             for key in test_results:
                 small_result[key] = {}
                 fail_result[key] = {}
 
                 for cmd in test_results[key]:
                     print(cmd)
+                    print(test_results[key][cmd])
+                    logging.warning("Watch out!")  # will print a message to the console
+                    logging.info("I told you so")  # will not print anything
                     if test_fail_message in test_results[key][cmd]:
                         print(test_fail_message)
                         agg_result = test_fail_message
+                        print("agg_result = %s", agg_result)
                         small_result[key][cmd] = test_results[key][cmd]
                         fail_result[key][cmd] = test_results[key][cmd]
                     if test_pass_message in test_results[key][cmd]:
@@ -304,7 +328,7 @@ def test(
                             print("write failfile")
                             # read content from first file
                             for line in sumtempfile:
-                                print("templine")
+                                print("fail templine")
                                 print(line)
                                 # write content to second file
                                 failfile.write(line)
@@ -423,7 +447,7 @@ def doTest(options, t):
         Running commands ...
         #######################################"""
     )
-    print()
+    print("Before connect")
 
     # create connect object for current machine
     connect = Connection(
@@ -431,6 +455,8 @@ def doTest(options, t):
         user=options["user"],
         connect_kwargs=options["connect_kwargs"],
     )
+
+    print("Ater connect")
 
     for cmd in options["commands"]:
         # default to fail so failed connections aren't ignored
@@ -450,6 +476,7 @@ def doTest(options, t):
             #######################################"""
         )
 
+        print("")
         # run command on remote machine
         result = connect.run(options["commands"][cmd], hide=True, timeout=300)
 
