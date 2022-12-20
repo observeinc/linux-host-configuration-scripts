@@ -141,10 +141,10 @@ def test(
     outPutTitleAppend="1",
 ):
     """Run a test of install script"""
+    # delete files from last run
+    folderCleanup()
     if runTerraform == "true":
         try:
-            # delete files from last run
-            folderCleanup()
             # run terraform appy to create infrastructure
             print("#######################################")
             print("Running terraform apply ...")
