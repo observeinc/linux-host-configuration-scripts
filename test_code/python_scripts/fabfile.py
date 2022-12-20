@@ -279,11 +279,11 @@ def test(
 
             logging.info(json.dumps(small_result, indent=4))
 
-            logging.debug("###########  DETAIL   ##############")
-            logging.debug(json.dumps(test_results, indent=4))
-            logging.debug(seperator)
-            logging.debug(seperator)
-            logging.debug(seperator)
+            logging.info("###########  DETAIL   ##############")
+            logging.info(json.dumps(test_results, indent=4))
+            logging.info(seperator)
+            logging.info(seperator)
+            logging.info(seperator)
 
             # write results to file
             write_test_results_to_file(test_results_file_name, test_results)
@@ -508,6 +508,7 @@ def doTest(options, t):
         #######################################"""
     )
     logging.info("Connecting to %s...", key)
+    t[key]["connection"] = test_fail_message
 
     # create connect object for current machine
     connect = Connection(
@@ -516,6 +517,7 @@ def doTest(options, t):
         connect_kwargs=options["connect_kwargs"],
     )
 
+    t[key]["connection"] = test_pass_message
     logging.info("Connection Success %s", key)
 
     for cmd in options["commands"]:
