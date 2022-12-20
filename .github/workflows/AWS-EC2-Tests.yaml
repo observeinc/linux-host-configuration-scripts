@@ -201,7 +201,8 @@ jobs:
         run: |
           # create output directory for archive files
           mkdir file_outputs
-
+          mkdir log_outputs
+          
           # install dependencies
           pip3 install -r requirements.txt
 
@@ -221,8 +222,11 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: file_outputs
-          path: "/home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/file_outputs/"
+          path: | 
+            /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/file_outputs/
+            /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/log_outputs/
           retention-days: 1
+  
 
       - name: delete ini
         if: always()
