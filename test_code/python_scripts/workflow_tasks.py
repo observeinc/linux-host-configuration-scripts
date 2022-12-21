@@ -130,7 +130,7 @@ def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
         )
 
 
-def set_custom_vars(github_context):
+def set_custom_vars(github_context={}):
 
     print("event_name = %s", github_context["event_name"])
     print("event_name = %s", github_context["event_name"])
