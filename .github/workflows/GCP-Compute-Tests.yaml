@@ -214,7 +214,7 @@ jobs:
         if: ${{ env.TEST_RESULT == 'FAIL' }} 
         run: |
           # run tests
-          fab test -a ${{ env.FAIL_SECOND_TEST }} -s 1 -o 2
+          fab test -a ${{ env.FAIL_SECOND_TEST }} -o 2
           
         working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 
