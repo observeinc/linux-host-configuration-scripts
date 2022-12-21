@@ -13,6 +13,7 @@ from fabric import Connection
 from fabric import task
 
 import logging
+import sys
 
 
 def getObserveConfig(config, environment):
@@ -43,7 +44,12 @@ def getCurlCommand(options):
     if "FLAGS" in options:
         FLAGS.update(options["FLAGS"])
 
-    return f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {YOUR_CUSTOMERID} --ingest_token {YOUR_DATA_STREAM_TOKEN} --observe_host_name https://{YOUR_CUSTOMERID}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} '
+    logging.info(
+        "curl command = %s",
+        f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {YOUR_CUSTOMERID} --ingest_token ****** --observe_host_name https://{YOUR_CUSTOMERID}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]}',
+    )
+
+    return f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {YOUR_CUSTOMERID} --ingest_token {YOUR_DATA_STREAM_TOKEN} --observe_host_name https://{YOUR_CUSTOMERID}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]}'
 
 
 # your "parallelness"
@@ -128,9 +134,10 @@ def test(
     log_path = log_file_name(log_path_pattern)
 
     logging.basicConfig(
-        filename=log_path,
+        # filename=log_path,
         encoding="utf-8",
         level=log_levels[log_level],
+        handlers=[logging.FileHandler(log_path), logging.StreamHandler(sys.stdout)],
     )
 
     logging.info(seperator)
