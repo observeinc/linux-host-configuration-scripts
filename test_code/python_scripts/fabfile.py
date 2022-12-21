@@ -135,6 +135,8 @@ def test(
 
     logging.basicConfig(
         # filename=log_path,
+        format="%(asctime)s:%(levelname)s:%(message)s",
+        datefmt="%m/%d/%Y %I:%M:%S %p",
         encoding="utf-8",
         level=log_levels[log_level],
         handlers=[logging.FileHandler(log_path), logging.StreamHandler(sys.stdout)],
