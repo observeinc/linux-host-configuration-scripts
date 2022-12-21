@@ -440,7 +440,8 @@ def write_to_local_summary_results_file(sum_file, small_result, outPutTitleAppen
                     if test_pass_message in small_result[key][cmd]:
                         cell_value = f'<span style="color:green">***{test_pass_message}***</span>'
 
-                    sumtempfile.write(f"| {cmd} | {cell_value} |\n")
+                    if cell_value != "NA":
+                        sumtempfile.write(f"| {cmd} | {cell_value} |\n")
 
                     # open both files
 
