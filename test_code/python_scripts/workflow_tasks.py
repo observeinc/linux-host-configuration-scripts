@@ -130,8 +130,7 @@ def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
         )
 
 
-def set_custom_vars(inputs={}):
-    env_file = os.getenv("GITHUB_ENV")
+def set_custom_vars(github_context):
 
-    for key in inputs:
+    for key in github_context:
         print("key = {key}")
