@@ -135,7 +135,7 @@ def test(
 
     logging.basicConfig(
         # filename=log_path,
-        format="%(asctime)s:%(levelname)s:%(message)s",
+        format="%(asctime)s \n %(levelname)s \n %(message)s",
         datefmt="%m/%d/%Y %I:%M:%S %p",
         encoding="utf-8",
         level=log_levels[log_level],
