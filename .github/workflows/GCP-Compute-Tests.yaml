@@ -227,13 +227,13 @@ jobs:
       - name: clean_output
         if: always()
         run: |
-          sed -i '' 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./*
+          sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./*
         working-directory: "${{ env.WORK_DIR }}/python_scripts/file_outputs"
 
       - name: clean_logs
         if: always()
         run: |
-          sed -i '' 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./*
+          sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./*
         working-directory: "${{ env.WORK_DIR }}/python_scripts/log_outputs"
 
       - name: Archive test results
