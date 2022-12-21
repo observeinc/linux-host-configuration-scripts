@@ -202,7 +202,7 @@ jobs:
           # create output directory for archive files
           mkdir file_outputs
           mkdir log_outputs
-          
+
           # install dependencies
           pip3 install -r requirements.txt
 
@@ -218,6 +218,24 @@ jobs:
           
         working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 
+      - name: delete ini
+        if: always()
+        run: |
+          rm config.ini
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+
+      - name: clean_output
+        if: always()
+        run: |
+          sed -i '' 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./*
+        working-directory: "${{ env.WORK_DIR }}/python_scripts/file_outputs"
+
+      - name: clean_logs
+        if: always()
+        run: |
+          sed -i '' 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./*
+        working-directory: "${{ env.WORK_DIR }}/python_scripts/log_outputs"
+
       - name: Archive test results
         uses: actions/upload-artifact@v3
         with:
@@ -226,13 +244,6 @@ jobs:
             /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/file_outputs/
             /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/log_outputs/
           retention-days: 1
-  
-
-      - name: delete ini
-        if: always()
-        run: |
-          rm config.ini
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: terraform destroy
         if: always()
