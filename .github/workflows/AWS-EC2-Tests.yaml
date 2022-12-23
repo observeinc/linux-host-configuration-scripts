@@ -122,12 +122,12 @@ jobs:
           GITHUB_BRANCH: ${{ github.ref }}
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
-      - name: Check out repository code
+      - name: Check out repository code XX
         uses: actions/checkout@v3
         with:
           ref: ${{ env.THIS_REPO_BRANCH }}
 
-      - name: Set Custom Environment Variables
+      - name: Set Custom Environment Variables XXX
         run: |
           mkdir file_outputs 
           echo '${{ toJSON(github) }}' > file_outputs/context.json    
