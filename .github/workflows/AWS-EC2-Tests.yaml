@@ -97,7 +97,7 @@ jobs:
       - name: Set Custom Environment Variables
         run: |
         
-          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(github_context=${{ toJSON(github) }})"
+          # python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(github_context=${{ toJSON(github) }})"
           # if pull request don't destroy resources
           if ${{ github.event_name == 'pull_request' }}; then
             echo "TERRAFORM_RUN_DESTROY=false" >> $GITHUB_ENV
