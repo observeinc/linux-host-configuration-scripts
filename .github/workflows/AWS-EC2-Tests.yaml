@@ -119,7 +119,7 @@ jobs:
           echo "TF_VAR_PRIVATE_KEY_PATH=$HOME/.ssh/github_actions" >> $GITHUB_ENV
         env:
           GITHUB_BRANCH: ${{ github.ref }}
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+
 
       - name: Check out repository code XX
         uses: actions/checkout@v3
