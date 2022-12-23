@@ -93,11 +93,9 @@ jobs:
           echo "FAIL_FIRST_TEST=${{ github.event.inputs.fail_first_test }}" >> $GITHUB_ENV
           
           echo "FAIL_SECOND_TEST=${{ github.event.inputs.fail_second_test }}" >> $GITHUB_ENV
-
+          
       - name: Set Custom Environment Variables
         run: |
-
-          echo '${{ toJSON(github) }}' > file_outputs/context_dump.json
         
           python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(github_context=${{ toJSON(github) }})"
           # if pull request don't destroy resources
@@ -123,7 +121,18 @@ jobs:
         env:
           GITHUB_BRANCH: ${{ github.ref }}
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
-      
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.THIS_REPO_BRANCH }}
+
+      - name: Set Custom Environment Variables
+        run: |
+          mkdir file_outputs 
+          echo '${{ toJSON(github) }}' > file_outputs/context.json    
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+
       - name: Archive test results
         uses: actions/upload-artifact@v3
         with:
