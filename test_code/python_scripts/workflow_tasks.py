@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import json
 
 
 def tf_override_file(cloud="", test_group="", override_file_path="../override.tf"):
@@ -130,7 +131,24 @@ def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
         )
 
 
-def set_custom_vars(github_context={}):
+def set_custom_vars(context_dir="context"):
+    # event_name = os.getenv("GITHUB_EVENT_NAME")
+    # head_ref = os.getenv("GITHUB_HEAD_REF")
+    # Opening JSON file
+    with open("{context_dir}/github_context.json", "r") as git_hub_context_file:
 
-    print("event_name = %s", github_context["event_name"])
-    print("event_name = %s", github_context["event_name"])
+        # returns JSON object as
+        # a dictionary
+        git_hub_context_data = json.load(git_hub_context_file)
+
+        head_ref = git_hub_context_data["head_ref"]
+        event_name = git_hub_context_data["event_name"]
+
+        inputs = git_hub_context_data["event"]["inputs"]
+
+        print("head_ref = %s", head_ref)
+        print("event_name = %s", event_name)
+        print("inputs = %s", inputs)
+
+        for key in git_hub_context_data:
+            print("key = %s", key)

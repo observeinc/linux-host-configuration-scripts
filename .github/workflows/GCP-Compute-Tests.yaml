@@ -26,10 +26,10 @@ on:
         options:
         - false
         - true
-  push:
-    branches:    
-      - 'test/**'
-  pull_request:
+  # push:
+  #   branches:    
+  #     - 'test/**'
+  # pull_request:
 
   schedule:
     # only runs on default branch

@@ -26,10 +26,10 @@ on:
         options:
         - false
         - true
-  push:
-    branches:    
-      - 'test/**'
-  pull_request:
+  # push:
+  #   branches:    
+  #     - 'test/**'
+  # pull_request:
 
   schedule:
     # only runs on default branch
@@ -72,6 +72,46 @@ jobs:
 
       # TF_LOG: DEBUG
     steps:
+      # AWS Login - orig role - has to occur before checkout
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
+          aws-region: ${{ env.TF_VAR_REGION }}
+
+      - name: Set code repo
+        run: |
+          echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
+
+      - name: Check out repository code XX
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.THIS_REPO_BRANCH }}
+
+      - name: Set contexts
+        run: |
+          mkdir context 
+          echo '${{ toJSON(github) }}' > context/github_context.json   
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+
+      - name: workflow helper
+        run: |
+          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(context_dir=\"context\")"
+   
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+
+      # GCP Login
+      # This is key generated in GCP console for service account
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
       - name: Value of inputs
         run: |
           echo "install_script_branch=${{ github.event.inputs.install_script_branch }}"
@@ -121,25 +161,6 @@ jobs:
           GITHUB_BRANCH: ${{ github.ref }}
 
 
-      - name: Check out repository code XX
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.THIS_REPO_BRANCH }}
-
-      - name: Set Custom Environment Variables XXX
-        run: |
-          mkdir file_outputs 
-          echo '${{ toJSON(github) }}' > file_outputs/context.json    
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: file_outputs
-          path: | 
-            /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/file_outputs/
-          retention-days: 1
-
       - name: Set SSH Key
         run: |
           # variable for path to private key
@@ -164,27 +185,11 @@ jobs:
         with:
           terraform_wrapper: false
 
-      # AWS Login - orig role
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
-          aws-region: ${{ env.TF_VAR_REGION }}
 
-      # GCP Login
-      # This is key generated in GCP console for service account
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v0'
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: 'Test gcloud CLI'
-        run: 'gcloud info'
+
+
 
       - name: terraform and config files
         run: |
