@@ -135,7 +135,7 @@ def set_custom_vars(context_dir="context"):
     # event_name = os.getenv("GITHUB_EVENT_NAME")
     # head_ref = os.getenv("GITHUB_HEAD_REF")
     # Opening JSON file
-    with open("{context_dir}/github_context.json", "r") as git_hub_context_file:
+    with open(f"{context_dir}/github_context.json", "r") as git_hub_context_file:
 
         # returns JSON object as
         # a dictionary
