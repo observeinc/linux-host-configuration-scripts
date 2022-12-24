@@ -67,6 +67,8 @@ jobs:
       FAIL_FIRST_TEST: false
       FAIL_SECOND_TEST: false
       WORK_DIR: test_code
+      CLOUD: aws
+      MODULE: aws_machines
       # TF_LOG: DEBUG
 
     steps:
@@ -99,11 +101,11 @@ jobs:
         run: |
           python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(context_dir='context')"
 
-          python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"aws\", test_group=\"${{ matrix.test_groups }}\")"
+          python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"${{ env.CLOUD }}\", test_group=\"${{ matrix.test_groups }}\")"
 
-          python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"aws_machines\")"
+          python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"${{ env.MODULE }}\")"
 
-          python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"aws_machines\")"
+          python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"${{ env.MODULE }}\")"
 
           python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ secrets.STAGE_CUSTOMER_ID }}\", domain=\"${{ secrets.STAGE_DOMAIN }}\", token=\"${{ secrets.STAGE_DATASTREAM_TOKEN }}\")"
 
