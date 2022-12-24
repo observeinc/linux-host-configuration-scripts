@@ -52,8 +52,8 @@ jobs:
       issues: read
       checks: write
     env: # Or as an environment variable
-      TF_VAR_OBSERVE_CUSTOMER_ID: ${{ secrets.TF_VAR_OBSERVE_CUSTOMER_ID }}
-      TF_VAR_OBSERVE_DATASTREAM_TOKEN: ${{ secrets.TF_VAR_OBSERVE_DATASTREAM_TOKEN }}
+      # TF_VAR_OBSERVE_CUSTOMER_ID: ${{ secrets.TF_VAR_OBSERVE_CUSTOMER_ID }}
+      # TF_VAR_OBSERVE_DATASTREAM_TOKEN: ${{ secrets.TF_VAR_OBSERVE_DATASTREAM_TOKEN }}
       TF_VAR_PUBLIC_KEY: ${{ secrets.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
       TF_VAR_USE_BRANCH_NAME: main

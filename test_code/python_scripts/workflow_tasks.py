@@ -174,9 +174,7 @@ def set_custom_vars(context_dir="context", local_test=False):
                     f'TF_VAR_USE_BRANCH_NAME={inputs["install_script_branch"]}'
                 )
                 environmentFile.write(f'THIS_REPO_BRANCH={inputs["this_repo_branch"]}')
-                environmentFile.write(
-                    f'TF_VAR_USE_BRANCH_NAME={inputs["install_script_branch"]}'
-                )
+
                 environmentFile.write(
                     f'TERRAFORM_RUN_DESTROY={inputs["terraform_run_destroy"]}'
                 )
