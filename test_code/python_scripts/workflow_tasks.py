@@ -238,5 +238,6 @@ def set_custom_vars(context_dir="context", local_test=False):
             perk = "600"
             os.chmod(private_key_path, int(perk, base=8))
 
+        with open(env_file, "r") as environmentFile:
             for line in environmentFile:
                 print(f"line = {line}")
