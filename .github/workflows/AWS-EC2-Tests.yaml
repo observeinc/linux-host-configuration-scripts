@@ -57,7 +57,7 @@ jobs:
       TF_VAR_PUBLIC_KEY: ${{ secrets.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
       TF_VAR_USE_BRANCH_NAME: main
-      
+
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} 
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -168,23 +168,16 @@ jobs:
           
         working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 
-      - name: delete ini
+      - name: cleanup
         if: always()
         run: |
-          rm -f config.ini
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+          rm -f python_scripts/config.ini
 
-      - name: clean_output
-        if: always()
-        run: |
-          sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./*
-        working-directory: "${{ env.WORK_DIR }}/python_scripts/file_outputs"
+          sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/file_outputs/*
 
-      - name: clean_logs
-        if: always()
-        run: |
-          sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./*
-        working-directory: "${{ env.WORK_DIR }}/python_scripts/log_outputs"
+          sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/log_outputs/*
+
+        working-directory: "${{ env.WORK_DIR }}"
 
       - name: Archive test results
         uses: actions/upload-artifact@v3
