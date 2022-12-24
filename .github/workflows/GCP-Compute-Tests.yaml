@@ -29,7 +29,7 @@ on:
   # push:
   #   branches:    
   #     - 'test/**'
-  # pull_request:
+  pull_request:
 
   schedule:
     # only runs on default branch
