@@ -208,7 +208,7 @@ def set_custom_vars(context_dir="context", local_test=False):
             # Create directory for keys and set permissions
             home_dir = os.getenv("HOME")
             new_dir = f"{home_dir}/.ssh"
-            secret_path = f"{home_dir}/private_key"
+            secret_path = f"{context_dir}/private_key"
 
             if local_test == True:
                 new_dir = f"{home_dir}/.ssh_test"
