@@ -178,27 +178,31 @@ def set_custom_vars(context_dir="context", local_test=False):
 
                 print(seperator)
 
-                environmentFile.write(f"TF_VAR_USE_BRANCH_NAME={install_script_branch}")
-                environmentFile.write(f"THIS_REPO_BRANCH={this_repo_branch}")
+                environmentFile.write(
+                    f"TF_VAR_USE_BRANCH_NAME={install_script_branch}\n"
+                )
+                environmentFile.write(f"THIS_REPO_BRANCH={this_repo_branch}\n")
 
-                environmentFile.write(f"TERRAFORM_RUN_DESTROY={terraform_run_destroy}")
-                environmentFile.write(f"FAIL_FIRST_TEST={fail_first_test}")
-                environmentFile.write(f"FAIL_SECOND_TEST={fail_second_test}")
+                environmentFile.write(
+                    f"TERRAFORM_RUN_DESTROY={terraform_run_destroy}\n"
+                )
+                environmentFile.write(f"FAIL_FIRST_TEST={fail_first_test}\n")
+                environmentFile.write(f"FAIL_SECOND_TEST={fail_second_test}\n")
 
             # if pull request don't destroy resources
             if event_name == "pull_request":
                 ref = git_hub_context_data["ref"]
-                environmentFile.write(f"TERRAFORM_RUN_DESTROY=false")
-                environmentFile.write(f"THIS_REPO_BRANCH={ref}")
+                environmentFile.write(f"TERRAFORM_RUN_DESTROY=false\n")
+                environmentFile.write(f"THIS_REPO_BRANCH={ref}\n")
 
             # value for resource names
             environmentFile.write(
-                f'TF_VAR_WORKFLOW_MATRIX_VALUE={matrix_data["test_groups"]}'
+                f'TF_VAR_WORKFLOW_MATRIX_VALUE={matrix_data["test_groups"]}\n'
             )
 
             # This variable tells code it running on CI server
             CI = os.getenv("CI")
-            environmentFile.write(f"TF_VAR_CI={CI}")
+            environmentFile.write(f"TF_VAR_CI={CI}\n")
 
             # This variable gets just the branch name without url stuff
             # txt = "refs/heads/arthur/ob-14272"
@@ -226,7 +230,7 @@ def set_custom_vars(context_dir="context", local_test=False):
 
             #  with open(env_file, "a") as environmentFile:
             # variable for private key which is required for CI server to login to machines
-            environmentFile.write(f"TF_VAR_PRIVATE_KEY_PATH={private_key_path}")
+            environmentFile.write(f"TF_VAR_PRIVATE_KEY_PATH={private_key_path}\n")
 
             with open(private_key_path, "w+") as private_key_file, open(
                 secret_path, "r"
