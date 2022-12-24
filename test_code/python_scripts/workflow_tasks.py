@@ -135,7 +135,7 @@ def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
 seperator = "################################"
 
 
-def set_custom_vars(context_dir="context"):
+def set_custom_vars(context_dir="context", local_test=False):
     # event_name = os.getenv("GITHUB_EVENT_NAME")
     # head_ref = os.getenv("GITHUB_HEAD_REF")
     # Opening JSON file
@@ -153,14 +153,14 @@ def set_custom_vars(context_dir="context"):
         head_ref = git_hub_context_data["head_ref"]
         event_name = git_hub_context_data["event_name"]
 
-        inputs = git_hub_context_data["event"]["inputs"]
-
         print(f"head_ref = {head_ref}")
         print(f"event_name = {event_name}")
-        print(f"inputs = {inputs}")
 
         with open(env_file, "a") as environmentFile:
             if event_name == "workflow_dispatch":
+                inputs = git_hub_context_data["event"]["inputs"]
+                print(f"inputs = {inputs}")
+
                 print(seperator)
                 print(f'install_script_branch={inputs["install_script_branch"]}')
                 print(f'this_repo_branch={inputs["this_repo_branch"]}')
@@ -186,7 +186,7 @@ def set_custom_vars(context_dir="context"):
             # if pull request don't destroy resources
             if event_name == "pull_request":
                 environmentFile.write(f"TERRAFORM_RUN_DESTROY=false")
-                environmentFile.write(f'THIS_REPO_BRANCH={inputs["ref"]}')
+                environmentFile.write(f'THIS_REPO_BRANCH={git_hub_context_data["ref"]}')
 
             # value for resource names
             environmentFile.write(
@@ -208,11 +208,17 @@ def set_custom_vars(context_dir="context"):
             # Create directory for keys and set permissions
             home_dir = os.getenv("HOME")
             new_dir = f"{home_dir}/.ssh"
-            private_key_path = f"{new_dir}/github_actions"
             secret_path = f"{home_dir}/private_key"
 
+            if local_test == True:
+                new_dir = f"{home_dir}/.ssh_test"
+                secret_path = f"{home_dir}/.ssh/id_rsa_ec2"
+
+            private_key_path = f"{new_dir}/github_actions"
+
             os.mkdir(new_dir)
-            os.chmod(new_dir, "0o700")  # chmod 700 "$HOME/.ssh"
+            per = "700"
+            os.chmod(new_dir, int(per, base=8))  # chmod 700 "$HOME/.ssh"
 
             #  with open(env_file, "a") as environmentFile:
             # variable for private key which is required for CI server to login to machines
@@ -225,7 +231,8 @@ def set_custom_vars(context_dir="context"):
                     private_key_file.write(line)
 
             # set permissions for key file
-            os.chmod(private_key_file, "0o600")
+            perk = "600"
+            os.chmod(private_key_path, int(perk, base=8))
 
         for key in git_hub_context_data:
             print(f"key = {key}")
