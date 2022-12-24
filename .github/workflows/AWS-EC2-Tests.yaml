@@ -92,11 +92,16 @@ jobs:
         run: |
           mkdir context 
           echo '${{ toJSON(github) }}' > context/github_context.json   
+          echo '${{ toJSON(matrix) }}' > context/matrix_context.json 
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: workflow helper
         run: |
-          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(context_dir=\"context\")"
+          python3 -c "from workflow_tasks import set_custom_vars; /
+          set_custom_vars( /
+          context_dir=\"context\", /
+          private_key=\"${{ secrets.PRIVATE_KEY }}\"
+          )"
    
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
@@ -112,63 +117,63 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      - name: Value of inputs
-        run: |
-          echo "install_script_branch=${{ github.event.inputs.install_script_branch }}"
-          echo "this_repo_branch=${{ github.event.inputs.this_repo_branch }}"
-          echo "terraform_run_destroy=${{ github.event.inputs.terraform_run_destroy }}"
-          echo "fail_first_test=${{ github.event.inputs.fail_first_test }}"
-          echo "fail_second_test=${{ github.event.inputs.fail_second_test }}"
+      # - name: Value of inputs
+      #   run: |
+      #     echo "install_script_branch=${{ github.event.inputs.install_script_branch }}"
+      #     echo "this_repo_branch=${{ github.event.inputs.this_repo_branch }}"
+      #     echo "terraform_run_destroy=${{ github.event.inputs.terraform_run_destroy }}"
+      #     echo "fail_first_test=${{ github.event.inputs.fail_first_test }}"
+      #     echo "fail_second_test=${{ github.event.inputs.fail_second_test }}"
 
-      - name: Set variables based on inputs
-        if: github.event.inputs.terraform_run_destroy != ''
-        run: |
+      # - name: Set variables based on inputs
+      #   if: github.event.inputs.terraform_run_destroy != ''
+      #   run: |
 
-          echo "TF_VAR_USE_BRANCH_NAME=${{ github.event.inputs.install_script_branch }}" >> $GITHUB_ENV
+      #     echo "TF_VAR_USE_BRANCH_NAME=${{ github.event.inputs.install_script_branch }}" >> $GITHUB_ENV
 
-          echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
+      #     echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
 
-          echo "TERRAFORM_RUN_DESTROY=${{ github.event.inputs.terraform_run_destroy }}" >> $GITHUB_ENV
+      #     echo "TERRAFORM_RUN_DESTROY=${{ github.event.inputs.terraform_run_destroy }}" >> $GITHUB_ENV
         
-          echo "FAIL_FIRST_TEST=${{ github.event.inputs.fail_first_test }}" >> $GITHUB_ENV
+      #     echo "FAIL_FIRST_TEST=${{ github.event.inputs.fail_first_test }}" >> $GITHUB_ENV
           
-          echo "FAIL_SECOND_TEST=${{ github.event.inputs.fail_second_test }}" >> $GITHUB_ENV
+      #     echo "FAIL_SECOND_TEST=${{ github.event.inputs.fail_second_test }}" >> $GITHUB_ENV
           
-      - name: Set Custom Environment Variables
-        run: |
+      # - name: Set Custom Environment Variables
+      #   run: |
         
-          # if pull request don't destroy resources
-          if ${{ github.event_name == 'pull_request' }}; then
-            echo "TERRAFORM_RUN_DESTROY=false" >> $GITHUB_ENV
-            echo "THIS_REPO_BRANCH=${{ github.ref }}" >> $GITHUB_ENV
-          fi
+      #     # if pull request don't destroy resources
+      #     if ${{ github.event_name == 'pull_request' }}; then
+      #       echo "TERRAFORM_RUN_DESTROY=false" >> $GITHUB_ENV
+      #       echo "THIS_REPO_BRANCH=${{ github.ref }}" >> $GITHUB_ENV
+      #     fi
 
-          # value for resource names
-          echo "TF_VAR_WORKFLOW_MATRIX_VALUE=${{ matrix.test_groups }}" >> $GITHUB_ENV
+      #     # value for resource names
+      #     echo "TF_VAR_WORKFLOW_MATRIX_VALUE=${{ matrix.test_groups }}" >> $GITHUB_ENV
 
-          # This variable tells code it running on CI server
-          echo "TF_VAR_CI=$CI" >> $GITHUB_ENV
+      #     # This variable tells code it running on CI server
+      #     echo "TF_VAR_CI=$CI" >> $GITHUB_ENV
 
-          # This variable gets just the branch name without url stuff
-          echo "GIT_HUB_SHORT_BRANCH_NAME=${GITHUB_BRANCH##*/}" >> $GITHUB_ENV
+      #     # This variable gets just the branch name without url stuff
+      #     echo "GIT_HUB_SHORT_BRANCH_NAME=${GITHUB_BRANCH##*/}" >> $GITHUB_ENV
 
-          # Create directory for keys and set permissions
-          mkdir "$HOME/.ssh"
-          chmod 700 "$HOME/.ssh"
-          # variable for private key which is required for CI server to login to machines
-          echo "TF_VAR_PRIVATE_KEY_PATH=$HOME/.ssh/github_actions" >> $GITHUB_ENV
-        env:
-          GITHUB_BRANCH: ${{ github.ref }}
+      #     # Create directory for keys and set permissions
+      #     mkdir "$HOME/.ssh"
+      #     chmod 700 "$HOME/.ssh"
+      #     # variable for private key which is required for CI server to login to machines
+      #     echo "TF_VAR_PRIVATE_KEY_PATH=$HOME/.ssh/github_actions" >> $GITHUB_ENV
+      #   env:
+      #     GITHUB_BRANCH: ${{ github.ref }}
 
 
       - name: Set SSH Key
         run: |
-          # variable for path to private key
-          echo "${{ secrets.PRIVATE_KEY }}" > "$TF_VAR_PRIVATE_KEY_PATH"
-          # set permissions for key file
-          chmod 600 "$TF_VAR_PRIVATE_KEY_PATH"
-          # display for troubleshooting
-          cat "$TF_VAR_PRIVATE_KEY_PATH"
+          # # variable for path to private key
+          # echo "${{ secrets.PRIVATE_KEY }}" > "$TF_VAR_PRIVATE_KEY_PATH"
+          # # set permissions for key file
+          # chmod 600 "$TF_VAR_PRIVATE_KEY_PATH"
+          # # display for troubleshooting
+          # cat "$TF_VAR_PRIVATE_KEY_PATH"
           core.setFailed('Fabric tests failed')
 
       - name: Print Environment Variables - troubleshooting
