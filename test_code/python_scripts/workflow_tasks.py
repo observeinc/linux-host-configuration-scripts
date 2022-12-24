@@ -157,34 +157,39 @@ def set_custom_vars(context_dir="context", local_test=False):
         print(f"event_name = {event_name}")
 
         with open(env_file, "a") as environmentFile:
+            # if manual run
             if event_name == "workflow_dispatch":
                 inputs = git_hub_context_data["event"]["inputs"]
+                install_script_branch = inputs["install_script_branch"]
+                this_repo_branch = inputs["this_repo_branch"]
+                terraform_run_destroy = inputs["terraform_run_destroy"]
+                fail_first_test = inputs["fail_first_test"]
+                fail_second_test = inputs["fail_second_test"]
+
+                # print inputs
                 print(f"inputs = {inputs}")
 
                 print(seperator)
-                print(f'install_script_branch={inputs["install_script_branch"]}')
-                print(f'this_repo_branch={inputs["this_repo_branch"]}')
-                print(f'terraform_run_destroy={inputs["terraform_run_destroy"]}')
-                print(f'fail_first_test={inputs["fail_first_test"]}')
-                print(f'fail_second_test={inputs["fail_second_test"]}')
+                print(f"install_script_branch={install_script_branch}")
+                print(f"this_repo_branch={this_repo_branch}")
+                print(f"terraform_run_destroy={terraform_run_destroy}")
+                print(f"fail_first_test={fail_first_test}")
+                print(f"fail_second_test={fail_second_test}")
 
                 print(seperator)
 
-                environmentFile.write(
-                    f'TF_VAR_USE_BRANCH_NAME={inputs["install_script_branch"]}'
-                )
-                environmentFile.write(f'THIS_REPO_BRANCH={inputs["this_repo_branch"]}')
+                environmentFile.write(f"TF_VAR_USE_BRANCH_NAME={install_script_branch}")
+                environmentFile.write(f"THIS_REPO_BRANCH={this_repo_branch}")
 
-                environmentFile.write(
-                    f'TERRAFORM_RUN_DESTROY={inputs["terraform_run_destroy"]}'
-                )
-                environmentFile.write(f'FAIL_FIRST_TEST={inputs["fail_first_test"]}')
-                environmentFile.write(f'FAIL_SECOND_TEST={inputs["fail_second_test"]}')
+                environmentFile.write(f"TERRAFORM_RUN_DESTROY={terraform_run_destroy}")
+                environmentFile.write(f"FAIL_FIRST_TEST={fail_first_test}")
+                environmentFile.write(f"FAIL_SECOND_TEST={fail_second_test}")
 
             # if pull request don't destroy resources
             if event_name == "pull_request":
+                ref = git_hub_context_data["ref"]
                 environmentFile.write(f"TERRAFORM_RUN_DESTROY=false")
-                environmentFile.write(f'THIS_REPO_BRANCH={git_hub_context_data["ref"]}')
+                environmentFile.write(f"THIS_REPO_BRANCH={ref}")
 
             # value for resource names
             environmentFile.write(
@@ -192,7 +197,8 @@ def set_custom_vars(context_dir="context", local_test=False):
             )
 
             # This variable tells code it running on CI server
-            environmentFile.write(f'TF_VAR_CI={os.getenv("CI")}')
+            CI = os.getenv("CI")
+            environmentFile.write(f"TF_VAR_CI={CI}")
 
             # This variable gets just the branch name without url stuff
             # txt = "refs/heads/arthur/ob-14272"
@@ -232,5 +238,5 @@ def set_custom_vars(context_dir="context", local_test=False):
             perk = "600"
             os.chmod(private_key_path, int(perk, base=8))
 
-        for key in git_hub_context_data:
-            print(f"key = {key}")
+            for line in environmentFile:
+                print(f"line = {line}")
