@@ -57,6 +57,7 @@ jobs:
       TF_VAR_PUBLIC_KEY: ${{ secrets.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
       TF_VAR_USE_BRANCH_NAME: main
+      
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} 
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
@@ -68,9 +69,8 @@ jobs:
       FAIL_FIRST_TEST: false
       FAIL_SECOND_TEST: false
       WORK_DIR: test_code
-
-
       # TF_LOG: DEBUG
+
     steps:
       # AWS Login - orig role - has to occur before checkout
       - name: Configure AWS Credentials
@@ -83,7 +83,7 @@ jobs:
         run: |
           echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
 
-      - name: Check out repository code XX
+      - name: Check out repository code
         uses: actions/checkout@v3
         with:
           ref: ${{ env.THIS_REPO_BRANCH }}
@@ -100,6 +100,15 @@ jobs:
       - name: workflow helper
         run: |
           python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(context_dir='context')"
+
+          python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"aws\", test_group=\"${{ matrix.test_groups }}\")"
+
+          python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"aws_machines\")"
+
+          python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"aws_machines\")"
+
+          python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ secrets.STAGE_CUSTOMER_ID }}\", domain=\"${{ secrets.STAGE_DOMAIN }}\", token=\"${{ secrets.STAGE_DATASTREAM_TOKEN }}\")"
+
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       # GCP Login
@@ -114,109 +123,21 @@ jobs:
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-      # - name: Value of inputs
-      #   run: |
-      #     echo "install_script_branch=${{ github.event.inputs.install_script_branch }}"
-      #     echo "this_repo_branch=${{ github.event.inputs.this_repo_branch }}"
-      #     echo "terraform_run_destroy=${{ github.event.inputs.terraform_run_destroy }}"
-      #     echo "fail_first_test=${{ github.event.inputs.fail_first_test }}"
-      #     echo "fail_second_test=${{ github.event.inputs.fail_second_test }}"
-
-      # - name: Set variables based on inputs
-      #   if: github.event.inputs.terraform_run_destroy != ''
-      #   run: |
-
-      #     echo "TF_VAR_USE_BRANCH_NAME=${{ github.event.inputs.install_script_branch }}" >> $GITHUB_ENV
-
-      #     echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
-
-      #     echo "TERRAFORM_RUN_DESTROY=${{ github.event.inputs.terraform_run_destroy }}" >> $GITHUB_ENV
-        
-      #     echo "FAIL_FIRST_TEST=${{ github.event.inputs.fail_first_test }}" >> $GITHUB_ENV
-          
-      #     echo "FAIL_SECOND_TEST=${{ github.event.inputs.fail_second_test }}" >> $GITHUB_ENV
-          
-      # - name: Set Custom Environment Variables
-      #   run: |
-        
-      #     # if pull request don't destroy resources
-      #     if ${{ github.event_name == 'pull_request' }}; then
-      #       echo "TERRAFORM_RUN_DESTROY=false" >> $GITHUB_ENV
-      #       echo "THIS_REPO_BRANCH=${{ github.ref }}" >> $GITHUB_ENV
-      #     fi
-
-      #     # value for resource names
-      #     echo "TF_VAR_WORKFLOW_MATRIX_VALUE=${{ matrix.test_groups }}" >> $GITHUB_ENV
-
-      #     # This variable tells code it running on CI server
-      #     echo "TF_VAR_CI=$CI" >> $GITHUB_ENV
-
-      #     # This variable gets just the branch name without url stuff
-      #     echo "GIT_HUB_SHORT_BRANCH_NAME=${GITHUB_BRANCH##*/}" >> $GITHUB_ENV
-
-      #     # Create directory for keys and set permissions
-      #     mkdir "$HOME/.ssh"
-      #     chmod 700 "$HOME/.ssh"
-      #     # variable for private key which is required for CI server to login to machines
-      #     echo "TF_VAR_PRIVATE_KEY_PATH=$HOME/.ssh/github_actions" >> $GITHUB_ENV
-      #   env:
-      #     GITHUB_BRANCH: ${{ github.ref }}
-
-
-      - name: Set SSH Key
-        run: |
-          # # variable for path to private key
-          # echo "${{ secrets.PRIVATE_KEY }}" > "$TF_VAR_PRIVATE_KEY_PATH"
-          # # set permissions for key file
-          # chmod 600 "$TF_VAR_PRIVATE_KEY_PATH"
-          # # display for troubleshooting
-          # cat "$TF_VAR_PRIVATE_KEY_PATH"
-          core.setFailed('Fabric tests failed')
-
       - name: Print Environment Variables - troubleshooting
         run: |
           env | sort -f
-
-      - name: Check out repository code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.THIS_REPO_BRANCH }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
-
-
-
-
-
-
-
-      - name: terraform and config files
-        run: |
-          python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"aws\", test_group=\"${{ matrix.test_groups }}\")"
-
-          python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"aws_machines\")"
-
-          python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"aws_machines\")"
-
-          python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ secrets.STAGE_CUSTOMER_ID }}\", domain=\"${{ secrets.STAGE_DOMAIN }}\", token=\"${{ secrets.STAGE_DATASTREAM_TOKEN }}\")"
-
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
         
-      - name: terraform version
+      - name: terraform tasks
         run: |
           terraform version
-        working-directory: "${{ env.WORK_DIR }}"
 
-      - name: terraform init
-        run: |
           terraform init
-        working-directory: "${{ env.WORK_DIR }}"
 
-      - name: terraform validate
-        run: |
           terraform validate
         working-directory: "${{ env.WORK_DIR }}"
 
@@ -226,7 +147,7 @@ jobs:
         working-directory: "${{ env.WORK_DIR }}"
 
       # Run tests
-      - name: python script
+      - name: run fabric tests python script
         run: |
           # create output directory for archive files
           mkdir file_outputs
@@ -250,7 +171,7 @@ jobs:
       - name: delete ini
         if: always()
         run: |
-          rm config.ini
+          rm -f config.ini
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: clean_output
