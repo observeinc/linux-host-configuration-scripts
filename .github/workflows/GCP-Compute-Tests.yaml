@@ -81,7 +81,11 @@ jobs:
 
       - name: Set code repo
         run: |
-          echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
+          if ${{ github.event.inputs.this_repo_branch != '' }}; then
+            echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
+          else
+            echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
+          fi
 
       - name: Check out repository code
         uses: actions/checkout@v3
