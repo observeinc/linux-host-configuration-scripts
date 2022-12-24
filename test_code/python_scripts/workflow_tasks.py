@@ -135,7 +135,7 @@ def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
 seperator = "################################"
 
 
-def set_custom_vars(context_dir="context", private_key=""):
+def set_custom_vars(context_dir="context"):
     # event_name = os.getenv("GITHUB_EVENT_NAME")
     # head_ref = os.getenv("GITHUB_HEAD_REF")
     # Opening JSON file
@@ -209,6 +209,7 @@ def set_custom_vars(context_dir="context", private_key=""):
             home_dir = os.getenv("HOME")
             new_dir = f"{home_dir}/.ssh"
             private_key_path = f"{new_dir}/github_actions"
+            secret_path = f"{home_dir}/private_key"
 
             os.mkdir(new_dir)
             os.chmod(new_dir, "0o700")  # chmod 700 "$HOME/.ssh"
@@ -217,16 +218,12 @@ def set_custom_vars(context_dir="context", private_key=""):
             # variable for private key which is required for CI server to login to machines
             environmentFile.write(f"TF_VAR_PRIVATE_KEY_PATH={private_key_path}")
 
-            set_ssh_key(private_key, private_key_path)
+            with open(private_key_path, "w+") as private_key_file, open(secret_path, "r") as secret:
+                for line in secret
+                    private_key_file.write(line)
+
+            # set permissions for key file
+            os.chmod(private_key_file, "0o600")
 
         for key in git_hub_context_data:
             print(f"key = {key}")
-
-
-def set_ssh_key(private_key, private_key_path):
-    # variable for path to private key
-    with open(private_key_path, "w+") as private_key_file:
-        private_key_file.write(private_key)
-
-    # set permissions for key file
-    os.chmod(private_key_file, "0o600")  # chmod 700 "$HOME/.ssh"

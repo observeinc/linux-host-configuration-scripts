@@ -93,12 +93,13 @@ jobs:
           mkdir context 
           echo '${{ toJSON(github) }}' > context/github_context.json   
           echo '${{ toJSON(matrix) }}' > context/matrix_context.json 
+          echo '${{ secrets.PRIVATE_KEY }}' > context/private_key 
    
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: workflow helper
         run: |
-          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(context_dir='context', private_key='${{ secrets.PRIVATE_KEY }}')"
+          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(context_dir='context')"
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       # GCP Login
