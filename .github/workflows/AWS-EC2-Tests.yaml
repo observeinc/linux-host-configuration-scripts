@@ -51,9 +51,7 @@ jobs:
       pull-requests: write
       issues: read
       checks: write
-    env: # Or as an environment variable
-      # TF_VAR_OBSERVE_CUSTOMER_ID: ${{ secrets.TF_VAR_OBSERVE_CUSTOMER_ID }}
-      # TF_VAR_OBSERVE_DATASTREAM_TOKEN: ${{ secrets.TF_VAR_OBSERVE_DATASTREAM_TOKEN }}
+    env:
       TF_VAR_PUBLIC_KEY: ${{ secrets.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
       TF_VAR_USE_BRANCH_NAME: main
@@ -157,14 +155,14 @@ jobs:
           pip3 install -r requirements.txt
 
           # run tests 
-          fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }}
+          fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -o "1: run fabric tests python script"
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: Retry tests
         if: ${{ env.TEST_RESULT == 'FAIL' }} 
         run: |
           # run tests
-          fab test -a ${{ env.FAIL_SECOND_TEST }} -o 2 -b ${{ env.THIS_REPO_BRANCH }}
+          fab test -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests"  -b ${{ env.THIS_REPO_BRANCH }}
           
         working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 
