@@ -218,8 +218,10 @@ def set_custom_vars(context_dir="context"):
             # variable for private key which is required for CI server to login to machines
             environmentFile.write(f"TF_VAR_PRIVATE_KEY_PATH={private_key_path}")
 
-            with open(private_key_path, "w+") as private_key_file, open(secret_path, "r") as secret:
-                for line in secret
+            with open(private_key_path, "w+") as private_key_file, open(
+                secret_path, "r"
+            ) as secret:
+                for line in secret:
                     private_key_file.write(line)
 
             # set permissions for key file
