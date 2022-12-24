@@ -100,7 +100,7 @@ jobs:
           python3 -c "from workflow_tasks import set_custom_vars; /
           set_custom_vars( /
           context_dir=\"context\", /
-          private_key=\"${{ secrets.PRIVATE_KEY }}\"
+          private_key=\"${{ secrets.PRIVATE_KEY }}\" /
           )"
    
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
