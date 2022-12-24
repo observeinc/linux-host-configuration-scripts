@@ -135,7 +135,7 @@ def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
 seperator = "################################"
 
 
-def set_custom_vars(context_dir="context", private_key):
+def set_custom_vars(context_dir="context", private_key=""):
     # event_name = os.getenv("GITHUB_EVENT_NAME")
     # head_ref = os.getenv("GITHUB_HEAD_REF")
     # Opening JSON file
