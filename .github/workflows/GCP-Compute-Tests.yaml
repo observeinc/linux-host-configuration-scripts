@@ -26,9 +26,6 @@ on:
         options:
         - false
         - true
-  # push:
-  #   branches:    
-  #     - 'test/**'
   pull_request:
 
   schedule:
