@@ -32,6 +32,9 @@ def tf_override_file(cloud="", test_group="", override_file_path="../override.tf
         """
         )
 
+        for line in myfile:
+            print(line)
+
 
 def tf_main_file(module="", main_file_path="../main.tf"):
 
@@ -191,9 +194,9 @@ def set_custom_vars(context_dir="context", local_test=False):
 
             # if pull request don't destroy resources
             if event_name == "pull_request":
-                ref = git_hub_context_data["ref"]
+                # ref = git_hub_context_data["head_ref"]
                 environmentFile.write(f"TERRAFORM_RUN_DESTROY=false\n")
-                environmentFile.write(f"THIS_REPO_BRANCH={ref}\n")
+                # environmentFile.write(f"THIS_REPO_BRANCH={head_ref}\n")
 
             # value for resource names
             environmentFile.write(
