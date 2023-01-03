@@ -104,6 +104,7 @@ jobs:
 
           python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"${{ env.CLOUD }}\", test_group=\"${{ matrix.test_groups }}\")"
 
+          # !!! vvvvv THIS OVERWRITES MAIN.TF FILE for specific cloud module vvvvv !!! 
           python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"${{ env.MODULE }}\")"
 
           python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"${{ env.MODULE }}\")"
