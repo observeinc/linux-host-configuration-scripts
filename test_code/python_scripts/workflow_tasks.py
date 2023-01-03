@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import os
+import json
+import stat
 
 
 def tf_override_file(cloud="", test_group="", override_file_path="../override.tf"):
@@ -29,6 +31,9 @@ def tf_override_file(cloud="", test_group="", override_file_path="../override.tf
             }}
         """
         )
+
+        for line in myfile:
+            print(line)
 
 
 def tf_main_file(module="", main_file_path="../main.tf"):
@@ -130,8 +135,116 @@ def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
         )
 
 
-def set_custom_vars(inputs={}):
-    env_file = os.getenv("GITHUB_ENV")
+seperator = "################################"
 
-    for key in inputs:
-        print("key = {key}")
+
+def set_custom_vars(context_dir="context", local_test=False):
+    # event_name = os.getenv("GITHUB_EVENT_NAME")
+    # head_ref = os.getenv("GITHUB_HEAD_REF")
+    # Opening JSON file
+    with open(f"{context_dir}/github_context.json", "r") as git_hub_context_file, open(
+        f"{context_dir}/matrix_context.json", "r"
+    ) as matrix_context_file:
+
+        env_file = os.getenv("GITHUB_ENV")
+
+        # returns JSON object as
+        # a dictionary
+        git_hub_context_data = json.load(git_hub_context_file)
+        matrix_data = json.load(matrix_context_file)
+
+        head_ref = git_hub_context_data["head_ref"]
+        event_name = git_hub_context_data["event_name"]
+
+        print(f"head_ref = {head_ref}")
+        print(f"event_name = {event_name}")
+
+        with open(env_file, "a") as environmentFile:
+            # if manual run
+            if event_name == "workflow_dispatch":
+                inputs = git_hub_context_data["event"]["inputs"]
+                install_script_branch = inputs["install_script_branch"]
+                this_repo_branch = inputs["this_repo_branch"]
+                terraform_run_destroy = inputs["terraform_run_destroy"]
+                fail_first_test = inputs["fail_first_test"]
+                fail_second_test = inputs["fail_second_test"]
+
+                # print inputs
+                print(f"inputs = {inputs}")
+
+                print(seperator)
+                print(f"install_script_branch={install_script_branch}")
+                print(f"this_repo_branch={this_repo_branch}")
+                print(f"terraform_run_destroy={terraform_run_destroy}")
+                print(f"fail_first_test={fail_first_test}")
+                print(f"fail_second_test={fail_second_test}")
+
+                print(seperator)
+
+                environmentFile.write(
+                    f"TF_VAR_USE_BRANCH_NAME={install_script_branch}\n"
+                )
+                environmentFile.write(f"THIS_REPO_BRANCH={this_repo_branch}\n")
+
+                environmentFile.write(
+                    f"TERRAFORM_RUN_DESTROY={terraform_run_destroy}\n"
+                )
+                environmentFile.write(f"FAIL_FIRST_TEST={fail_first_test}\n")
+                environmentFile.write(f"FAIL_SECOND_TEST={fail_second_test}\n")
+
+            # if pull request don't destroy resources
+            if event_name == "pull_request":
+                # ref = git_hub_context_data["head_ref"]
+                environmentFile.write(f"TERRAFORM_RUN_DESTROY=false\n")
+                # environmentFile.write(f"THIS_REPO_BRANCH={head_ref}\n")
+
+            # value for resource names
+            environmentFile.write(
+                f'TF_VAR_WORKFLOW_MATRIX_VALUE={matrix_data["test_groups"]}\n'
+            )
+
+            # This variable tells code it running on CI server
+            CI = os.getenv("CI")
+            environmentFile.write(f"TF_VAR_CI={CI}\n")
+
+            # This variable gets just the branch name without url stuff
+            # txt = "refs/heads/arthur/ob-14272"
+            # x = re.search('(?:refs\/heads\/)(.*)', txt)
+
+            # if x:
+            # print("YES! We have a match!")
+            # for group in x.groups():
+            #     print(group)
+
+            # Create directory for keys and set permissions
+            home_dir = os.getenv("HOME")
+            new_dir = f"{home_dir}/.ssh"
+            secret_path = f"{context_dir}/private_key"
+
+            if local_test == True:
+                new_dir = f"{home_dir}/.ssh_test"
+                secret_path = f"{home_dir}/.ssh/id_rsa_ec2"
+
+            private_key_path = f"{new_dir}/github_actions"
+
+            os.mkdir(new_dir)
+            per = "700"
+            os.chmod(new_dir, int(per, base=8))  # chmod 700 "$HOME/.ssh"
+
+            #  with open(env_file, "a") as environmentFile:
+            # variable for private key which is required for CI server to login to machines
+            environmentFile.write(f"TF_VAR_PRIVATE_KEY_PATH={private_key_path}\n")
+
+            with open(private_key_path, "w+") as private_key_file, open(
+                secret_path, "r"
+            ) as secret:
+                for line in secret:
+                    private_key_file.write(line)
+
+            # set permissions for key file
+            perk = "600"
+            os.chmod(private_key_path, int(perk, base=8))
+
+        with open(env_file, "r") as environmentFile:
+            for line in environmentFile:
+                print(f"line = {line}")

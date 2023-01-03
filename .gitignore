@@ -9,3 +9,4 @@ __pycache__
 *.ini
 test_code/python_scripts/testenv
 log_outputs
+/test_code/python_scripts/context
