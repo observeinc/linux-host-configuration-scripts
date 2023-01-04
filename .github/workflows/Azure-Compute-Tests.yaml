@@ -34,7 +34,7 @@ on:
   schedule:
     # only runs on default branch
     # * is a special character in YAML so you have to quote this string
-    - cron:  '45 */6 * * *'
+    - cron:  '0 * * * *'
 
 jobs:
   
@@ -83,7 +83,7 @@ jobs:
         run: |
           if ${{ github.event.inputs.this_repo_branch != '' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
-          else
+          elif ${{ github.event_name == 'pull_request' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
           fi
 
@@ -107,8 +107,7 @@ jobs:
 
           python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"${{ env.CLOUD }}\", test_group=\"${{ matrix.test_groups }}\")"
 
-          # !!! THIS OVERWRITES MAIN.TF FILE !!! 
-          
+          # !!! vvvvv THIS OVERWRITES MAIN.TF FILE for specific cloud module vvvvv !!! 
           python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"${{ env.MODULE }}\")"
 
           python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"${{ env.MODULE }}\")"
