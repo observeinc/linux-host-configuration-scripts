@@ -34,7 +34,7 @@ on:
   schedule:
     # only runs on default branch
     # * is a special character in YAML so you have to quote this string
-    - cron:  '45 */6 * * *'
+    - cron:  '15 */12 * * *'
 
 jobs:
   
@@ -83,7 +83,7 @@ jobs:
         run: |
           if ${{ github.event.inputs.this_repo_branch != '' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
-          else
+          elif ${{ github.event_name == 'pull_request' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
           fi
           
