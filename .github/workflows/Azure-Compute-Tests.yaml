@@ -179,8 +179,10 @@ jobs:
           rm -f python_scripts/config.ini
 
           sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/file_outputs/*
+          sed -i 's/${{ secrets.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/file_outputs/*
 
           sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/log_outputs/*
+          sed -i 's/${{ secrets.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/log_outputs/*
 
         working-directory: "${{ env.WORK_DIR }}"
 
