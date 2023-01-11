@@ -51,7 +51,7 @@ def tf_main_file(module="", main_file_path="../main.tf"):
                     PUBLIC_KEY_PATH  = var.PUBLIC_KEY_PATH
                     PRIVATE_KEY_PATH = var.PRIVATE_KEY_PATH
                     name_format        = local.name_format
-                    AWS_MACHINE_FILTER = true
+                    AWS_MACHINE_FILTER = []
                     CI                 = var.CI
                     PUBLIC_KEY         = var.PUBLIC_KEY
 
@@ -99,7 +99,7 @@ def tf_main_file(module="", main_file_path="../main.tf"):
                     PRIVATE_KEY_PATH     = var.PRIVATE_KEY_PATH
                     location             = "West US 3"
                     name_format          = local.name_format
-                    AZURE_COMPUTE_FILTER = ["UBUNTU_18_04_LTS", "UBUNTU_20_04_LTS", "UBUNTU_22_04_LTS", "RHEL_8", "CENTOS_8"]
+                    AZURE_COMPUTE_FILTER = []
                     CI                   = var.CI
                     PUBLIC_KEY           = var.PUBLIC_KEY
                     providers = {{
