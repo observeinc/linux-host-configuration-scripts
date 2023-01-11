@@ -1,5 +1,9 @@
 locals {
-  machine_loop = { for key, value in var.AWS_MACHINE_CONFIGS : key => value if key == var.AWS_MACHINE_FILTER || var.AWS_MACHINE_FILTER == true }
+  # machine_loop = { for key, value in var.AWS_MACHINE_CONFIGS : key => value if key == var.AWS_MACHINE_FILTER || var.AWS_MACHINE_FILTER == true }
+
+  compute_instances = { for key, value in var.AWS_MACHINE_CONFIGS :
+  key => value if contains(var.AWS_MACHINE_FILTER, key) || length(var.AWS_MACHINE_FILTER) == 0 }
+
 }
 
 
@@ -22,7 +26,7 @@ resource "aws_key_pair" "ec2key" {
 
 # EC2 instance for linux host 
 resource "aws_instance" "linux_host_integration" {
-  for_each = local.machine_loop
+  for_each = local.compute_instances
 
   ami           = each.value.ami_id
   instance_type = each.value.ami_instance_type

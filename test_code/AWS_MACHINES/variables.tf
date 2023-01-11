@@ -122,7 +122,7 @@ variable "AWS_MACHINE_CONFIGS" {
 # tflint-ignore: terraform_naming_convention
 variable "AWS_MACHINE_FILTER" {
   description = "This is used as filter agains AWS_MACHINE_CONFIGS in main.tf - if set to true then all values"
-  default     = "UBUNTU_18_04_LTS"
+  default     = ["UBUNTU_18_04_LTS"]
   type        = any
 }
 

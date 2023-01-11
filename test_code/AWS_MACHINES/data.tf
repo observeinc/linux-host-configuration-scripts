@@ -34,7 +34,7 @@ locals {
 
 # # rando value for filtering output and validating results
 resource "random_string" "output" {
-  for_each = local.machine_loop
+  for_each = local.compute_instances
   length   = 6
   special  = false
   # keepers = {
