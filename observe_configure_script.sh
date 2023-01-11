@@ -664,6 +664,8 @@ EOT
 
       sudo cp "$sourcefilename" "$filename"
 
+      sudo systemctl enable telegraf
+
       sudo service telegraf restart
 
     fi
@@ -793,6 +795,8 @@ EOF
 
       yum install ntp -y
 
+      sudo systemctl enable telegraf
+
       sudo service telegraf restart
 
     fi
@@ -915,6 +919,8 @@ EOT
       fi
 
       sudo cp "$sourcefilename" "$filename"
+
+      sudo systemctl enable telegraf
 
       sudo service telegraf restart
 
