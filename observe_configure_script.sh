@@ -130,6 +130,21 @@ getConfigurationFiles(){
       log "$filename created"
       log "$SPACER"
     fi
+
+    if [ ! -f "$config_file_directory/parsers-observe.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/parsers-observe.conf"
+      filename="$config_file_directory/parsers-observe.conf"
+
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
+      curl "$url" > "$filename"
+
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
+    fi
 }
 
 generateTestKey(){
@@ -179,6 +194,8 @@ printHelp(){
       log "    - controls whether to delete created config_files temp directory"
       log "- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE "
       log "    - controls fluentbit config for whether to use default ec2 metrics "
+      log "- Optional --cloud_metadata TRUE or FALSE - Defaults to FALSE"
+      log "    - controls fluentbit config for whether to poll for VM metadata"
       log "- Optional --datacenter defaults to AWS"
       log "- Optional --appgroup id supplied sets value in fluentbit config"
       log "- Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
@@ -215,6 +232,7 @@ printVariables(){
       log "observe_host_name: $observe_host_name"
       log "config_files_clean: $config_files_clean"
       log "ec2metadata: $ec2metadata"
+      log "cloud_metadata: $cloud_metadata"
       log "datacenter: $datacenter"
       log "appgroup: $appgroup"
       log "testeject: $testeject"
@@ -272,6 +290,7 @@ includeFiletdAgent(){
         log "includeFiletdAgent - $i"
 
         sudo cp "$config_file_directory/observe-installer.conf" /etc/td-agent-bit/observe-installer.conf;
+        sudo cp "$config_file_directory/parsers-observe.conf" /etc/td-agent-bit/parsers-observe.conf;
 
         case ${i} in
             linux_host)
@@ -350,6 +369,7 @@ ingest_token=0
 observe_host_name_base=
 config_files_clean="FALSE"
 ec2metadata="FALSE"
+cloud_metadata="FALSE"
 datacenter="AWS"
 testeject="NO"
 appgroup="UNSET"
@@ -392,6 +412,9 @@ fi
           ;;
         --ec2metadata)
           ec2metadata="$2"
+          ;;
+        --cloud_metadata)
+          cloud_metadata="$2"
           ;;
         --datacenter)
           datacenter="$2"
@@ -444,6 +467,7 @@ log "observe_host_name_base: ${observe_host_name_base}"
 log "observe_host_name: ${observe_host_name}"
 log "config_files_clean: ${config_files_clean}"
 log "ec2metadata: ${ec2metadata}"
+log "cloud_metadata: ${cloud_metadata}"
 log "datacenter: ${datacenter}"
 log "appgroup: ${appgroup}"
 log "testeject: ${testeject}"
@@ -537,6 +561,35 @@ fi
 if [ "$appgroup" != UNSET ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/Record appgroup ${appgroup}/g" ./*
 fi
+
+metadata_buffer_size="8mb"
+metadata_interval_secs="300"
+sed -i "s/REPLACE_WITH_METADATA_BUFFER_SIZE/${metadata_buffer_size}/g" ./*
+sed -i "s/REPLACE_WITH_METADATA_INTERVAL/${metadata_interval_secs}/g" ./*
+
+metadata_command=":"
+if [[ "$cloud_metadata" == TRUE ]]; then
+    # AWS
+    metadata_commands[0]='TOKEN=`curl --fail -s -X PUT http://169.254.169.254/latest/api/token -H "X-aws-ec2-metadata-token-ttl-seconds: 60"` \&\& curl --fail -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/dynamic/instance-identity/document | tr "\\n" " "'
+    # GCP
+    metadata_commands[1]='curl --fail "http://metadata.google.internal/computeMetadata/v1/?recursive=true" -H "Metadata-Flavor: Google"'
+    # Azure
+    metadata_commands[2]='curl --fail -s -H Metadata:true --noproxy "*" "http://169.254.169.254/metadata/instance?api-version=2021-02-01"'
+    for command in "${metadata_commands[@]}"
+    do  
+        command_parsed=$(echo REPLACE_WITH_METADATA_COMMAND | sed "s#REPLACE_WITH_METADATA_COMMAND#${command}#g")
+        eval $command_parsed > /dev/null 2>&1
+        retVal=$?
+        if [ $retVal -eq 0 ]; then
+            metadata_command="$command"
+            break
+        fi
+        echo $?
+    done
+fi
+
+log "Using the following command to fetch VM metadata: ${metadata_command}"
+sed -i "s#REPLACE_WITH_METADATA_COMMAND#${metadata_command}#g" ./*
 
 testEject "${testeject}" "EJECT2"
 

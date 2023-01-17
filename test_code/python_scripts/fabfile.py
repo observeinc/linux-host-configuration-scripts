@@ -8,6 +8,7 @@ import pprint
 import os
 import glob
 import time
+import traceback
 
 from fabric import Connection
 from fabric import task
@@ -39,17 +40,18 @@ def getCurlCommand(options):
         "ec2metadata": "TRUE",
         "datacenter": "FAB_DATA_CENTER",
         "appgroup": "FAB_APP_GROUP",
+        "cloud_metadata": "TRUE",
     }
 
     if "FLAGS" in options:
         FLAGS.update(options["FLAGS"])
 
+    curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {YOUR_CUSTOMERID} --ingest_token {YOUR_DATA_STREAM_TOKEN} --observe_host_name https://{YOUR_CUSTOMERID}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
     logging.info(
-        "curl command = %s",
-        f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {YOUR_CUSTOMERID} --ingest_token ****** --observe_host_name https://{YOUR_CUSTOMERID}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]}',
+        "curl command = %s", curl_command.replace(YOUR_DATA_STREAM_TOKEN, "*****")
     )
 
-    return f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {YOUR_CUSTOMERID} --ingest_token {YOUR_DATA_STREAM_TOKEN} --observe_host_name https://{YOUR_CUSTOMERID}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]}'
+    return curl_command
 
 
 # your "parallelness"
@@ -135,17 +137,16 @@ def test(
 
     logging.basicConfig(
         # filename=log_path,
-        format="%(asctime)s \n %(levelname)s \n %(message)s",
+        format="%(asctime)s %(levelname)s %(filename)s:%(lineno)d %(message)s",
         datefmt="%m/%d/%Y %I:%M:%S %p",
-        encoding="utf-8",
+        # encoding="utf-8",
         level=log_levels[log_level],
         handlers=[logging.FileHandler(log_path), logging.StreamHandler(sys.stdout)],
     )
 
-    logging.info(seperator)
-    logging.info("STARTING...")  # will print a message to the console
-
-    logging.info("log_level = %s", log_level)
+    logging.info(
+        f"STARTING: log_level={log_level}"
+    )  # will print a message to the console
 
     # delete files from last run
     folderCleanup()
@@ -153,12 +154,9 @@ def test(
     if runTerraform == "true":
         try:
             # run terraform appy to create infrastructure
-            logging.info(seperator)
-            logging.info("Running terraform apply ...")
-
-            logging.info(f"Error output written to {tf_apply_error_output}")
-            logging.info(f"Standard output written to {tf_apply_output}")
-            logging.info(seperator)
+            logging.info(
+                f"Running terraform apply: stderr_file={tf_apply_error_output} stdout_file={tf_apply_output}"
+            )
 
             os.system(
                 f'cd ../; export TF_LOG="ERROR"; terraform apply -auto-approve 2> {tf_apply_error_output} 1> {tf_apply_output}'
@@ -174,6 +172,7 @@ def test(
             logging.error("Terraform Flamed")  # will print a message to the console
             logging.error(e.message)
             logging.error(e.args)
+            traceback.print_exception(e)
             logging.error(f"Error output written to {tf_apply_error_output}")
             exit()
 
@@ -300,7 +299,7 @@ def test(
     except Exception as e:
         logging.error(seperator)
         logging.error("Tests Flamed")
-        logging.error(e)
+        traceback.print_exception(e)
         sum_file = f"{outputs_folder_name}/no_result.md"
         logging.error(seperator)
 
@@ -485,8 +484,8 @@ def write_to_local_summary_results_file(sum_file, small_result, outPutTitleAppen
             with open(sum_fail_file, "r") as failfile:
                 failfile.seek(0)
                 for line in failfile:
-                    logging.info("fail line")
-                    logging.info(line)
+                    logging.debug("fail line")
+                    logging.debug(line)
                     # write content to second file
 
                     sumfile.write(line)
@@ -498,8 +497,8 @@ def write_to_local_summary_results_file(sum_file, small_result, outPutTitleAppen
 
                 for line in passfile:
                     # write content to second file
-                    logging.info("pass line")
-                    logging.info(line)
+                    logging.debug("pass line")
+                    logging.debug(line)
                     sumfile.write(line)
 
 
@@ -507,69 +506,66 @@ def write_to_local_summary_results_file(sum_file, small_result, outPutTitleAppen
 ################
 def doTest(options, t):
     """Run test with options"""
-    key = options["key"]
-
-    # info
-    logging.info(
-        f"""
-        #######################################
-        {key}
-        Running commands ...
-        #######################################"""
-    )
-    logging.info("Connecting to %s...", key)
-    t[key]["connection"] = test_fail_message
-
-    # create connect object for current machine
-    connect = Connection(
-        host=options["host"],
-        user=options["user"],
-        connect_kwargs=options["connect_kwargs"],
-    )
-
-    t[key]["connection"] = test_pass_message
-    logging.info("Connection Success %s", key)
-
-    for cmd in options["commands"]:
-        # default to fail so failed connections aren't ignored
-        t[key][cmd] = test_fail_message
+    try:
+        key = options["key"]
 
         # info
-        logging.debug(
-            f"""
-            #######################################
-            {key}
+        logging.info("Connecting to %s...", key)
+        t[key]["connection"] = test_fail_message
 
-            host={options["host"]}
-            user={options["user"]}
-            connect_kwargs={options["connect_kwargs"]}
-
-            Running { options["commands"][cmd] }
-            #######################################"""
+        # create connect object for current machine
+        connect = Connection(
+            host=options["host"],
+            user=options["user"],
+            connect_kwargs=options["connect_kwargs"],
         )
 
-        # run command on remote machine
-        hide_run_output = True
-        if options["log_level"] == "DEBUG":
-            hide_run_output = False
-        result = connect.run(
-            options["commands"][cmd], hide=hide_run_output, timeout=300
-        )
+        t[key]["connection"] = test_pass_message
+        logging.info("Connection Success %s", key)
 
-        # format string for results
-        msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
-        result_msg = "{0.stdout}"
+        for cmd in options["commands"]:
+            # default to fail so failed connections aren't ignored
+            t[key][cmd] = test_fail_message
 
-        if "tofile" not in cmd:
-            # if not writing to a file add command result dictionary
-            t[key][cmd] = result_msg.format(result)
-        else:
-            # else add file path
-            file_name = f'file_outputs/{options["key"]}_{cmd}_results.txt'
-            f = open(file_name, "w")
-            f.write(msg.format(result))
-            f.close()
-            t[key][cmd] = file_name
+            # info
+            logging.debug(
+                f"""
+    `            #######################################
+    `            {key}
+
+                host={options["host"]}
+                user={options["user"]}
+                connect_kwargs={options["connect_kwargs"]}
+
+                Running { options["commands"][cmd] }
+                #######################################"""
+            )
+
+            # run command on remote machine
+            hide_run_output = True
+            if options["log_level"] == "DEBUG":
+                hide_run_output = False
+
+            result = connect.run(
+                options["commands"][cmd], hide=hide_run_output, timeout=300
+            )
+
+            # format string for results
+            msg = "Ran {0.command!r} on {0.connection.host}, got stdout:\n{0.stdout}"
+            result_msg = "{0.stdout}"
+
+            if "tofile" not in cmd:
+                # if not writing to a file add command result dictionary
+                t[key][cmd] = result_msg.format(result)
+            else:
+                # else add file path
+                file_name = f'file_outputs/{options["key"]}_{cmd}_results.txt'
+                f = open(file_name, "w")
+                f.write(msg.format(result))
+                f.close()
+                t[key][cmd] = file_name
+    except Exception as e:
+        traceback.print_exception(e)
 
 
 # def tt():
