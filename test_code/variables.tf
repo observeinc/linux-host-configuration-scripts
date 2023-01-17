@@ -1,3 +1,8 @@
+variable "name_format" {
+  type    = string
+  default = "linux-host-test-%s"
+}
+
 # github actions uppercases all of there vars 
 # tflint-ignore: terraform_naming_convention
 variable "WORKFLOW_MATRIX_VALUE" {
