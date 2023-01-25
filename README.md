@@ -3,9 +3,10 @@
 ![Pass/Fail Tests - Azure](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/Azure-Compute-Tests.yaml/badge.svg?branch=main)
 
 ![Pass/Fail Tests - GCP](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/GCP-Compute-Tests.yaml/badge.svg?branch=main)
-# Configuraton script for Linux
+# Configuration script for Linux
 ## Assumptions:
 - Assumes user running script can use passwordless sudo
+- Assumes Ubuntu, Amazon Linux, CentOS, or Red Hat
 
 ## What does it do
 - Creates a config_files directory in home of logged in user
