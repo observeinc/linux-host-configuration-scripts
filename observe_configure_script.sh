@@ -641,14 +641,23 @@ EOT
 
       printMessage "telegraf"
 
-sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null << EOT
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
 [influxdb]
-name = InfluxDB Repository - RHEL
-baseurl = https://repos.influxdata.com/rhel/7/\$basearch/stable/
+name = InfluxDB Repository - RHEL 7
+baseurl = https://repos.influxdata.com/rhel/7/\$basearch/stable
 enabled = 1
 gpgcheck = 1
-gpgkey = https://repos.influxdata.com/influxdb.key
-EOT
+gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
+EOF
+
+# sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null << EOT
+# [influxdb]
+# name = InfluxDB Repository - RHEL
+# baseurl = https://repos.influxdata.com/rhel/7/\$basearch/stable/
+# enabled = 1
+# gpgcheck = 1
+# gpgkey = https://repos.influxdata.com/influxdb.key
+# EOT
 
       sudo yum install telegraf -y
 
@@ -770,14 +779,23 @@ EOF
       if [ "$telegrafinstall" == TRUE ]; then
       printMessage "telegraf"
 
-cat << EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
 [influxdb]
 name = InfluxDB Repository - RHEL \$releasever
 baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
 enabled = 1
-gpgcheck = 0
-gpgkey = https://repos.influxdata.com/influxdb.key
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
 EOF
+
+# cat << EOF | sudo tee /etc/yum.repos.d/influxdb.repo
+# [influxdb]
+# name = InfluxDB Repository - RHEL \$releasever
+# baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+# enabled = 1
+# gpgcheck = 0
+# gpgkey = https://repos.influxdata.com/influxdb.key
+# EOF
 
       sudo yum install telegraf -y
 
@@ -893,16 +911,30 @@ EOT
       # #####################################
       if [ "$telegrafinstall" == TRUE ]; then
       printMessage "telegraf"
+      # 2027/01/27 - Comment out old key approach
+      # https://www.influxdata.com/blog/linux-package-signing-key-rotation/
+      # wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
+      wget -qO- https://repos.influxdata.com/influxdata-archive_compat.key | sudo apt-key add -
+      
+      # sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg >/dev/null
 
-      wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
-          #shellcheck disable=SC1091
-      source /etc/lsb-release
-      if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
+      #shellcheck disable=SC1091
+      # 2027/01/27 - Comment out old key approach
+      #source /etc/lsb-release
+      source /etc/os-release
+
+      # 2027/01/27 - Comment out old key approach
+      if ! grep -Fq "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" /etc/apt/sources.list.d/influxdb.list
       then
-sudo tee -a /etc/apt/sources.list.d/influxdb.list > /dev/null << EOT
-deb https://repos.influxdata.com/"${DISTRIB_ID,,}" "${DISTRIB_CODENAME}" stable
-EOT
+        echo "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
       fi
+      
+      #       if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
+      #       then
+      # sudo tee -a /etc/apt/sources.list.d/influxdb.list > /dev/null << EOT
+      # deb https://repos.influxdata.com/"${DISTRIB_ID,,}" "${DISTRIB_CODENAME}" stable
+      # EOT
+      #       fi
 
       sudo apt-get update
       sudo apt-get install -y telegraf

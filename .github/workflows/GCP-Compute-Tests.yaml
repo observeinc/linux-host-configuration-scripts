@@ -1,5 +1,6 @@
 run-name: GCP Compute - ${{ github.event_name }} by @${{ github.actor }}
 # name: Fabric Build
+concurrency: gcp-workflow
 on: 
   workflow_dispatch:
     inputs:
