@@ -1,5 +1,6 @@
 run-name: Azure Compute - ${{ github.event_name }} by @${{ github.actor }}
 # name: Fabric Build
+concurrency: azure-workflow
 on: 
   workflow_dispatch:
     inputs:
