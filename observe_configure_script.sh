@@ -914,14 +914,14 @@ EOT
       # 2027/01/27 - Comment out old key approach
       # https://www.influxdata.com/blog/linux-package-signing-key-rotation/
       # wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
-      wget -qO- https://repos.influxdata.com/influxdata-archive_compat.key | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg >/dev/null
+      wget -qO- https://repos.influxdata.com/influxdata-archive_compat.key | sudo apt-key add -
+      
+      # sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg >/dev/null
 
       #shellcheck disable=SC1091
       # 2027/01/27 - Comment out old key approach
       #source /etc/lsb-release
       source /etc/os-release
-
-      echo "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
 
       # 2027/01/27 - Comment out old key approach
       if ! grep -Fq "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" /etc/apt/sources.list.d/influxdb.list
