@@ -14,16 +14,16 @@ variable "WORKFLOW_MATRIX_VALUE" {
 # tflint-ignore: terraform_naming_convention
 variable "PUBLIC_KEY_PATH" {
   type        = string
-  description = "Public key path"
+  description = "Public key path ex - \"/Users/YOU/.ssh/id_rsa\""
+  default     = null
   nullable    = true
-  default     = "/Users/arthur/.ssh/id_rsa_ec2.pub"
 }
 
 # tflint-ignore: terraform_naming_convention
 variable "PRIVATE_KEY_PATH" {
-  description = "Private key path - only needed for github actions runs"
+  description = "Private key path ex - \"/Users/YOU/.ssh/id_rsa.pub\""
+  default     = null
   nullable    = true
-  default     = "/Users/arthur/.ssh/id_rsa_ec2"
   type        = string
 }
 
