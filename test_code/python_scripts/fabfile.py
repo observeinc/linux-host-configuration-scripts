@@ -115,6 +115,7 @@ def test(
     failMe="false",
     outPutTitleAppend="1",
     log_level="INFO",
+    config_ini_environment="target-stage-tenant",
 ):
     """Run a test of install script"""
 
@@ -215,7 +216,7 @@ def test(
                 # create command for install of linux host script
                 curl_cmd = getCurlCommand(
                     {
-                        "ENVIRONMENT": "arthur-stage-tenant",
+                        "ENVIRONMENT": config_ini_environment,
                         "BRANCH": branch,
                         "FLAGS": {
                             "config_files_clean": config_files_clean,
