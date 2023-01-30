@@ -8,11 +8,18 @@ To run manually run desired cloud workflow here - https://github.com/observeinc/
 
     ```
     PUBLIC_KEY_PATH="/Users/me/.ssh/id_rsa.pub"
+    PRIVATE_KEY_PATH="/Users/me/.ssh/id_rsa"
     ```
 
     Create an override.tf file in test_code directory and run terraform apply
 
-    You will need credentials for AWS / Google / Azure to run terraform or you can comment out cloud(s) you don't want to test in main.tf and outputs.tf
+    !!! You will need credentials for AWS / Google / Azure to run terraform !!!
+    
+    OR you can comment out cloud(s) you don't want to test in:
+    - main.tf and
+    - outputs.tf
+    
+    Do not comment out ```output "fab_host_all"``` just comment out modules you don't want
 
     Example override.tf
 
