@@ -8,7 +8,7 @@ output "ec2" {
       "user_name"       = var.AWS_MACHINE_CONFIGS[key].default_user
       "test_key"        = random_string.output[key].id
       "instance_id"     = value.id
-      "public_ssh_link" = "ssh -i ~/.ssh/id_rsa_ec2 ${var.AWS_MACHINE_CONFIGS[key].default_user}@${value.public_ip}"
+      "public_ssh_link" = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.AWS_MACHINE_CONFIGS[key].default_user}@${value.public_ip}"
     }
 
   }
@@ -22,7 +22,7 @@ output "fab_hosts" {
       "connect_kwargs" = {
         "key_filename" : var.PRIVATE_KEY_PATH
       }
-      "public_ssh_link" = "ssh -i ~/.ssh/id_rsa_ec2 ${var.AWS_MACHINE_CONFIGS[key].default_user}@${value.public_ip}"
+      "public_ssh_link" = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.AWS_MACHINE_CONFIGS[key].default_user}@${value.public_ip}"
       "sleep" : var.AWS_MACHINE_CONFIGS[key].sleep
     }
   }
