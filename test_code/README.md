@@ -9,6 +9,7 @@ To run manually run desired cloud workflow here - https://github.com/observeinc/
     ```
     PUBLIC_KEY_PATH="/Users/me/.ssh/id_rsa.pub"
     PRIVATE_KEY_PATH="/Users/me/.ssh/id_rsa"
+    name_format = "YOU-host-test-%s"
     ```
 
     Create an override.tf file in test_code directory and run terraform apply
