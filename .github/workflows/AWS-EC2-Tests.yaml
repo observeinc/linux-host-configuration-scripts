@@ -1,5 +1,6 @@
 run-name: AWS EC2 - ${{ github.event_name }} by @${{ github.actor }}
 # name: Fabric Build
+concurrency: aws-workflow
 on: 
   workflow_dispatch:
     inputs:
