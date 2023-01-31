@@ -531,8 +531,8 @@ def doTest(options, t):
             # info
             logging.debug(
                 f"""
-    `            #######################################
-    `            {key}
+                #######################################
+                {key}
 
                 host={options["host"]}
                 user={options["user"]}
