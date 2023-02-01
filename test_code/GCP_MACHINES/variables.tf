@@ -39,7 +39,7 @@ variable "GCP_MACHINE_CONFIGS" {
       user_data    = "user_data/aptbased.sh"
       sleep        = 120
     }
-
+    # Commenting out because this VM on GCP produces flaky test results and don't have motivation to figure out why
     # RHEL_8 = {
     #   recreate     = "changethistorecreate1"
     #   version      = "rhel-cloud/rhel-8"
