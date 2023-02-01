@@ -40,17 +40,17 @@ variable "GCP_MACHINE_CONFIGS" {
       sleep        = 120
     }
 
-    RHEL_8 = {
-      recreate     = "changethistorecreate1"
-      version      = "rhel-cloud/rhel-8"
-      machine_type = "e2-medium"
-      description  = "Red Hat Enterprise Linux 8"
-      default_user = "redhat"
-      zone         = "us-west1-b"
-      wait         = "300"
-      user_data    = "user_data/yumbased.sh"
-      sleep        = 120
-    }
+    # RHEL_8 = {
+    #   recreate     = "changethistorecreate1"
+    #   version      = "rhel-cloud/rhel-8"
+    #   machine_type = "e2-medium"
+    #   description  = "Red Hat Enterprise Linux 8"
+    #   default_user = "redhat"
+    #   zone         = "us-west1-b"
+    #   wait         = "300"
+    #   user_data    = "user_data/yumbased.sh"
+    #   sleep        = 120
+    # }
 
     CENTOS_8 = {
       recreate     = "changethistorecreate1"
