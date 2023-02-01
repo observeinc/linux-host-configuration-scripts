@@ -6,7 +6,7 @@ output "fab_hosts" {
       "connect_kwargs" = {
         "key_filename" : var.PRIVATE_KEY_PATH
       }
-      "public_ssh_link" = "ssh -i ~/.ssh/id_rsa_ec2 ${var.GCP_MACHINE_CONFIGS[key].default_user}@${value.network_interface[0].access_config[0].nat_ip}"
+      "public_ssh_link" = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.GCP_MACHINE_CONFIGS[key].default_user}@${value.network_interface[0].access_config[0].nat_ip}"
       "sleep" : var.GCP_MACHINE_CONFIGS[key].sleep
     }
   }

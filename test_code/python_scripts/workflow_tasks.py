@@ -122,12 +122,18 @@ def tf_output_file(module="", output_file_path="../outputs.tf"):
         )
 
 
-def config_ini(custid="", domain="", token="", config_file_path="config.ini"):
+def config_ini(
+    custid="",
+    domain="",
+    token="",
+    config_file_path="config.ini",
+    config_file_env="target-stage-tenant",
+):
 
     with open(config_file_path, "w+") as myfile:
         myfile.write(
             f"""
-            [arthur-stage-tenant]
+            [{config_file_env}]
                 customer_id = {custid}
                 domain = {domain}
                 datastream_token = {token}
