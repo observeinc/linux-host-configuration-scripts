@@ -151,6 +151,7 @@ generateTestKey(){
   echo "${OBSERVE_TEST_RUN_KEY}"
 }
 
+# identify OS and architecture
 if [ -f /etc/os-release ]; then
     #shellcheck disable=SC1091
     . /etc/os-release
@@ -163,6 +164,14 @@ elif lsb_release &>/dev/null; then
 else
     OS=$(uname -s)
 fi
+
+SYS_ARCH=$(uname -m)
+if [[ $SYS_ARCH = "aarch64" ]]; then
+    ARCH="arm64"
+else
+    ARCH="amd64"
+fi
+
 
 # used for terminal output
 generateSpacer(){
@@ -309,7 +318,7 @@ includeFiletdAgent(){
         esac
   done
 
-  #install custome config if exists
+  #install custom config if exists
   if ! [ -z ${custom_fluentbit_config}]
   then
     sudo cp ${custom_fluentbit_config} /etc/td-agent-bit/observe-custom-config.conf
@@ -451,7 +460,7 @@ fi
       requiredInputs
     fi
 
-# Custruct the per-customer-id ingest host name.
+# Construct the per-customer-id ingest host name.
 if [ -z "$observe_host_name_base" ]; then
   observe_host_name_base="https://${customer_id}.collect.observeinc.com/"
 fi
@@ -875,7 +884,7 @@ EOF
       ################################################################################################
           ;;
 
-    ubuntu)
+    ubuntu|debian)
       log "UBUNTU OS"
       #####################################
       # osquery
@@ -889,7 +898,7 @@ EOF
       if ! grep -Fq https://pkg.osquery.io/deb /etc/apt/sources.list.d/osquery.list
       then
 sudo tee -a /etc/apt/sources.list.d/osquery.list > /dev/null << EOT
-deb [arch=amd64] https://pkg.osquery.io/deb deb main
+deb [arch=$ARCH] https://pkg.osquery.io/deb deb main
 EOT
       fi
 
@@ -935,7 +944,7 @@ EOT
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
 
-      echo deb https://packages.fluentbit.io/ubuntu/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
+      echo deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
 
       sudo apt-get update
       sudo apt-get install -y td-agent-bit
@@ -977,9 +986,9 @@ EOT
       source /etc/os-release
 
       # 2027/01/27 - Comment out old key approach
-      if ! grep -Fq "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" /etc/apt/sources.list.d/influxdb.list
+      if ! grep -Fq "deb https://repos.influxdata.com/${ID} ${CODENAME} stable" /etc/apt/sources.list.d/influxdb.list
       then
-        echo "deb https://repos.influxdata.com/${ID} ${VERSION_CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+        echo "deb https://repos.influxdata.com/${ID} ${CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
       fi
       
       #       if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
