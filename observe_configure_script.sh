@@ -151,6 +151,7 @@ generateTestKey(){
   echo "${OBSERVE_TEST_RUN_KEY}"
 }
 
+# identify OS and architecture
 if [ -f /etc/os-release ]; then
     #shellcheck disable=SC1091
     . /etc/os-release
@@ -163,6 +164,14 @@ elif lsb_release &>/dev/null; then
 else
     OS=$(uname -s)
 fi
+
+SYS_ARCH=$(uname -m)
+if [[ $SYS_ARCH = "aarch64" ]]; then
+    ARCH="arm64"
+else
+    ARCH="amd64"
+fi
+
 
 # used for terminal output
 generateSpacer(){
@@ -889,7 +898,7 @@ EOF
       if ! grep -Fq https://pkg.osquery.io/deb /etc/apt/sources.list.d/osquery.list
       then
 sudo tee -a /etc/apt/sources.list.d/osquery.list > /dev/null << EOT
-deb [arch=amd64] https://pkg.osquery.io/deb deb main
+deb [arch=$ARCH] https://pkg.osquery.io/deb deb main
 EOT
       fi
 
