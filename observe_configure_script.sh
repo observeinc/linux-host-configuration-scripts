@@ -897,9 +897,7 @@ EOF
 
       if ! grep -Fq https://pkg.osquery.io/deb /etc/apt/sources.list.d/osquery.list
       then
-sudo tee -a /etc/apt/sources.list.d/osquery.list > /dev/null << EOT
-deb [arch=$ARCH] https://pkg.osquery.io/deb deb main
-EOT
+        echo deb [arch=$ARCH] https://pkg.osquery.io/deb deb main | sudo tee -a /etc/apt/sources.list.d/osquery.list
       fi
 
       sudo apt-get update
@@ -943,8 +941,11 @@ EOT
       printMessage "fluent"
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
-
-      echo deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
+      if ! grep -Fq "deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main" /etc/apt/sources.list
+      then
+        echo deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
+      fi
+      
 
       sudo apt-get update
       sudo apt-get install -y td-agent-bit
