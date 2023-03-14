@@ -515,7 +515,7 @@ if [ "$validate_endpoint" == TRUE ]; then
 
     if ((validate_endpoint_result != 1 )); then
         log "$SPACER"
-        log "Validate Endpoint Failed with: $curl_endpoint"
+        
         log "$curl_endpoint"
         log "$SPACER"
         log "$END_OUTPUT"
@@ -526,7 +526,7 @@ if [ "$validate_endpoint" == TRUE ]; then
         log "Successfully validated customer_id and ingest_token"
     fi
 
-    log "
+    log "$SPACER"
 
 fi
 
