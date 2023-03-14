@@ -511,7 +511,7 @@ if [ "$validate_endpoint" == TRUE ]; then
     -H "Content-type: application/json" \
     -d "{\"data\": {  \"datacenter\": \"${DEFAULT_OBSERVE_DATA_CENTER}\",\"host\": \"${DEFAULT_OBSERVE_HOSTNAME}\",\"message\": \"validating customer id and token\", \"os\": \"${TERRAFORM_REPLACE_OS_VALUE}\", \"result\": \"SUCCESS\",  \"script_run\": \"${DEFAULT_OBSERVE_DATA_CENTER}\" ,  \"OBSERVE_TEST_RUN_KEY\": \"${OBSERVE_TEST_RUN_KEY}\"}}")
 
-    validate_endpoint_result=$(echo "$curl_endpoint")
+    validate_endpoint_result=`$curl_endpoint`
      
 
     if (( $(validate_endpoint_result | grep -c -Po '(?<="ok":)(true)') != 1 )); then
