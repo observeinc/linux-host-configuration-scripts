@@ -511,11 +511,12 @@ if [ "$validate_endpoint" == TRUE ]; then
     -H "Content-type: application/json" \
     -d "{\"data\": {  \"datacenter\": \"${DEFAULT_OBSERVE_DATA_CENTER}\",\"host\": \"${DEFAULT_OBSERVE_HOSTNAME}\",\"message\": \"validating customer id and token\", \"os\": \"${TERRAFORM_REPLACE_OS_VALUE}\", \"result\": \"SUCCESS\",  \"script_run\": \"${DEFAULT_OBSERVE_DATA_CENTER}\" ,  \"OBSERVE_TEST_RUN_KEY\": \"${OBSERVE_TEST_RUN_KEY}\"}}")
 
-    validate_endpoint_result=$(echo "$curl_endpoint" | grep -c -Po '(?<="ok":)(true)')
+    validate_endpoint_result=$(echo "$curl_endpoint")
+     
 
-    if ((validate_endpoint_result != 1 )); then
+    if (( $(validate_endpoint_result | grep -c -Po '(?<="ok":)(true)') != 1 )); then
         log "$SPACER"
-        log "Invalid value for customer_id or ingest_token"
+        log "Validate Endpoint Failed with: $validate_endpoint_result" 
         log "$curl_endpoint"
         log "$SPACER"
         log "$END_OUTPUT"
@@ -526,7 +527,7 @@ if [ "$validate_endpoint" == TRUE ]; then
         log "Successfully validated customer_id and ingest_token"
     fi
 
-    log
+    log "$SPACER"
 
 fi
 
