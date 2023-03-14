@@ -514,7 +514,7 @@ if [ "$validate_endpoint" == TRUE ]; then
     validate_endpoint_result=`$curl_endpoint`
      
 
-    if (( $(validate_endpoint_result | grep -c -Po '(?<="ok":)(true)') != 1 )); then
+    if (( $(echo validate_endpoint_result | grep -c -Po '(?<="ok":)(true)') != 1 )); then
         log "$SPACER"
         log "Validate Endpoint Failed with: $validate_endpoint_result" 
         log "$curl_endpoint"
