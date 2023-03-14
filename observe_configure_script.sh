@@ -515,7 +515,7 @@ if [ "$validate_endpoint" == TRUE ]; then
 
     if ((validate_endpoint_result != 1 )); then
         log "$SPACER"
-        
+        log "Endpoint Validation failed with:"
         log "$curl_endpoint"
         log "$SPACER"
         log "$END_OUTPUT"
