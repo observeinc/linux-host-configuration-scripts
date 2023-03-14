@@ -600,6 +600,11 @@ fi
 log "Using the following command to fetch VM metadata: ${metadata_command}"
 sed -i "s#REPLACE_WITH_METADATA_COMMAND#${metadata_command}#g" ./*
 
+if [[ "${metadata_command}" == *"aws-ec2"* ]]; then
+  log "Cloud is AWS, enabling ec2metadata"
+  ec2metadata="TRUE"
+fi
+
 testEject "${testeject}" "EJECT2"
 
 # https://docs.observeinc.com/en/latest/content/integrations/linux/linux.html
