@@ -7,5 +7,5 @@ variable "project_id" {
 variable "name_format" {
   type        = string
   description = "name prefix"
-  default     = "gha-lht-base-defaults"
+  default     = "gha-lht-base-defaults-%s"
 }

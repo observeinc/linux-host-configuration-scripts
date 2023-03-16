@@ -10,7 +10,6 @@ resource "google_service_account" "compute" {
 }
 
 resource "google_project_iam_member" "compute" {
-  depends_on = ["null_resource.delay"]
   for_each = toset([
     "roles/compute.admin",
     "roles/osconfig.osPolicyAssignmentAdmin",
