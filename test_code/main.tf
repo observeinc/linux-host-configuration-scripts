@@ -8,7 +8,7 @@ module "aws_machines" {
   PRIVATE_KEY_PATH = var.PRIVATE_KEY_PATH
   # REGION             = "us-west-2"
   name_format        = local.name_format
-  AWS_MACHINE_FILTER = ["AMAZON_LINUX_2", "UBUNTU_18_04_LTS", "UBUNTU_20_04_LTS", "UBUNTU_22_04_LTS", "RHEL_8", "CENTOS_8"]
+  AWS_MACHINE_FILTER = ["AMAZON_LINUX_2", "UBUNTU_18_04_LTS", "UBUNTU_20_04_LTS", "RHEL_8_4_0", "CENT_OS_7"]
   CI                 = var.CI
   PUBLIC_KEY         = var.PUBLIC_KEY
 
@@ -17,7 +17,7 @@ module "aws_machines" {
   }
 }
 
-module "gcp_machines" {
+/*module "gcp_machines" {
   source             = "./GCP_MACHINES"
   public_key_path    = var.PUBLIC_KEY_PATH
   PRIVATE_KEY_PATH   = var.PRIVATE_KEY_PATH
@@ -46,3 +46,4 @@ module "azure_machines" {
     azurerm = azurerm
   }
 }
+*/
