@@ -74,6 +74,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
           aws-region: ${{ env.TF_VAR_REGION }}
+
       - name: Extract branch name
         shell: bash
         run: echo "THIS_REPO_BRANCH=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_ENV

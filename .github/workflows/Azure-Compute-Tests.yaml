@@ -8,10 +8,6 @@ on:
         type: string
         description: Select the branch to test from linux-agent-install-scripts 
         default: main
-      this_repo_branch:
-        type: string
-        description: Select the branch to use from this repo
-        default: main
       terraform_run_destroy:
         type: choice
         options:
@@ -80,13 +76,10 @@ jobs:
           role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
           aws-region: ${{ env.TF_VAR_REGION }}
 
-      - name: Set code repo
-        run: |
-          if ${{ github.event.inputs.this_repo_branch != '' }}; then
-            echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
-          elif ${{ github.event_name == 'pull_request' }}; then
-            echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
-          fi
+      - name: Extract branch name
+        shell: bash
+        run: echo "THIS_REPO_BRANCH=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_ENV
+        id: extract_branch
 
       - name: Check out repository code
         uses: actions/checkout@v3
