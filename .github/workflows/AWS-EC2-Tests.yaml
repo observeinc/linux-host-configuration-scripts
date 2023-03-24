@@ -59,7 +59,6 @@ jobs:
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       INSTALL_BRANCH: main
-      THIS_REPO_BRANCH: main
       TERRAFORM_RUN_DESTROY: true
       FAIL_FIRST_TEST: false
       FAIL_SECOND_TEST: false
@@ -79,7 +78,7 @@ jobs:
         shell: bash
         run: echo "THIS_REPO_BRANCH=$(echo ${GITHUB_REF#refs/heads/})" >>$GITHUB_ENV
         id: extract_branch
-      
+
       - name: Check out repository code
         uses: actions/checkout@v3
         with:

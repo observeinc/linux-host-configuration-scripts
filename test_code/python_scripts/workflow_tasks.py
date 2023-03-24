@@ -170,7 +170,6 @@ def set_custom_vars(context_dir="context", local_test=False):
             if event_name == "workflow_dispatch":
                 inputs = git_hub_context_data["event"]["inputs"]
                 install_script_branch = inputs["install_script_branch"]
-                this_repo_branch = inputs["this_repo_branch"]
                 terraform_run_destroy = inputs["terraform_run_destroy"]
                 fail_first_test = inputs["fail_first_test"]
                 fail_second_test = inputs["fail_second_test"]
@@ -180,7 +179,6 @@ def set_custom_vars(context_dir="context", local_test=False):
 
                 print(seperator)
                 print(f"install_script_branch={install_script_branch}")
-                print(f"this_repo_branch={this_repo_branch}")
                 print(f"terraform_run_destroy={terraform_run_destroy}")
                 print(f"fail_first_test={fail_first_test}")
                 print(f"fail_second_test={fail_second_test}")
@@ -190,7 +188,6 @@ def set_custom_vars(context_dir="context", local_test=False):
                 environmentFile.write(
                     f"TF_VAR_USE_BRANCH_NAME={install_script_branch}\n"
                 )
-                environmentFile.write(f"THIS_REPO_BRANCH={this_repo_branch}\n")
 
                 environmentFile.write(
                     f"TERRAFORM_RUN_DESTROY={terraform_run_destroy}\n"
@@ -202,7 +199,6 @@ def set_custom_vars(context_dir="context", local_test=False):
             if event_name == "pull_request":
                 # ref = git_hub_context_data["head_ref"]
                 environmentFile.write(f"TERRAFORM_RUN_DESTROY=false\n")
-                # environmentFile.write(f"THIS_REPO_BRANCH={head_ref}\n")
 
             # value for resource names
             environmentFile.write(
