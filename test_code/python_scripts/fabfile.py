@@ -109,7 +109,7 @@ def test(
     fileName="tf_hosts.json",
     branch="main",
     runTerraform="false",
-    sleep=0,
+    sleep=300,
     runTerraformDestroy="false",
     runTerraformOutput="true",
     failMe="false",
