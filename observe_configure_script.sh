@@ -515,7 +515,7 @@ if [ "$validate_endpoint" == TRUE ]; then
 
     if ((validate_endpoint_result != 1 )); then
         log "$SPACER"
-        log "Invalid value for customer_id or ingest_token"
+        log "Endpoint Validation failed with:"
         log "$curl_endpoint"
         log "$SPACER"
         log "$END_OUTPUT"
@@ -526,7 +526,7 @@ if [ "$validate_endpoint" == TRUE ]; then
         log "Successfully validated customer_id and ingest_token"
     fi
 
-    log
+    log "$SPACER"
 
 fi
 
@@ -599,6 +599,11 @@ fi
 
 log "Using the following command to fetch VM metadata: ${metadata_command}"
 sed -i "s#REPLACE_WITH_METADATA_COMMAND#${metadata_command}#g" ./*
+
+if [[ "${metadata_command}" == *"aws-ec2"* ]]; then
+  log "Cloud is AWS, enabling ec2metadata"
+  ec2metadata="TRUE"
+fi
 
 testEject "${testeject}" "EJECT2"
 
@@ -897,9 +902,7 @@ EOF
 
       if ! grep -Fq https://pkg.osquery.io/deb /etc/apt/sources.list.d/osquery.list
       then
-sudo tee -a /etc/apt/sources.list.d/osquery.list > /dev/null << EOT
-deb [arch=$ARCH] https://pkg.osquery.io/deb deb main
-EOT
+        echo deb [arch=$ARCH] https://pkg.osquery.io/deb deb main | sudo tee -a /etc/apt/sources.list.d/osquery.list
       fi
 
       sudo apt-get update
@@ -943,8 +946,11 @@ EOT
       printMessage "fluent"
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
-
-      echo deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
+      if ! grep -Fq "deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main" /etc/apt/sources.list
+      then
+        echo deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
+      fi
+      
 
       sudo apt-get update
       sudo apt-get install -y td-agent-bit
