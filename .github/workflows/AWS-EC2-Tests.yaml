@@ -169,6 +169,7 @@ jobs:
         if: ${{ env.TEST_RESULT == 'FAIL' }}
         run: |
           cat file_outputs/AWS_AMAZON_LINUX_2023_tofile_osqueryd_status_results.txt && cat file_outputs/AWS_AMAZON_LINUX_2023_tofile_td-agent-bit_status_results.txt
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: Retry tests
         if: ${{ env.TEST_RESULT == 'FAIL' }}
