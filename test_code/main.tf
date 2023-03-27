@@ -17,7 +17,7 @@ module "aws_machines" {
   }
 }
 
-/*module "gcp_machines" {
+module "gcp_machines" {
   source             = "./GCP_MACHINES"
   public_key_path    = var.PUBLIC_KEY_PATH
   PRIVATE_KEY_PATH   = var.PRIVATE_KEY_PATH
@@ -46,4 +46,3 @@ module "azure_machines" {
     azurerm = azurerm
   }
 }
-*/
