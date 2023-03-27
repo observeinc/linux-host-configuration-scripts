@@ -1,12 +1,12 @@
 run-name: AWS EC2 - ${{ github.event_name }} by @${{ github.actor }}
 # name: Fabric Build
 concurrency: aws-workflow
-on: 
+on:
   workflow_dispatch:
     inputs:
       install_script_branch:
         type: string
-        description: Select the branch to test from linux-agent-install-scripts 
+        description: Select the branch to test from linux-agent-install-scripts
         default: main
       this_repo_branch:
         type: string
@@ -15,36 +15,35 @@ on:
       terraform_run_destroy:
         type: choice
         options:
-        - true
-        - false
+          - true
+          - false
       fail_first_test:
         type: choice
         options:
-        - false
-        - true
+          - false
+          - true
       fail_second_test:
         type: choice
         options:
-        - false
-        - true
+          - false
+          - true
   # push:
-  #   branches:    
+  #   branches:
   #     - 'test/**'
   pull_request:
 
   schedule:
     # only runs on default branch
     # * is a special character in YAML so you have to quote this string
-    - cron:  '15 */12 * * *'
+    - cron: "15 */12 * * *"
 
 jobs:
-  
   Run-Test-Build:
     strategy:
       max-parallel: 30
       fail-fast: false
       matrix:
-        test_groups: ['base_defaults']
+        test_groups: ["base_defaults"]
     runs-on: ubuntu-latest
     permissions:
       id-token: write
@@ -57,7 +56,7 @@ jobs:
       TF_VAR_REGION: "us-west-2"
       TF_VAR_USE_BRANCH_NAME: main
 
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} 
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -87,7 +86,7 @@ jobs:
           elif ${{ github.event_name == 'pull_request' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
           fi
-          
+
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
@@ -98,8 +97,8 @@ jobs:
           mkdir context 
           echo '${{ toJSON(github) }}' > context/github_context.json   
           echo '${{ toJSON(matrix) }}' > context/matrix_context.json 
-          echo '${{ secrets.PRIVATE_KEY }}' > context/private_key 
-   
+          echo '${{ secrets.PRIVATE_KEY }}' > context/private_key
+
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: workflow helper
@@ -119,13 +118,13 @@ jobs:
 
       # GCP Login
       # This is key generated in GCP console for service account
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v0'
+      - id: "auth"
+        uses: "google-github-actions/auth@v0"
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
+      - name: "Set up Cloud SDK"
+        uses: "google-github-actions/setup-gcloud@v0"
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
 
@@ -137,7 +136,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_wrapper: false
-        
+
       - name: terraform tasks
         run: |
           terraform version
@@ -166,13 +165,18 @@ jobs:
           fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -o "1: run fabric tests python script"
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
+      - name: Output logs
+        if: ${{ env.TEST_RESULT == 'FAIL' }}
+        run: |
+          cat file_outputs/AWS_AMAZON_LINUX_2023_tofile_osqueryd_status_results.txt && cat file_outputs/AWS_AMAZON_LINUX_2023_tofile_td-agent-bit_status_results.txt
+
       - name: Retry tests
-        if: ${{ env.TEST_RESULT == 'FAIL' }} 
+        if: ${{ env.TEST_RESULT == 'FAIL' }}
         run: |
           # run tests
           fab test -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests"  -b ${{ env.THIS_REPO_BRANCH }}
-          
-        working-directory: "${{ env.WORK_DIR }}/python_scripts" 
+
+        working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: cleanup
         if: always()
@@ -191,7 +195,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: file_outputs
-          path: | 
+          path: |
             /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/file_outputs/
             /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/log_outputs/
           retention-days: 1
@@ -200,15 +204,15 @@ jobs:
         if: always()
         run: |
           echo "Value of input ${{ env.TERRAFORM_RUN_DESTROY == 'true' }}"
-          
+
           if ${{ env.TERRAFORM_RUN_DESTROY == 'true' }}; then
             terraform destroy -auto-approve
           fi
         working-directory: "${{ env.WORK_DIR }}"
 
       - name: Fail Check
-        if: ${{ env.TEST_RESULT == 'FAIL' }} 
+        if: ${{ env.TEST_RESULT == 'FAIL' }}
         uses: actions/github-script@v3
         with:
           script: |
-              core.setFailed('Fabric tests failed')
+            core.setFailed('Fabric tests failed')
