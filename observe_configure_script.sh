@@ -620,7 +620,7 @@ case ${OS} in
 
     log "Amazon OS"
 
-    export AL_VERSION=$(awk -F= '$1=="VERSION" { print $2 ;}' /etc/os-release)
+    AL_VERSION=$(awk -F= '$1=="VERSION" { print $2 ;}' /etc/os-release)
 
       #####################################
       # osquery
