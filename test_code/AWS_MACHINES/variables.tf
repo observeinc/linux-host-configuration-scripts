@@ -70,24 +70,24 @@ variable "AWS_MACHINE_CONFIGS" {
   description = "variables for supported OS"
   default = {
 
-    UBUNTU_20_04_LTS = {
-      # ami used in testing
-      ami_instance_type = "t3.small"
-      ami_id            = "ami-0892d3c7ee96c0bf7"
-      ami_description   = "Canonical, Ubuntu, 20.04 LTS, amd64 focal image build on 2021-11-29"
-      default_user      = "ubuntu"
-      sleep             = 120
-      user_data         = "user_data/aptbased.sh"
-    }
+    # UBUNTU_20_04_LTS = {
+    #   # ami used in testing
+    #   ami_instance_type = "t3.small"
+    #   ami_id            = "ami-0892d3c7ee96c0bf7"
+    #   ami_description   = "Canonical, Ubuntu, 20.04 LTS, amd64 focal image build on 2021-11-29"
+    #   default_user      = "ubuntu"
+    #   sleep             = 120
+    #   user_data         = "user_data/aptbased.sh"
+    # }
 
-    UBUNTU_18_04_LTS = {
-      ami_instance_type = "t3.small"
-      ami_id            = "ami-0cfa91bdbc3be780c"
-      ami_description   = "Canonical, Ubuntu, 18.04 LTS, amd64 bionic image build on 2022-04-11"
-      default_user      = "ubuntu"
-      sleep             = 120
-      user_data         = "user_data/aptbased.sh"
-    }
+    # UBUNTU_18_04_LTS = {
+    #   ami_instance_type = "t3.small"
+    #   ami_id            = "ami-0cfa91bdbc3be780c"
+    #   ami_description   = "Canonical, Ubuntu, 18.04 LTS, amd64 bionic image build on 2022-04-11"
+    #   default_user      = "ubuntu"
+    #   sleep             = 120
+    #   user_data         = "user_data/aptbased.sh"
+    # }
 
     AMAZON_LINUX_2 = {
       ami_instance_type = "t3.small"
@@ -98,34 +98,33 @@ variable "AWS_MACHINE_CONFIGS" {
       user_data         = "user_data/aptbased.sh"
     }
 
-    # fluentbit not yet supported
-    # AMAZON_LINUX_2023 = {
+    AMAZON_LINUX_2023 = {
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-0efa651876de2a5ce"
+      ami_description   = "Amazon Linux 2023 AMI 2023.0.20230322.0 x86_64 HVM kernel-6.1"
+      default_user      = "ec2-user"
+      sleep             = 60
+      user_data         = "user_data/aptbased.sh"
+    }
+
+    # RHEL_8_4_0 = {
     #   ami_instance_type = "t3.small"
-    #   ami_id            = "ami-0efa651876de2a5ce"
-    #   ami_description   = "Amazon Linux 2023 AMI 2023.0.20230322.0 x86_64 HVM kernel-6.1"
+    #   ami_id            = "ami-0b28dfc7adc325ef4"
+    #   ami_description   = "Red Hat Enterprise Linux 8 (HVM), SSD Volume Type"
     #   default_user      = "ec2-user"
-    #   sleep             = 60
-    #   user_data         = "user_data/aptbased.sh"
+    #   sleep             = 120
+    #   user_data         = "user_data/yumbased.sh"
     # }
 
-    RHEL_8_4_0 = {
-      ami_instance_type = "t3.small"
-      ami_id            = "ami-0b28dfc7adc325ef4"
-      ami_description   = "Red Hat Enterprise Linux 8 (HVM), SSD Volume Type"
-      default_user      = "ec2-user"
-      sleep             = 120
-      user_data         = "user_data/yumbased.sh"
-    }
-
-    CENT_OS_7 = {
-      # https://wiki.centos.org/Cloud/AWS
-      ami_instance_type = "t3.small"
-      ami_id            = "ami-0686851c4e7b1a8e1"
-      ami_description   = "CentOS 7.9.2009 x86_64 ami-0686851c4e7b1a8e1"
-      default_user      = "centos"
-      sleep             = 120
-      user_data         = "user_data/yumbased.sh"
-    }
+    # CENT_OS_7 = {
+    #   # https://wiki.centos.org/Cloud/AWS
+    #   ami_instance_type = "t3.small"
+    #   ami_id            = "ami-0686851c4e7b1a8e1"
+    #   ami_description   = "CentOS 7.9.2009 x86_64 ami-0686851c4e7b1a8e1"
+    #   default_user      = "centos"
+    #   sleep             = 120
+    #   user_data         = "user_data/yumbased.sh"
+    # }
   }
 }
 

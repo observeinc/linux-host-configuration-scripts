@@ -679,10 +679,16 @@ case ${OS} in
 
       printMessage "fluent"
 
+      if [ "$AL_VERSION" == "2023" ]; then
+        fluentbitver="2023"
+      else
+        fluentbitver="2"
+      fi
+
 sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null << EOT
 [td-agent-bit]
 name = TD Agent Bit
-baseurl = https://packages.fluentbit.io/amazonlinux/2/\$basearch/
+baseurl = https://packages.fluentbit.io/amazonlinux/$fluentbitver/\$basearch/
 gpgcheck=1
 gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
