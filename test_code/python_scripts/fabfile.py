@@ -242,7 +242,7 @@ def test(
                                 "telegraf": "if systemctl is-active --quiet telegraf; then echo PASS; else echo FAIL; fi",
                                 "tofile_telegraf_status": "sudo service telegraf status  | cat",
                                 "tofile_osqueryd_status": "sudo service osqueryd status  | cat",
-                                "tofile_td-agent-fluent-bit_status": "sudo service td-agent-bit status && sudo service fluent-bit status | cat",
+                                "tofile_td-agent-fluent-bit_status": "sudo service td-agent-bit status || true && sudo service fluent-bit status || true | cat",
                             },
                             "key": key,
                             "sleep": sleep,
