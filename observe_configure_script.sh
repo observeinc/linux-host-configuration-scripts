@@ -325,6 +325,39 @@ includeFiletdAgent(){
   fi
 }
 
+includeFilefluentAgent(){
+  # Process modules
+  IFS=',' read -a CONFS <<< "$module"
+  for i in "${CONFS[@]}"; do
+        log "includeFilefluentAgent - $i"
+
+        sudo cp "$config_file_directory/observe-installer.conf" /etc/fluent-bit/observe-installer.conf;
+        sudo cp "$config_file_directory/parsers-observe.conf" /etc/fluent-bit/parsers-observe.conf;
+
+        case ${i} in
+            linux_host)
+              sudo cp "$config_file_directory/observe-linux-host.conf" /etc/fluent-bit/observe-linux-host.conf;
+              ;;
+            jenkins)
+              sudo cp "$config_file_directory/observe-jenkins.conf" /etc/fluent-bit/observe-jenkins.conf;
+              ;;
+            *)
+              log "includeFiletdAgent function failed - i = $i"
+              log "$SPACER"
+              log "$END_OUTPUT"
+              log "$SPACER"
+              exit 1;
+              ;;
+        esac
+  done
+
+  #install custom config if exists
+  if ! [ -z ${custom_fluentbit_config}]
+  then
+    sudo cp ${custom_fluentbit_config} /etc/td-agent-bit/observe-custom-config.conf
+  fi
+}
+
 setInstallFlags(){
   # Process modules
   log "$SPACER"
@@ -680,41 +713,60 @@ case ${OS} in
       printMessage "fluent"
 
       if [[ $AL_VERSION == "2023" ]]; then
-        fluentbitver="2023"
-      else
-        fluentbitver="2"
-      fi
-
-sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null << EOT
-[td-agent-bit]
-name = TD Agent Bit
-baseurl = https://packages.fluentbit.io/amazonlinux/$fluentbitver/\$basearch/
+sudo tee /etc/yum.repos.d/fluent-bit.repo > /dev/null << EOT
+[fluent-bit]
+name = Fluent Bit
+baseurl = https://packages.fluentbit.io/amazonlinux/2023/$basearch/
 gpgcheck=1
 gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
 EOT
 
-      sudo yum install td-agent-bit -y
+        sudo yum install fluent-bit -y
 
-      sourcefilename=$config_file_directory/td-agent-bit.conf
-      filename=/etc/td-agent-bit/td-agent-bit.conf
+        sourcefilename=$config_file_directory/fluent-bit.conf
+        filename=/etc/fluent-bit/fluent-bit.conf
 
-      td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
+        fluent_bit_filename=/etc/fluent-bit/fluent-bit.conf
 
+        if [ -f "$filename" ]; then
+            sudo mv "$filename"  "$filename".OLD
+        fi
 
+        sudo cp "$sourcefilename" "$filename"
 
-      if [ -f "$filename" ]
-      then
-          sudo mv "$filename"  "$filename".OLD
+        includeFilefluentAgent
+
+        sudo service fluent-bit restart
+        sudo systemctl enable fluent-bit
+      else
+sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null << EOT
+[td-agent-bit]
+name = TD Agent Bit
+baseurl = https://packages.fluentbit.io/amazonlinux/2/\$basearch/
+gpgcheck=1
+gpgkey=https://packages.fluentbit.io/fluentbit.key
+enabled=1
+EOT
+
+        sudo yum install td-agent-bit -y
+
+        sourcefilename=$config_file_directory/td-agent-bit.conf
+        filename=/etc/td-agent-bit/td-agent-bit.conf
+
+        td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
+
+        if [ -f "$filename" ]; then
+            sudo mv "$filename"  "$filename".OLD
+        fi
+
+        sudo cp "$sourcefilename" "$filename"
+
+        includeFiletdAgent
+
+        sudo service td-agent-bit restart
+        sudo systemctl enable td-agent-bit
       fi
-
-      sudo cp "$sourcefilename" "$filename"
-
-      includeFiletdAgent
-
-      sudo service td-agent-bit restart
-      sudo systemctl enable td-agent-bit
-
     fi
       # #####################################
       # # telegraf
