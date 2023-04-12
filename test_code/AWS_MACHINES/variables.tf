@@ -98,15 +98,14 @@ variable "AWS_MACHINE_CONFIGS" {
       user_data         = "user_data/aptbased.sh"
     }
 
-    # fluentbit not yet supported
-    # AMAZON_LINUX_2023 = {
-    #   ami_instance_type = "t3.small"
-    #   ami_id            = "ami-0efa651876de2a5ce"
-    #   ami_description   = "Amazon Linux 2023 AMI 2023.0.20230322.0 x86_64 HVM kernel-6.1"
-    #   default_user      = "ec2-user"
-    #   sleep             = 60
-    #   user_data         = "user_data/aptbased.sh"
-    # }
+    AMAZON_LINUX_2023 = {
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-0efa651876de2a5ce"
+      ami_description   = "Amazon Linux 2023 AMI 2023.0.20230322.0 x86_64 HVM kernel-6.1"
+      default_user      = "ec2-user"
+      sleep             = 60
+      user_data         = "user_data/aptbased.sh"
+    }
 
     RHEL_8_4_0 = {
       ami_instance_type = "t3.small"

@@ -71,6 +71,21 @@ getConfigurationFiles(){
       log "$SPACER"
     fi
 
+    if [ ! -f "$config_file_directory/fluent-bit.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/fluent-bit.conf"
+      filename="$config_file_directory/fluent-bit.conf"
+
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
+      curl "$url" > "$filename"
+
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
+    fi
+
     if [ ! -f "$config_file_directory/observe-linux-host.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-linux-host.conf"
       filename="$config_file_directory/observe-linux-host.conf"
@@ -307,6 +322,39 @@ includeFiletdAgent(){
               ;;
             jenkins)
               sudo cp "$config_file_directory/observe-jenkins.conf" /etc/td-agent-bit/observe-jenkins.conf;
+              ;;
+            *)
+              log "includeFiletdAgent function failed - i = $i"
+              log "$SPACER"
+              log "$END_OUTPUT"
+              log "$SPACER"
+              exit 1;
+              ;;
+        esac
+  done
+
+  #install custom config if exists
+  if ! [ -z ${custom_fluentbit_config}]
+  then
+    sudo cp ${custom_fluentbit_config} /etc/td-agent-bit/observe-custom-config.conf
+  fi
+}
+
+includeFilefluentAgent(){
+  # Process modules
+  IFS=',' read -a CONFS <<< "$module"
+  for i in "${CONFS[@]}"; do
+        log "includeFilefluentAgent - $i"
+
+        sudo cp "$config_file_directory/observe-installer.conf" /etc/fluent-bit/observe-installer.conf;
+        sudo cp "$config_file_directory/parsers-observe.conf" /etc/fluent-bit/parsers-observe.conf;
+
+        case ${i} in
+            linux_host)
+              sudo cp "$config_file_directory/observe-linux-host.conf" /etc/fluent-bit/observe-linux-host.conf;
+              ;;
+            jenkins)
+              sudo cp "$config_file_directory/observe-jenkins.conf" /etc/fluent-bit/observe-jenkins.conf;
               ;;
             *)
               log "includeFiletdAgent function failed - i = $i"
@@ -620,7 +668,7 @@ case ${OS} in
 
     log "Amazon OS"
 
-    export AL_VERSION=$(awk -F= '$1=="VERSION" { print $2 ;}' /etc/os-release)
+    export AL_VERSION=$(awk -F= '$1=="VERSION" { print $2 ;}' /etc/os-release | xargs)
 
       #####################################
       # osquery
@@ -631,7 +679,7 @@ case ${OS} in
 
         curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
 
-        if [ "$AL_VERSION" == "2023" ]; then
+        if [[ $AL_VERSION == "2023" ]]; then
           sudo dnf config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
           sudo dnf config-manager --enable osquery-s3-rpm-repo
           sudo dnf install osquery -y
@@ -679,6 +727,34 @@ case ${OS} in
 
       printMessage "fluent"
 
+      if [[ $AL_VERSION == "2023" ]]; then
+sudo tee /etc/yum.repos.d/fluent-bit.repo > /dev/null << EOT
+[fluent-bit]
+name = Fluent Bit
+baseurl = https://packages.fluentbit.io/amazonlinux/2023/
+gpgcheck=1
+gpgkey=https://packages.fluentbit.io/fluentbit.key
+enabled=1
+EOT
+
+        sudo yum install fluent-bit -y
+
+        sourcefilename=$config_file_directory/fluent-bit.conf
+        filename=/etc/fluent-bit/fluent-bit.conf
+
+        fluent_bit_filename=/etc/fluent-bit/fluent-bit.conf
+
+        if [ -f "$filename" ]; then
+            sudo mv "$filename"  "$filename".OLD
+        fi
+
+        sudo cp "$sourcefilename" "$filename"
+
+        includeFilefluentAgent
+
+        sudo service fluent-bit restart
+        sudo systemctl enable fluent-bit
+      else
 sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null << EOT
 [td-agent-bit]
 name = TD Agent Bit
@@ -688,27 +764,24 @@ gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
 EOT
 
-      sudo yum install td-agent-bit -y
+        sudo yum install td-agent-bit -y
 
-      sourcefilename=$config_file_directory/td-agent-bit.conf
-      filename=/etc/td-agent-bit/td-agent-bit.conf
+        sourcefilename=$config_file_directory/td-agent-bit.conf
+        filename=/etc/td-agent-bit/td-agent-bit.conf
 
-      td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
+        td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
 
+        if [ -f "$filename" ]; then
+            sudo mv "$filename"  "$filename".OLD
+        fi
 
+        sudo cp "$sourcefilename" "$filename"
 
-      if [ -f "$filename" ]
-      then
-          sudo mv "$filename"  "$filename".OLD
+        includeFiletdAgent
+
+        sudo service td-agent-bit restart
+        sudo systemctl enable td-agent-bit
       fi
-
-      sudo cp "$sourcefilename" "$filename"
-
-      includeFiletdAgent
-
-      sudo service td-agent-bit restart
-      sudo systemctl enable td-agent-bit
-
     fi
       # #####################################
       # # telegraf
@@ -1053,28 +1126,49 @@ if [ "$fluentbitinstall" == TRUE ]; then
   log "$SPACER"
   log
   log "$SPACER"
-  log "td-agent-bit status"
+  if [[ $AL_VERSION == "2023" ]]; then
+    log "fluent-bit status"
 
-  if systemctl is-active --quiet td-agent-bit; then
-    log td-agent-bit is running
+    if systemctl is-active --quiet fluent-bit; then
+      log fluent-bit is running
 
-    curlObserve "td-agent-bit is running" "td-agent-bit" "SUCCESS"
+      curlObserve "fluent-bit is running" "fluent-bit" "SUCCESS"
 
+    else
+      log fluent-bit is NOT running
+
+      curlObserve "fluent-bit is NOT running" "fluent-bit" "FAILURE"
+
+      sudo service fluent-bit status
+    fi
+
+    log "$SPACER"
+    log "Check status - sudo service fluent-bit status"
+    log "Config file location: ${fluent_bit_filename}"
+    log
   else
-    log td-agent-bit is NOT running
+    log "td-agent-bit status"
 
-    curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
+    if systemctl is-active --quiet td-agent-bit; then
+      log td-agent-bit is running
 
-    sudo service td-agent-bit status
+      curlObserve "td-agent-bit is running" "td-agent-bit" "SUCCESS"
+
+    else
+      log td-agent-bit is NOT running
+
+      curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
+
+      sudo service td-agent-bit status
+    fi
+
+    log "$SPACER"
+    log "Check status - sudo service td-agent-bit status"
+    log "Config file location: ${td_agent_bit_filename}"
+    log
   fi
 
 
-
-
-  log "$SPACER"
-  log "Check status - sudo service td-agent-bit status"
-  log "Config file location: ${td_agent_bit_filename}"
-  log
 
 fi
 log "$SPACER"
