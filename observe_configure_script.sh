@@ -653,7 +653,7 @@ case ${OS} in
 
     log "Amazon OS"
 
-    AL_VERSION=$(awk -F= '$1=="VERSION" { print $2 ;}' /etc/os-release | xargs)
+    export AL_VERSION=$(awk -F= '$1=="VERSION" { print $2 ;}' /etc/os-release | xargs)
 
       #####################################
       # osquery
@@ -1111,28 +1111,49 @@ if [ "$fluentbitinstall" == TRUE ]; then
   log "$SPACER"
   log
   log "$SPACER"
-  log "td-agent-bit status"
+  if [[ $AL_VERSION == "2023" ]]; then
+    log "fluent-bit status"
 
-  if systemctl is-active --quiet td-agent-bit; then
-    log td-agent-bit is running
+    if systemctl is-active --quiet fluent-bit; then
+      log fluent-bit is running
 
-    curlObserve "td-agent-bit is running" "td-agent-bit" "SUCCESS"
+      curlObserve "fluent-bit is running" "fluent-bit" "SUCCESS"
 
+    else
+      log fluent-bit is NOT running
+
+      curlObserve "fluent-bit is NOT running" "fluent-bit" "FAILURE"
+
+      sudo service fluent-bit status
+    fi
+
+    log "$SPACER"
+    log "Check status - sudo service fluent-bit status"
+    log "Config file location: ${fluent_bit_filename}"
+    log
   else
-    log td-agent-bit is NOT running
+    log "td-agent-bit status"
 
-    curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
+    if systemctl is-active --quiet td-agent-bit; then
+      log td-agent-bit is running
 
-    sudo service td-agent-bit status
+      curlObserve "td-agent-bit is running" "td-agent-bit" "SUCCESS"
+
+    else
+      log td-agent-bit is NOT running
+
+      curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
+
+      sudo service td-agent-bit status
+    fi
+
+    log "$SPACER"
+    log "Check status - sudo service td-agent-bit status"
+    log "Config file location: ${td_agent_bit_filename}"
+    log
   fi
 
 
-
-
-  log "$SPACER"
-  log "Check status - sudo service td-agent-bit status"
-  log "Config file location: ${td_agent_bit_filename}"
-  log
 
 fi
 log "$SPACER"
