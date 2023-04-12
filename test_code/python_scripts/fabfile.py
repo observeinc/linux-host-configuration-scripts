@@ -237,7 +237,7 @@ def test(
                             "connect_kwargs": hosts[key]["connect_kwargs"],
                             "commands": {
                                 "tofile_curl": curl_cmd,
-                                "fluent/tdagent": "if systemctl is-active --quiet td-agent-bit or systemctl is-active --quiet fluent-bit; then echo PASS; else echo FAIL; fi",
+                                "fluent/tdagent": "if systemctl is-active --quiet td-agent-bit || systemctl is-active --quiet fluent-bit; then echo PASS; else echo FAIL; fi",
                                 "osquery": "if systemctl is-active --quiet osqueryd; then echo PASS; else echo FAIL; fi",
                                 "telegraf": "if systemctl is-active --quiet telegraf; then echo PASS; else echo FAIL; fi",
                                 "tofile_telegraf_status": "sudo service telegraf status  | cat",
