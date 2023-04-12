@@ -620,7 +620,7 @@ case ${OS} in
 
     log "Amazon OS"
 
-    AL_VERSION=$(awk -F= '$1=="VERSION" { print $2 ;}' /etc/os-release)
+    AL_VERSION=$(awk -F= '$1=="VERSION" { print $2 ;}' /etc/os-release | xargs)
 
       #####################################
       # osquery
@@ -631,7 +631,7 @@ case ${OS} in
 
         curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
 
-        if [ "$AL_VERSION" == "2023" ]; then
+        if [[ $AL_VERSION == "2023" ]]; then
           sudo dnf config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
           sudo dnf config-manager --enable osquery-s3-rpm-repo
           sudo dnf install osquery -y
@@ -679,7 +679,7 @@ case ${OS} in
 
       printMessage "fluent"
 
-      if [ "$AL_VERSION" == "2023" ]; then
+      if [[ $AL_VERSION == "2023" ]]; then
         fluentbitver="2023"
       else
         fluentbitver="2"
