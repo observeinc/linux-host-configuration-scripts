@@ -71,6 +71,21 @@ getConfigurationFiles(){
       log "$SPACER"
     fi
 
+    if [ ! -f "$config_file_directory/fluent-bit.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/fluent-bit.conf"
+      filename="$config_file_directory/fluent-bit.conf"
+
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
+      curl "$url" > "$filename"
+
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
+    fi
+
     if [ ! -f "$config_file_directory/observe-linux-host.conf" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-linux-host.conf"
       filename="$config_file_directory/observe-linux-host.conf"
@@ -716,7 +731,7 @@ case ${OS} in
 sudo tee /etc/yum.repos.d/fluent-bit.repo > /dev/null << EOT
 [fluent-bit]
 name = Fluent Bit
-baseurl = https://packages.fluentbit.io/amazonlinux/2023/$basearch/
+baseurl = https://packages.fluentbit.io/amazonlinux/2023/\$basearch/
 gpgcheck=1
 gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
