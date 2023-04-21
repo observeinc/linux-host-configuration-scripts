@@ -116,6 +116,21 @@ getConfigurationFiles(){
       log "$SPACER"
     fi
 
+    if [ ! -f "$config_file_directory/observe-securityonion.conf" ]; then
+      url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/observe-securityonion.conf"
+      filename="$config_file_directory/observe-securityonion.conf"
+
+      log "$SPACER"
+      log "filename = $filename"
+      log "$SPACER"
+      log "url = $url"
+      curl "$url" > "$filename"
+
+      log "$SPACER"
+      log "$filename created"
+      log "$SPACER"
+    fi
+
     if [ ! -f "$config_file_directory/osquery.flags" ]; then
       url="https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/${branch_replace}/config_files/osquery.flags"
       filename="$config_file_directory/osquery.flags"
@@ -225,7 +240,8 @@ printHelp(){
       log "- Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
       log "- Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
       log "- Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf"
-      log "    can be combined with jenkins flag which add a config to fluentbit or only jenkons flag which only installs fluent bit with configs"
+      log "    - Optional module flag: securityonion adds a config to fluentbit. If securityonion is specified without linux_host, only fluent bit will be installed."
+      log "    - Optional module flag: jenkins adds a config to fluentbit. If jenkins is specified without linux_host, only fluent bit will be installed."
       log "- Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
       log "- Optional --custom_fluentbit_config add an additional configuration file for fluentbit"
       log "***************************"
@@ -323,6 +339,9 @@ includeFiletdAgent(){
             jenkins)
               sudo cp "$config_file_directory/observe-jenkins.conf" /etc/td-agent-bit/observe-jenkins.conf;
               ;;
+            securityonion)
+              sudo cp "$config_file_directory/observe-securityonion.conf" /etc/td-agent-bit/observe-securityonion.conf;
+              ;;
             *)
               log "includeFiletdAgent function failed - i = $i"
               log "$SPACER"
@@ -356,6 +375,9 @@ includeFilefluentAgent(){
             jenkins)
               sudo cp "$config_file_directory/observe-jenkins.conf" /etc/fluent-bit/observe-jenkins.conf;
               ;;
+            securityonion)
+              sudo cp "$config_file_directory/observe-securityonion.conf" /etc/fluent-bit/observe-securityonion.conf;
+              ;;
             *)
               log "includeFiletdAgent function failed - i = $i"
               log "$SPACER"
@@ -388,6 +410,9 @@ setInstallFlags(){
             log "setInstallFlags linux_host flags"
               osqueryinstall="TRUE"
               telegrafinstall="TRUE"
+              fluentbitinstall="TRUE"
+              ;;
+            securityonion)
               fluentbitinstall="TRUE"
               ;;
             jenkins)
