@@ -27,9 +27,9 @@ on:
         options:
         - false
         - true
-  # push:
-  #   branches:    
-  #     - 'test/**'
+  push:
+    branches:    
+      - 'arthur/secret-manager'
   pull_request:
 
   schedule:
