@@ -6,7 +6,6 @@ import stat
 
 
 def tf_override_file(cloud="", test_group="", override_file_path="../override.tf"):
-
     with open(override_file_path, "w+") as myfile:
         myfile.write(
             f"""
@@ -37,7 +36,6 @@ def tf_override_file(cloud="", test_group="", override_file_path="../override.tf
 
 
 def tf_main_file(module="", main_file_path="../main.tf"):
-
     with open(main_file_path, "w+") as myfile:
         if module == "aws_machines":
             myfile.write(
@@ -111,7 +109,6 @@ def tf_main_file(module="", main_file_path="../main.tf"):
 
 
 def tf_output_file(module="", output_file_path="../outputs.tf"):
-
     with open(output_file_path, "w+") as myfile:
         myfile.write(
             f"""
@@ -129,7 +126,6 @@ def config_ini(
     config_file_path="config.ini",
     config_file_env="target-stage-tenant",
 ):
-
     with open(config_file_path, "w+") as myfile:
         myfile.write(
             f"""
@@ -151,7 +147,6 @@ def set_custom_vars(context_dir="context", local_test=False):
     with open(f"{context_dir}/github_context.json", "r") as git_hub_context_file, open(
         f"{context_dir}/matrix_context.json", "r"
     ) as matrix_context_file:
-
         env_file = os.getenv("GITHUB_ENV")
 
         # returns JSON object as
@@ -169,7 +164,7 @@ def set_custom_vars(context_dir="context", local_test=False):
             # if manual run
             if event_name == "workflow_dispatch":
                 inputs = git_hub_context_data["event"]["inputs"]
-                install_script_branch = inputs["install_script_branch"]
+                # install_script_branch = inputs["install_script_branch"]
                 this_repo_branch = inputs["this_repo_branch"]
                 terraform_run_destroy = inputs["terraform_run_destroy"]
                 fail_first_test = inputs["fail_first_test"]
@@ -179,7 +174,7 @@ def set_custom_vars(context_dir="context", local_test=False):
                 print(f"inputs = {inputs}")
 
                 print(seperator)
-                print(f"install_script_branch={install_script_branch}")
+                # print(f"install_script_branch={install_script_branch}")
                 print(f"this_repo_branch={this_repo_branch}")
                 print(f"terraform_run_destroy={terraform_run_destroy}")
                 print(f"fail_first_test={fail_first_test}")
@@ -187,9 +182,9 @@ def set_custom_vars(context_dir="context", local_test=False):
 
                 print(seperator)
 
-                environmentFile.write(
-                    f"TF_VAR_USE_BRANCH_NAME={install_script_branch}\n"
-                )
+                # environmentFile.write(
+                #     f"TF_VAR_USE_BRANCH_NAME={install_script_branch}\n"
+                # )
                 environmentFile.write(f"THIS_REPO_BRANCH={this_repo_branch}\n")
 
                 environmentFile.write(
