@@ -53,7 +53,7 @@ jobs:
       issues: read
       checks: write
     env:
-      TF_VAR_PUBLIC_KEY: ${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}
+      # TF_VAR_PUBLIC_KEY: ${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
       # TF_VAR_USE_BRANCH_NAME: main
 
@@ -105,7 +105,11 @@ jobs:
           elif ${{ github.event_name == 'pull_request' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
           fi
-          
+
+      - name: Set env var
+        run: |
+          echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
+
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
