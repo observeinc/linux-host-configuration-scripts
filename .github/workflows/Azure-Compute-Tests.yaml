@@ -105,10 +105,10 @@ jobs:
             STAGE_CUSTOMER_ID:projects/896946759488/secrets/STAGE_CUSTOMER_ID
             STAGE_DATASTREAM_TOKEN:projects/896946759488/secrets/STAGE_DATASTREAM_TOKEN
             STAGE_DOMAIN:projects/896946759488/secrets/STAGE_DOMAIN
-            ARM_CLIENT_ID:projects/896946759488/secrets/ARM_CLIENT_ID
-            ARM_CLIENT_SECRET:projects/896946759488/secrets/ARM_CLIENT_SECRET
-            ARM_SUBSCRIPTION_ID:projects/896946759488/secrets/ARM_SUBSCRIPTION_ID
-            ARM_TENANT_ID:projects/896946759488/secrets/ARM_TENANT_ID
+            # ARM_CLIENT_ID:projects/896946759488/secrets/ARM_CLIENT_ID
+            # ARM_CLIENT_SECRET:projects/896946759488/secrets/ARM_CLIENT_SECRET
+            # ARM_SUBSCRIPTION_ID:projects/896946759488/secrets/ARM_SUBSCRIPTION_ID
+            # ARM_TENANT_ID:projects/896946759488/secrets/ARM_TENANT_ID
 
   
       # AWS Login - orig role - has to occur before checkout
