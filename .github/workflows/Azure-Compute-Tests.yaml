@@ -141,7 +141,7 @@ jobs:
 
       - name: Set env as secret
         env:
-          MY_VAL: '${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}'
+          MY_VAL: '${{ steps.secrets.outputs.THUNDERDOME_AWS_ROLE }}'
         run: |
           import os
           for q in (os.getenv("MY_VAL")):
