@@ -99,25 +99,17 @@ jobs:
         uses: 'google-github-actions/get-secretmanager-secrets@v1'
         with:
           secrets: |-
-            TF_VAR_PUBLIC_KEY:projects/896946759488/secrets/TF_VAR_PUBLIC_KEY
-            THUNDERDOME_AWS_ROLE:projects/896946759488/secrets/THUNDERDOME_AWS_ROLE
-            PRIVATE_KEY:projects/896946759488/secrets/PRIVATE_KEY
-            STAGE_CUSTOMER_ID:projects/896946759488/secrets/STAGE_CUSTOMER_ID
-            STAGE_DATASTREAM_TOKEN:projects/896946759488/secrets/STAGE_DATASTREAM_TOKEN
-            STAGE_DOMAIN:projects/896946759488/secrets/STAGE_DOMAIN
-            X_ARM_CLIENT_ID:projects/896946759488/secrets/ARM_CLIENT_ID
-            X_ARM_CLIENT_SECRET:projects/896946759488/secrets/ARM_CLIENT_SECRET
-            X_ARM_SUBSCRIPTION_ID:projects/896946759488/secrets/ARM_SUBSCRIPTION_ID
-            X_ARM_TENANT_ID:projects/896946759488/secrets/ARM_TENANT_ID
+            TF_VAR_PUBLIC_KEY:content-eng-linux-host-test/TF_VAR_PUBLIC_KEY
+            THUNDERDOME_AWS_ROLE:content-eng-linux-host-test/THUNDERDOME_AWS_ROLE
+            PRIVATE_KEY:content-eng-linux-host-test/PRIVATE_KEY
+            STAGE_CUSTOMER_ID:content-eng-linux-host-test/STAGE_CUSTOMER_ID
+            STAGE_DATASTREAM_TOKEN:content-eng-linux-host-test/STAGE_DATASTREAM_TOKEN
+            STAGE_DOMAIN:content-eng-linux-host-test/STAGE_DOMAIN
+            X_ARM_CLIENT_ID:content-eng-linux-host-test/ARM_CLIENT_ID
+            X_ARM_CLIENT_SECRET:content-eng-linux-host-test/ARM_CLIENT_SECRET
+            X_ARM_SUBSCRIPTION_ID:content-eng-linux-host-test/ARM_SUBSCRIPTION_ID
+            X_ARM_TENANT_ID:content-eng-linux-host-test/ARM_TENANT_ID
 
-      - id: 'secrets2'
-        uses: 'google-github-actions/get-secretmanager-secrets@v1'
-        with:
-          secrets: |-
-            ARM_CLIENT_ID:projects/896946759488/secrets/ARM_CLIENT_ID
-            ARM_CLIENT_SECRET:projects/896946759488/secrets/ARM_CLIENT_SECRET
-            ARM_SUBSCRIPTION_ID:projects/896946759488/secrets/ARM_SUBSCRIPTION_ID
-            ARM_TENANT_ID:projects/896946759488/secrets/ARM_TENANT_ID
       # AWS Login - orig role - has to occur before checkout
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -143,7 +135,7 @@ jobs:
 
       - name: Set env as secret
         env:
-          MY_VAL: '${{ steps.secrets2.outputs.AZURE_SUBSCRIPTION_ID }}'
+          MY_VAL: '${{ steps.secrets.outputs.X_ARM_CLIENT_ID }}'
         run: |
           import os
           for q in (os.getenv("MY_VAL")):
