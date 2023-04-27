@@ -53,7 +53,7 @@ jobs:
       issues: read
       checks: write
     env:
-      # TF_VAR_PUBLIC_KEY: ${{ secrets.TF_VAR_PUBLIC_KEY }}
+      TF_VAR_PUBLIC_KEY: ${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
       # TF_VAR_USE_BRANCH_NAME: main
 
