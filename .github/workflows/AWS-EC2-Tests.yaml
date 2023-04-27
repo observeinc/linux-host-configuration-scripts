@@ -4,10 +4,6 @@ concurrency: aws-workflow
 on: 
   workflow_dispatch:
     inputs:
-      # install_script_branch:
-      #   type: string
-      #   description: Select the branch to test from linux-agent-install-scripts 
-      #   default: main
       this_repo_branch:
         type: string
         description: Select the branch to use from this repo
@@ -53,11 +49,7 @@ jobs:
       issues: read
       checks: write
     env:
-      # TF_VAR_PUBLIC_KEY: ${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
-      # TF_VAR_USE_BRANCH_NAME: main
-
-      # INSTALL_BRANCH: main
       THIS_REPO_BRANCH: main
       TERRAFORM_RUN_DESTROY: true
       FAIL_FIRST_TEST: false
