@@ -57,10 +57,10 @@ jobs:
       TF_VAR_REGION: "us-west-2"
       # TF_VAR_USE_BRANCH_NAME: main
 
-      # ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} 
-      # ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      # ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      # ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} 
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
       # INSTALL_BRANCH: main
       THIS_REPO_BRANCH: main
@@ -130,10 +130,10 @@ jobs:
         run: |
             echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
   
-            echo "ARM_CLIENT_ID=${{ steps.secrets.outputs.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
-            echo "ARM_CLIENT_SECRET=${{ steps.secrets.outputs.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
-            echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets.outputs.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
-            echo "ARM_TENANT_ID=${{ steps.secrets.outputs.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+            # echo "ARM_CLIENT_ID=${{ steps.secrets.outputs.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
+            # echo "ARM_CLIENT_SECRET=${{ steps.secrets.outputs.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
+            # echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets.outputs.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+            # echo "ARM_TENANT_ID=${{ steps.secrets.outputs.AZURE_TENANT_ID }}" >> $GITHUB_ENV
 
       - name: Check out repository code
         uses: actions/checkout@v3
