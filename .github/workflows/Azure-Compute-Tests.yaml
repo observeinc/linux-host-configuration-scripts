@@ -130,7 +130,7 @@ jobs:
             echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
             echo "X_ARM_CLIENT_ID=${{ steps.secrets.outputs.X_AZURE_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ARM_CLIENT_SECRET=${{ steps.secrets.outputs.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
-            echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets2.outputs.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+            echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets.outputs.X_ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
             echo "ARM_TENANT_ID=${{ steps.secrets.outputs.AZURE_TENANT_ID }}" >> $GITHUB_ENV
 
       - name: Set env as secret
@@ -142,6 +142,14 @@ jobs:
             print(q,end=" ")
         shell: python
 
+      - name: Set env as secret
+        env:
+          MY_VAL: '${{ steps.secrets.outputs.X_ARM_SUBSCRIPTION_ID }}'
+        run: |
+          import os
+          for q in (os.getenv("MY_VAL")):
+            print(q,end=" ")
+        shell: python
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
