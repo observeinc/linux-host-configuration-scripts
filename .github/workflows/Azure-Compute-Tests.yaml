@@ -105,10 +105,10 @@ jobs:
             STAGE_CUSTOMER_ID:projects/896946759488/secrets/STAGE_CUSTOMER_ID
             STAGE_DATASTREAM_TOKEN:projects/896946759488/secrets/STAGE_DATASTREAM_TOKEN
             STAGE_DOMAIN:projects/896946759488/secrets/STAGE_DOMAIN
-            ARM_CLIENT_ID:projects/896946759488/secrets/ARM_CLIENT_ID
-            ARM_CLIENT_SECRET:projects/896946759488/secrets/ARM_CLIENT_SECRET
-            ARM_SUBSCRIPTION_ID:projects/896946759488/secrets/ARM_SUBSCRIPTION_ID
-            ARM_TENANT_ID:projects/896946759488/secrets/ARM_TENANT_ID
+            X_ARM_CLIENT_ID:projects/896946759488/secrets/ARM_CLIENT_ID
+            X_ARM_CLIENT_SECRET:projects/896946759488/secrets/ARM_CLIENT_SECRET
+            X_ARM_SUBSCRIPTION_ID:projects/896946759488/secrets/ARM_SUBSCRIPTION_ID
+            X_ARM_TENANT_ID:projects/896946759488/secrets/ARM_TENANT_ID
 
       - id: 'secrets2'
         uses: 'google-github-actions/get-secretmanager-secrets@v1'
@@ -136,10 +136,19 @@ jobs:
       - name: Set env var
         run: |
             echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
-            echo "ARM_CLIENT_ID=${{ steps.secrets2.outputs.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "X_ARM_CLIENT_ID=${{ steps.secrets.outputs.X_AZURE_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ARM_CLIENT_SECRET=${{ steps.secrets.outputs.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
             echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets2.outputs.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
             echo "ARM_TENANT_ID=${{ steps.secrets.outputs.AZURE_TENANT_ID }}" >> $GITHUB_ENV
+
+      - name: Set env as secret
+        env:
+          MY_VAL: '${{ steps.secrets2.outputs.AZURE_SUBSCRIPTION_ID }}'
+        run: |
+          import os
+          for q in (os.getenv("MY_VAL")):
+            print(q,end=" ")
+        shell: python
 
       - name: Check out repository code
         uses: actions/checkout@v3
