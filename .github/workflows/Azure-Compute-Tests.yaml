@@ -73,6 +73,16 @@ jobs:
       # TF_LOG: DEBUG
 
     steps:
+      
+      - name: Set env as secret
+        env:
+          MY_VAL: '${{ secrets.AZURE_CLIENT_ID }}'
+        run: |
+          import os
+          for q in (os.getenv("MY_VAL")):
+            print(q,end=" ")
+        shell: python
+
       # GCP Login
       # This is key generated in GCP console for service account
       - id: 'auth'
