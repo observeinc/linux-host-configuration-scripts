@@ -110,7 +110,14 @@ jobs:
             ARM_SUBSCRIPTION_ID:projects/896946759488/secrets/ARM_SUBSCRIPTION_ID
             ARM_TENANT_ID:projects/896946759488/secrets/ARM_TENANT_ID
 
-  
+      - id: 'secrets2'
+        uses: 'google-github-actions/get-secretmanager-secrets@v1'
+        with:
+          secrets: |-
+            ARM_CLIENT_ID:projects/896946759488/secrets/ARM_CLIENT_ID
+            ARM_CLIENT_SECRET:projects/896946759488/secrets/ARM_CLIENT_SECRET
+            ARM_SUBSCRIPTION_ID:projects/896946759488/secrets/ARM_SUBSCRIPTION_ID
+            ARM_TENANT_ID:projects/896946759488/secrets/ARM_TENANT_ID
       # AWS Login - orig role - has to occur before checkout
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -129,9 +136,9 @@ jobs:
       - name: Set env var
         run: |
             echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
-            echo "ARM_CLIENT_ID=${{ steps.secrets.outputs.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ARM_CLIENT_ID=${{ steps.secrets2.outputs.AZURE_CLIENT_ID }}" >> $GITHUB_ENV
             echo "ARM_CLIENT_SECRET=${{ steps.secrets.outputs.AZURE_CLIENT_SECRET }}" >> $GITHUB_ENV
-            echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets.outputs.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+            echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets2.outputs.AZURE_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
             echo "ARM_TENANT_ID=${{ steps.secrets.outputs.AZURE_TENANT_ID }}" >> $GITHUB_ENV
 
       - name: Check out repository code
@@ -141,7 +148,7 @@ jobs:
 
       - name: Set env as secret
         env:
-          MY_VAL: '${{ steps.secrets.outputs.AZURE_SUBSCRIPTION_ID }}'
+          MY_VAL: '${{ steps.secrets2.outputs.AZURE_SUBSCRIPTION_ID }}'
         run: |
           import os
           for q in (os.getenv("MY_VAL")):
