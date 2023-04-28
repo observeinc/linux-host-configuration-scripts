@@ -15,18 +15,7 @@ on:
 jobs:
   
   Run-Test-Build:
-    strategy:
-      max-parallel: 30
-      fail-fast: false
-      matrix:
-        test_groups: ['base_defaults']
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: write
-      pull-requests: write
-      issues: read
-      checks: write
 
     steps:
       - name: Delete workflow runs
