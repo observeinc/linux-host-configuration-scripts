@@ -4,10 +4,6 @@ concurrency: azure-workflow
 on: 
   workflow_dispatch:
     inputs:
-      # install_script_branch:
-      #   type: string
-      #   description: Select the branch to test from linux-agent-install-scripts 
-      #   default: main
       this_repo_branch:
         type: string
         description: Select the branch to use from this repo
@@ -27,9 +23,9 @@ on:
         options:
         - false
         - true
-  push:
-    branches:    
-      - 'arthur/secret-manager'
+  # push:
+  #   branches:    
+  #     - 'arthur/secret-manager'
   pull_request:
 
   schedule:
