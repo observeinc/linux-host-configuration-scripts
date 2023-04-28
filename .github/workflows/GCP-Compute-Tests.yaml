@@ -114,6 +114,18 @@ jobs:
    
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
+        # GCP Login
+        # This is key generated in GCP console for service account
+      - id: 'auth2'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          
       - name: workflow helper
         run: |
           python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(context_dir='context')"
