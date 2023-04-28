@@ -1,0 +1,27 @@
+run-name: JOB_CLEANUP - ${{ github.event_name }} by @${{ github.actor }}
+# name: Fabric Build
+concurrency: job-cleanup
+on: 
+  push:
+    branches:    
+      - 'arthur/secret-manager'
+  pull_request:
+
+  schedule:
+    # only runs on default branch
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '15 0 * * *'
+
+jobs:
+  
+  Run-Test-Build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 2
+          keep_minimum_runs: 5

@@ -4,10 +4,6 @@ concurrency: azure-workflow
 on: 
   workflow_dispatch:
     inputs:
-      install_script_branch:
-        type: string
-        description: Select the branch to test from linux-agent-install-scripts 
-        default: main
       this_repo_branch:
         type: string
         description: Select the branch to use from this repo
@@ -29,7 +25,7 @@ on:
         - true
   # push:
   #   branches:    
-  #     - 'test/**'
+  #     - 'arthur/secret-manager'
   pull_request:
 
   schedule:
@@ -53,16 +49,7 @@ jobs:
       issues: read
       checks: write
     env:
-      TF_VAR_PUBLIC_KEY: ${{ secrets.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
-      TF_VAR_USE_BRANCH_NAME: main
-
-      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} 
-      ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-      INSTALL_BRANCH: main
       THIS_REPO_BRANCH: main
       TERRAFORM_RUN_DESTROY: true
       FAIL_FIRST_TEST: false
@@ -73,11 +60,39 @@ jobs:
       # TF_LOG: DEBUG
 
     steps:
+
+      # GCP Login
+      # This is key generated in GCP console for service account
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+
+      - name: 'Set up Cloud SDK'
+        uses: 'google-github-actions/setup-gcloud@v0'
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+  
+      - id: 'secrets'
+        uses: 'google-github-actions/get-secretmanager-secrets@v1'
+        with:
+          secrets: |-
+            TF_VAR_PUBLIC_KEY:content-eng-linux-host-test/TF_VAR_PUBLIC_KEY
+            THUNDERDOME_AWS_ROLE:content-eng-linux-host-test/THUNDERDOME_AWS_ROLE
+            PRIVATE_KEY:content-eng-linux-host-test/PRIVATE_KEY
+            STAGE_CUSTOMER_ID:content-eng-linux-host-test/STAGE_CUSTOMER_ID
+            STAGE_DATASTREAM_TOKEN:content-eng-linux-host-test/STAGE_DATASTREAM_TOKEN
+            STAGE_DOMAIN:content-eng-linux-host-test/STAGE_DOMAIN
+            ARM_CLIENT_ID:content-eng-linux-host-test/ARM_CLIENT_ID
+            ARM_CLIENT_SECRET:content-eng-linux-host-test/ARM_CLIENT_SECRET
+            ARM_SUBSCRIPTION_ID:content-eng-linux-host-test/ARM_SUBSCRIPTION_ID
+            ARM_TENANT_ID:content-eng-linux-host-test/ARM_TENANT_ID
+
       # AWS Login - orig role - has to occur before checkout
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
+          role-to-assume: ${{ steps.secrets.outputs.THUNDERDOME_AWS_ROLE }}
           aws-region: ${{ env.TF_VAR_REGION }}
 
       - name: Set code repo
@@ -87,6 +102,14 @@ jobs:
           elif ${{ github.event_name == 'pull_request' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
           fi
+
+      - name: Set env var
+        run: |
+            echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
+            echo "ARM_CLIENT_ID=${{ steps.secrets.outputs.ARM_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "ARM_CLIENT_SECRET=${{ steps.secrets.outputs.ARM_CLIENT_SECRET }}" >> $GITHUB_ENV
+            echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets.outputs.ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
+            echo "ARM_TENANT_ID=${{ steps.secrets.outputs.ARM_TENANT_ID }}" >> $GITHUB_ENV
 
       - name: Check out repository code
         uses: actions/checkout@v3
@@ -98,7 +121,7 @@ jobs:
           mkdir context 
           echo '${{ toJSON(github) }}' > context/github_context.json   
           echo '${{ toJSON(matrix) }}' > context/matrix_context.json 
-          echo '${{ secrets.PRIVATE_KEY }}' > context/private_key 
+          echo '${{ steps.secrets.outputs.PRIVATE_KEY }}' > context/private_key 
    
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
@@ -113,21 +136,9 @@ jobs:
 
           python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"${{ env.MODULE }}\")"
 
-          python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ secrets.STAGE_CUSTOMER_ID }}\", domain=\"${{ secrets.STAGE_DOMAIN }}\", token=\"${{ secrets.STAGE_DATASTREAM_TOKEN }}\")"
+          python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}\", domain=\"${{ steps.secrets.outputs.STAGE_DOMAIN }}\", token=\"${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}\")"
 
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
-
-      # GCP Login
-      # This is key generated in GCP console for service account
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v0'
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
 
       - name: Print Environment Variables - troubleshooting
         run: |
@@ -179,11 +190,11 @@ jobs:
         run: |
           rm -f python_scripts/config.ini
 
-          sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/file_outputs/*
-          sed -i 's/${{ secrets.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/file_outputs/*
+          sed -i 's/${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/file_outputs/*
+          sed -i 's/${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/file_outputs/*
 
-          sed -i 's/${{ secrets.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/log_outputs/*
-          sed -i 's/${{ secrets.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/log_outputs/*
+          sed -i 's/${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/log_outputs/*
+          sed -i 's/${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/log_outputs/*
 
         working-directory: "${{ env.WORK_DIR }}"
 
