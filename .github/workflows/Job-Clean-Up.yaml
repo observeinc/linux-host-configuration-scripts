@@ -1,0 +1,53 @@
+run-name: JOB_CLEANUP - ${{ github.event_name }} by @${{ github.actor }}
+# name: Fabric Build
+concurrency: job-cleanup
+on: 
+  push:
+    branches:    
+      - 'arthur/secret-manager'
+  pull_request:
+
+  schedule:
+    # only runs on default branch
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '15 */12 * * *'
+
+jobs:
+  
+  Run-Test-Build:
+    strategy:
+      max-parallel: 30
+      fail-fast: false
+      matrix:
+        test_groups: ['base_defaults']
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+      issues: read
+      checks: write
+
+    steps:
+      - name: Delete Job History
+        run: |
+
+          org=observeinc
+          repo=linux-host-configuration-scripts
+
+          # Get workflow IDs with status "disabled_manually"
+          workflow_ids=($(gh api repos/$org/$repo/actions/workflows --paginate | jq '.workflows[] | select(.["state"] | contains("disabled_manually")) | .id'))
+
+          for workflow_id in "${workflow_ids[@]}"
+          do
+            echo "Listing runs for the workflow ID $workflow_id"
+            run_ids=( $(gh api repos/$org/$repo/actions/workflows/$workflow_id/runs --paginate | jq '.workflow_runs[].id') )
+            for run_id in "${run_ids[@]}"
+            do
+              echo "Deleting Run ID $run_id"
+              gh api repos/$org/$repo/actions/runs/$run_id -X DELETE >/dev/null
+            done
+          done
+   
+
+     

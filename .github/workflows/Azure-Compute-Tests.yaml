@@ -53,16 +53,7 @@ jobs:
       issues: read
       checks: write
     env:
-      # TF_VAR_PUBLIC_KEY: ${{ secrets.TF_VAR_PUBLIC_KEY }}
       TF_VAR_REGION: "us-west-2"
-      # TF_VAR_USE_BRANCH_NAME: main
-
-      # ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }} 
-      # ARM_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      # ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-      # ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-
-      # INSTALL_BRANCH: main
       THIS_REPO_BRANCH: main
       TERRAFORM_RUN_DESTROY: true
       FAIL_FIRST_TEST: false
@@ -73,15 +64,6 @@ jobs:
       # TF_LOG: DEBUG
 
     steps:
-      
-      - name: Set env as secret
-        env:
-          MY_VAL: '${{ secrets.AZURE_CLIENT_ID }}'
-        run: |
-          import os
-          for q in (os.getenv("MY_VAL")):
-            print(q,end=" ")
-        shell: python
 
       # GCP Login
       # This is key generated in GCP console for service account
@@ -133,23 +115,6 @@ jobs:
             echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets.outputs.ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
             echo "ARM_TENANT_ID=${{ steps.secrets.outputs.ARM_TENANT_ID }}" >> $GITHUB_ENV
 
-      - name: Set env as secret
-        env:
-          MY_VAL: '${{ steps.secrets.outputs.ARM_CLIENT_ID }}'
-        run: |
-          import os
-          for q in (os.getenv("MY_VAL")):
-            print(q,end=" ")
-        shell: python
-
-      - name: Set env as secret
-        env:
-          MY_VAL: '${{ steps.secrets.outputs.ARM_SUBSCRIPTION_ID }}'
-        run: |
-          import os
-          for q in (os.getenv("MY_VAL")):
-            print(q,end=" ")
-        shell: python
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
