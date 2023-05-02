@@ -61,6 +61,18 @@ jobs:
       # TF_LOG: DEBUG
 
     steps:
+      - name: Set code repo
+        run: |
+          if ${{ github.event.inputs.this_repo_branch != '' }}; then
+            echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
+          elif ${{ github.event_name == 'pull_request' }}; then
+            echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
+          fi
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ env.THIS_REPO_BRANCH }}
 
       # GCP Login
       # This is key generated in GCP console for service account
@@ -92,22 +104,9 @@ jobs:
           role-to-assume: ${{ steps.secrets.outputs.THUNDERDOME_AWS_ROLE }}
           aws-region: ${{ env.TF_VAR_REGION }}
 
-      - name: Set code repo
-        run: |
-          if ${{ github.event.inputs.this_repo_branch != '' }}; then
-            echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
-          elif ${{ github.event_name == 'pull_request' }}; then
-            echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
-          fi
-
       - name: Set env var
         run: |
             echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
-
-      - name: Check out repository code
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ env.THIS_REPO_BRANCH }}
 
       - name: Set contexts
         run: |
@@ -120,15 +119,15 @@ jobs:
 
         # GCP Login
         # This is key generated in GCP console for service account
-      - id: 'auth2'
-        uses: 'google-github-actions/auth@v0'
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+      # - id: 'auth2'
+      #   uses: 'google-github-actions/auth@v0'
+      #   with:
+      #     credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
+      # - name: 'Set up Cloud SDK'
+      #   uses: 'google-github-actions/setup-gcloud@v0'
+      #   with:
+      #     project_id: ${{ secrets.GCP_PROJECT_ID }}
           
       - name: workflow helper
         run: |
