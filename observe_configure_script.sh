@@ -762,7 +762,7 @@ gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
 EOT
 
-        sudo yum install fluent-bit -y
+        sudo yum install fluent-bit-2.0.14 -y
 
         sourcefilename=$config_file_directory/fluent-bit.conf
         filename=/etc/fluent-bit/fluent-bit.conf
@@ -789,7 +789,7 @@ gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
 EOT
 
-        sudo yum install td-agent-bit -y
+        sudo yum install td-agent-bit-1.9.10 -y
 
         sourcefilename=$config_file_directory/td-agent-bit.conf
         filename=/etc/td-agent-bit/td-agent-bit.conf
@@ -925,7 +925,7 @@ gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
 EOF
 
-      sudo yum install td-agent-bit -y
+      sudo yum install td-agent-bit-1.9.10 -y
 
       sudo service td-agent-bit start
 
@@ -1060,7 +1060,7 @@ EOF
       
 
       sudo apt-get update
-      sudo apt-get install -y td-agent-bit
+      sudo apt-get install -y td-agent-bit=1.9.10
       sudo service td-agent-bit start
 
       sourcefilename=$config_file_directory/td-agent-bit.conf

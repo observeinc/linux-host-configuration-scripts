@@ -70,6 +70,16 @@ variable "AWS_MACHINE_CONFIGS" {
   description = "variables for supported OS"
   default = {
 
+    # UBUNTU_22_04_LTS = {
+    #   # ami used in testing
+    #   ami_instance_type = "t3.small"
+    #   ami_id            = "<NEED TO REPLACE WITH AMI in THUNDERDOME"
+    #   ami_description   = "Canonical, Ubuntu, 22.04 LTS, amd64 jammy image build on 2023-05-16"
+    #   default_user      = "ubuntu"
+    #   sleep             = 120
+    #   user_data         = "user_data/aptbased.sh"
+    # }
+
     UBUNTU_20_04_LTS = {
       # ami used in testing
       ami_instance_type = "t3.small"
