@@ -29,8 +29,8 @@ def getObserveConfig(config, environment):
 
 def getCurlCommand(options):
     """Create command for running install script"""
-    YOUR_CUSTOMERID = getObserveConfig("customer_id", options["ENVIRONMENT"])
-    YOUR_DATA_STREAM_TOKEN = getObserveConfig(
+    OBSERVE_CUSTOMER = getObserveConfig("customer_id", options["ENVIRONMENT"])
+    OBSERVE_TOKEN = getObserveConfig(
         "datastream_token", options["ENVIRONMENT"]
     )
     DOMAIN = getObserveConfig("domain", options["ENVIRONMENT"])
@@ -46,9 +46,9 @@ def getCurlCommand(options):
     if "FLAGS" in options:
         FLAGS.update(options["FLAGS"])
 
-    curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {YOUR_CUSTOMERID} --ingest_token {YOUR_DATA_STREAM_TOKEN} --observe_host_name https://{YOUR_CUSTOMERID}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
+    curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {OBSERVE_CUSTOMER} --ingest_token {OBSERVE_TOKEN} --observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
     logging.info(
-        "curl command = %s", curl_command.replace(YOUR_DATA_STREAM_TOKEN, "*****")
+        "curl command = %s", curl_command.replace(OBSERVE_TOKEN, "*****")
     )
 
     return curl_command
