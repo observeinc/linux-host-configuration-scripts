@@ -34,10 +34,10 @@ Run --help command for list of flags and options
 ## HELP CONTENT
 ###########################################
 ### Required inputs
-- Required --customer_id YOUR_OBSERVE_CUSTOMERID 
-- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN 
+- Required --customer_id OBSERVE_CUSTOMER 
+- Required --ingest_token OBSERVE_TOKEN 
 ## Optional inputs
-- Optional --observe_host_name - Defaults to https://<YOUR_OBSERVE_CUSTOMERID>.collect.observeinc.com/ 
+- Optional --observe_host_name - Defaults to https://<_OBSERVE_CUSTOMER>.collect.observeinc.com/ 
 - Optional --config_files_clean TRUE or FALSE - Defaults to FALSE 
     - controls whether to delete created config_files temp directory
 - Optional --ec2metadata TRUE or FALSE - Defaults to FALSE 
@@ -55,6 +55,6 @@ Run --help command for list of flags and options
 - Optional --custom_fluentbit_config add an additional configuration file for fluentbit
 ***************************
 ### Sample command:
-``` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://<YOUR_CUSTOMERID>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP```
+``` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id OBSERVE_CUSTOMER --ingest_token OBSERVE_TOKEN --observe_host_name https://<OBSERVE_CUSTOMER>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP```
 ***************************
 

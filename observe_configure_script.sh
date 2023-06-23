@@ -225,13 +225,13 @@ printHelp(){
       log "## HELP CONTENT"
       log "$SPACER"
       log "### Required inputs"
-      log "- Required --customer_id YOUR_OBSERVE_CUSTOMERID "
-      log "- Required --ingest_token YOUR_OBSERVE_DATA_STREAM_TOKEN "
+      log "- Required --customer_id OBSERVE_CUSTOMER "
+      log "- Required --ingest_token OBSERVE_TOKEN "
       log "## Optional inputs"
-      log "- Optional --observe_host_name - Defaults to https://<YOUR_OBSERVE_CUSTOMERID>.collect.observeinc.com/ "
-      log "- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE "
+      log "- Optional --observe_host_name - Defaults to https://<OBSERVE_CUSTOMER>.collect.observeinc.com/ "
+      log "- Optional --config_files_clean TRUE or FALSE - Defaults to FALSE"
       log "    - controls whether to delete created config_files temp directory"
-      log "- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE "
+      log "- Optional --ec2metadata TRUE or FALSE - Defaults to FALSE"
       log "    - controls fluentbit config for whether to use default ec2 metrics "
       log "- Optional --cloud_metadata TRUE or FALSE - Defaults to FALSE"
       log "    - controls fluentbit config for whether to poll for VM metadata"
@@ -239,14 +239,14 @@ printHelp(){
       log "- Optional --appgroup id supplied sets value in fluentbit config"
       log "- Optional --branch_input branch of repository to pull scrips and config files from -Defaults to main"
       log "- Optional --validate_endpoint of observe_hostname using customer_id and ingest_token -Defaults to TRUE"
-      log "- Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit and telegraf"
-      log "    - Optional module flag: securityonion adds a config to fluentbit. If securityonion is specified without linux_host, only fluent bit will be installed."
-      log "    - Optional module flag: jenkins adds a config to fluentbit. If jenkins is specified without linux_host, only fluent bit will be installed."
+      log "- Optional --module to use for installs -Defaults to linux_host which installs osquery, fluentbit or td-agent-bit, and telegraf"
+      log "    - Optional module flag: securityonion adds a config to fluentbit or td-agent-bit. If securityonion is specified without linux_host, only fluent-bit (or td-agent-bit) will be installed."
+      log "    - Optional module flag: jenkins adds a config to fluent-bit or td-agent-bit. If jenkins is specified without linux_host, only fluent-bit or td-agent-bit will be installed."
       log "- Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
-      log "- Optional --custom_fluentbit_config add an additional configuration file for fluentbit"
+      log "- Optional --custom_fluentbit_config add an additional configuration file for fluentbit or td-agent-bit"
       log "***************************"
       log "### Sample command:"
-      log "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id YOUR_CUSTOMERID --ingest_token YOUR_DATA_STREAM_TOKEN --observe_host_name https://<YOUR_CUSTOMERID>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
+      log "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id OBSERVE_CUSTOMER --ingest_token OBSERVE_TOKEN --observe_host_name https://<OBSERVE_CUSTOMER>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
       log "***************************"
 }
 
@@ -353,7 +353,7 @@ includeFiletdAgent(){
   done
 
   #install custom config if exists
-  if ! [ -z ${custom_fluentbit_config}]
+  if ! [ -z ${custom_fluentbit_config} ]
   then
     sudo cp ${custom_fluentbit_config} /etc/td-agent-bit/observe-custom-config.conf
   fi
