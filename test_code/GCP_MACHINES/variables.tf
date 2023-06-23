@@ -28,17 +28,18 @@ variable "GCP_MACHINE_CONFIGS" {
       sleep        = 120
     }
 
-    UBUNTU_18_04_LTS = {
-      recreate     = "changethistorecreate1"
-      version      = "ubuntu-os-cloud/ubuntu-1804-lts"
-      machine_type = "e2-medium"
-      description  = "Ubuntu 18_04 LTS"
-      default_user = "ubuntu"
-      zone         = "us-west1-b"
-      wait         = "120"
-      user_data    = "user_data/aptbased.sh"
-      sleep        = 120
-    }
+    # https://cloud.google.com/compute/docs/eol/ubuntu-eol - Ubuntu 18.04 LTS (Bionic): end of life on May 31, 2023.
+    # UBUNTU_18_04_LTS = {
+    #   recreate     = "changethistorecreate1"
+    #   version      = "ubuntu-os-cloud/ubuntu-1804-lts"
+    #   machine_type = "e2-medium"
+    #   description  = "Ubuntu 18_04 LTS"
+    #   default_user = "ubuntu"
+    #   zone         = "us-west1-b"
+    #   wait         = "120"
+    #   user_data    = "user_data/aptbased.sh"
+    #   sleep        = 120
+    # }
     # Commenting out because this VM on GCP produces flaky test results and don't have motivation to figure out why
     # RHEL_8 = {
     #   recreate     = "changethistorecreate1"
