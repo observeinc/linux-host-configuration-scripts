@@ -1,24 +1,3 @@
-# This gets your local machine ip for use in security group 
-# data "http" "myip" {
-#   url = "https://ipv4.icanhazip.com/?4"
-# }
-
-# Use a pre-deployed vpc - this is where ec2 instance will be deployed
-data "aws_vpc" "main" {
-  default = false
-  tags = {
-    Name = "linux-host-test-vpc"
-  }
-}
-
-data "aws_subnet" "main" {
-  vpc_id = data.aws_vpc.main.id
-  filter {
-    name   = "tag:Name"
-    values = ["linux-host-test-subnet"]
-  }
-}
-
 # The Canonical User ID data source allows access to the canonical user ID for the effective account in which Terraform is working.
 # tflint-ignore: terraform_unused_declarations
 data "aws_canonical_user_id" "current_user" {

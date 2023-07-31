@@ -114,6 +114,7 @@ def tf_output_file(module="", output_file_path="../outputs.tf"):
             f"""
             output "fab_host_all" {{
                 value = module.{module}.fab_hosts
+                sensitive = true 
                 }}
             """
         )

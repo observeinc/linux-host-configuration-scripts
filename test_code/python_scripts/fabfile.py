@@ -17,6 +17,30 @@ import logging
 import sys
 
 
+
+def mask_password(data):
+    masked_data = data.copy()
+    password = masked_data.get("password")
+    if password:
+        masked_data["password"] = "*" * 5
+    return masked_data
+
+def getPowerShellScript(service_name):
+    powershell_script = f'''
+    $serviceName = "{service_name}"
+
+    $service = Get-Service -Name $serviceName
+
+    if ($service -ne $null -and $service.Status -eq "Running") {{
+        Write-Output "PASS"
+    }} else {{
+        Write-Output "FAIL"
+    }}
+    '''
+
+    return powershell_script
+
+
 def getObserveConfig(config, environment):
     """Fetches config file"""
     # Set your Observe environment details in config\configfile.ini
@@ -45,17 +69,21 @@ def getCurlCommand(options):
 
     if "FLAGS" in options:
         FLAGS.update(options["FLAGS"])
+    if options["IS_WINDOWS"]:
+        curl_command = f'[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"; Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/observeinc/windows-host-configuration-scripts/{options["WINDOWS_BRANCH"]}/agents.ps1" -outfile .\\agents.ps1; .\\agents.ps1  -ingest_token {OBSERVE_TOKEN} -customer_id {OBSERVE_CUSTOMER}  -observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ -config_files_clean {FLAGS["config_files_clean"]} -ec2metadata {FLAGS["ec2metadata"]} -datacenter {FLAGS["datacenter"]} -appgroup {FLAGS["appgroup"]} -cloud_metadata {FLAGS["cloud_metadata"]} -force TRUE'
+    else:
+        curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {OBSERVE_CUSTOMER} --ingest_token {OBSERVE_TOKEN} --observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
 
-    curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {OBSERVE_CUSTOMER} --ingest_token {OBSERVE_TOKEN} --observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
     logging.info(
         "curl command = %s", curl_command.replace(OBSERVE_TOKEN, "*****")
     )
+
 
     return curl_command
 
 
 # your "parallelness"
-pool_size = 20
+pool_size = 30
 pool = Pool(pool_size)
 
 # folder to write files to
@@ -85,6 +113,7 @@ def folderCleanup():
 def terraformOutput(fileName="tf_hosts.json"):
     """Run terraform output command"""
     # run output to file that is read by test
+    logging.info("Running terraform output")
     os.system(
         f"cd ../; terraform output -json | jq -r '.fab_host_all.value' > python_scripts/{fileName}"
     )
@@ -108,6 +137,7 @@ def test(
     ctx,
     fileName="tf_hosts.json",
     branch="main",
+    windowsBranch="main",
     runTerraform="false",
     sleep=300,
     runTerraformDestroy="false",
@@ -186,7 +216,6 @@ def test(
         # open output
         with open(fileName) as json_file:
             hosts = json.load(json_file)
-
             # dict for results of commands
             test_results = {}
 
@@ -202,6 +231,10 @@ def test(
                 datacenter = "FAB_DC"
                 appgroup = "FAB_APP_GROUP"
                 config_files_clean = "TRUE"
+                is_windows = True if "WINDOWS" in key.upper() else False
+
+                if "WINDOWS" in key:
+                    del hosts[key]["connect_kwargs"]['key_filename']
 
                 if "GCP" in key:
                     datacenter = "GCP"
@@ -218,14 +251,43 @@ def test(
                     {
                         "ENVIRONMENT": config_ini_environment,
                         "BRANCH": branch,
+                        "WINDOWS_BRANCH": windowsBranch,
                         "FLAGS": {
                             "config_files_clean": config_files_clean,
                             "ec2metadata": ec2metadata,
                             "datacenter": datacenter,
                             "appgroup": appgroup,
                         },
+                        "IS_WINDOWS": is_windows
                     }
                 )
+
+                linux_test_commands = {
+                   "tofile_curl": curl_cmd,
+                   "fluent/tdagent": "if systemctl is-active --quiet td-agent-bit || systemctl is-active --quiet fluent-bit; then echo PASS; else echo FAIL; fi",
+                   "osquery": "if systemctl is-active --quiet osqueryd; then echo PASS; else echo FAIL; fi",
+                   "telegraf": "if systemctl is-active --quiet telegraf; then echo PASS; else echo FAIL; fi",
+                   "tofile_telegraf_status": "sudo service telegraf status  | cat",
+                   "tofile_osqueryd_status": "sudo service osqueryd status  | cat",
+                   "tofile_td-agent-fluent-bit_status": "sudo service td-agent-bit status || true && sudo service fluent-bit status || true | cat"
+                }
+
+
+
+                windows_test_commands = {
+                    "tofile_curl": curl_cmd,
+                    "fluent/tdagent": getPowerShellScript('fluent-bit'),
+                    "osquery": getPowerShellScript('osqueryd'),
+                    "telegraf": getPowerShellScript('telegraf'),
+                    "tofile_telegraf_status": "Get-Service telegraf ",
+                    "tofile_osqueryd_status": "Get-Service osqueryd",
+                    "tofile_td-agent-fluent-bit_status": "Get-Service fluent-bit"
+                }
+
+                if is_windows:
+                    test_commands = windows_test_commands
+                else:
+                    test_commands = linux_test_commands
 
                 # multitask pool - call doTest with parameters
                 pool.apply_async(
@@ -235,15 +297,7 @@ def test(
                             "host": hosts[key]["host"],
                             "user": hosts[key]["user"],
                             "connect_kwargs": hosts[key]["connect_kwargs"],
-                            "commands": {
-                                "tofile_curl": curl_cmd,
-                                "fluent/tdagent": "if systemctl is-active --quiet td-agent-bit || systemctl is-active --quiet fluent-bit; then echo PASS; else echo FAIL; fi",
-                                "osquery": "if systemctl is-active --quiet osqueryd; then echo PASS; else echo FAIL; fi",
-                                "telegraf": "if systemctl is-active --quiet telegraf; then echo PASS; else echo FAIL; fi",
-                                "tofile_telegraf_status": "sudo service telegraf status  | cat",
-                                "tofile_osqueryd_status": "sudo service osqueryd status  | cat",
-                                "tofile_td-agent-fluent-bit_status": "sudo service td-agent-bit status || true && sudo service fluent-bit status || true | cat",
-                            },
+                            "commands": test_commands,
                             "key": key,
                             "sleep": sleep,
                             "log_level": log_level,
@@ -528,6 +582,8 @@ def doTest(options, t):
             # default to fail so failed connections aren't ignored
             t[key][cmd] = test_fail_message
 
+
+
             # info
             logging.debug(
                 f"""
@@ -536,7 +592,7 @@ def doTest(options, t):
 
                 host={options["host"]}
                 user={options["user"]}
-                connect_kwargs={options["connect_kwargs"]}
+                connect_kwargs={mask_password(options["connect_kwargs"])}
 
                 Running { options["commands"][cmd] }
                 #######################################"""
@@ -548,7 +604,7 @@ def doTest(options, t):
                 hide_run_output = False
 
             result = connect.run(
-                options["commands"][cmd], hide=hide_run_output, timeout=300
+                options["commands"][cmd], hide=hide_run_output, timeout=480
             )
 
             # format string for results
@@ -557,7 +613,7 @@ def doTest(options, t):
 
             if "tofile" not in cmd:
                 # if not writing to a file add command result dictionary
-                t[key][cmd] = result_msg.format(result)
+                t[key][cmd] = result_msg.format(result).strip()
             else:
                 # else add file path
                 file_name = f'file_outputs/{options["key"]}_{cmd}_results.txt'

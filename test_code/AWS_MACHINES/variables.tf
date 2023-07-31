@@ -105,7 +105,7 @@ variable "AWS_MACHINE_CONFIGS" {
       ami_description   = "Amazon Linux 2 Kernel 5.10 AMI 2.0.20220419.0 x86_64 HVM gp2"
       default_user      = "ec2-user"
       sleep             = 60
-      user_data         = "user_data/aptbased.sh"
+      user_data         = "user_data/yumbased.sh"
     }
 
     AMAZON_LINUX_2023 = {
@@ -114,7 +114,7 @@ variable "AWS_MACHINE_CONFIGS" {
       ami_description   = "Amazon Linux 2023 AMI 2023.0.20230322.0 x86_64 HVM kernel-6.1"
       default_user      = "ec2-user"
       sleep             = 60
-      user_data         = "user_data/aptbased.sh"
+      user_data         = "user_data/yumbased.sh"
     }
 
     RHEL_8_4_0 = {
@@ -135,6 +135,35 @@ variable "AWS_MACHINE_CONFIGS" {
       sleep             = 120
       user_data         = "user_data/yumbased.sh"
     }
+
+    WINDOWS_SERVER_2016_BASE = {
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-0d7c5eb6a3508d55c"
+      ami_description   = "Microsoft Windows Server 2016 with Desktop Experience Locale English AMI provided by Amazon"
+      default_user      = "Administrator"
+      sleep             = 120
+      user_data         = "user_data/windows.ps"
+    }  
+
+    WINDOWS_SERVER_2019_BASE = {
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-05ca24eaec19902c1"
+      ami_description   = "Microsoft Windows Server 2019 with Desktop Experience Locale English AMI provided by Amazon"
+      default_user      = "Administrator"
+      sleep             = 120
+      user_data         = "user_data/windows.ps"
+    }  
+    
+    WINDOWS_SERVER_2022_BASE = {
+      ami_instance_type = "t3.small"
+      ami_id            = "ami-06810ab448caa0133"
+      ami_description   = "Microsoft Windows Server 2022 Full Locale English AMI provided by Amazon"
+      default_user      = "Administrator"
+      sleep             = 120
+      user_data         = "user_data/windows.ps"
+    }  
+
+    
   }
 }
 
