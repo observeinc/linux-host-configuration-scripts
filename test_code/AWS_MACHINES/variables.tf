@@ -105,7 +105,7 @@ variable "AWS_MACHINE_CONFIGS" {
       ami_description   = "Amazon Linux 2 Kernel 5.10 AMI 2.0.20220419.0 x86_64 HVM gp2"
       default_user      = "ec2-user"
       sleep             = 60
-      user_data         = "user_data/aptbased.sh"
+      user_data         = "user_data/yumbased.sh"
     }
 
     AMAZON_LINUX_2023 = {
