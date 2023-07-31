@@ -136,15 +136,7 @@ variable "AWS_MACHINE_CONFIGS" {
       user_data         = "user_data/yumbased.sh"
     }
 
-    WINDOWS_SERVER_2016 = {
-      ami_instance_type = "t3.small"
-      ami_id            = "ami-0d7c5eb6a3508d55c"
-      ami_description   = "Microsoft Windows Server 2016 with Desktop Experience Locale English AMI provided by Amazon"
-      default_user      = "Administrator"
-      sleep             = 120
-      user_data         = "user_data/yumbased.sh"
-    }
-
+    
   }
 }
 
