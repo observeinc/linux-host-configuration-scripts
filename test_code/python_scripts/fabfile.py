@@ -45,11 +45,15 @@ def getCurlCommand(options):
 
     if "FLAGS" in options:
         FLAGS.update(options["FLAGS"])
+    if options["IS_WINDOWS"]:
+        curl_command = f'[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"; Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/observeinc/windows-host-configuration-scripts/main/agents.ps1" -outfile .\\agents.ps1; .\\agents.ps1  -ingest_token {OBSERVE_TOKEN} -customer_id {OBSERVE_CUSTOMER} -config_files_clean {FLAGS["config_files_clean"]} -ec2metadata {FLAGS["ec2metadata"]} -datacenter {FLAGS["datacenter"]} -appgroup {FLAGS["appgroup"]} -cloud_metadata {FLAGS["cloud_metadata"]} -force TRUE'
+    else:
+        curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {OBSERVE_CUSTOMER} --ingest_token {OBSERVE_TOKEN} --observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
 
-    curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {OBSERVE_CUSTOMER} --ingest_token {OBSERVE_TOKEN} --observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
     logging.info(
         "curl command = %s", curl_command.replace(OBSERVE_TOKEN, "*****")
     )
+
 
     return curl_command
 
@@ -202,6 +206,8 @@ def test(
                 datacenter = "FAB_DC"
                 appgroup = "FAB_APP_GROUP"
                 config_files_clean = "TRUE"
+                is_windows = True if "WINDOWS" in key.upper() else False
+
 
                 if "GCP" in key:
                     datacenter = "GCP"
@@ -224,8 +230,34 @@ def test(
                             "datacenter": datacenter,
                             "appgroup": appgroup,
                         },
+                        "IS_WINDOWS": is_windows
                     }
                 )
+
+                linux_test_commands = {
+                   "tofile_curl": curl_cmd,
+                   "fluent/tdagent": "if systemctl is-active --quiet td-agent-bit || systemctl is-active --quiet fluent-bit; then echo PASS; else echo FAIL; fi",
+                   "osquery": "if systemctl is-active --quiet osqueryd; then echo PASS; else echo FAIL; fi",
+                   "telegraf": "if systemctl is-active --quiet telegraf; then echo PASS; else echo FAIL; fi",
+                   "tofile_telegraf_status": "sudo service telegraf status  | cat",
+                   "tofile_osqueryd_status": "sudo service osqueryd status  | cat",
+                   "tofile_td-agent-fluent-bit_status": "sudo service td-agent-bit status || true && sudo service fluent-bit status || true | cat"
+                }
+
+                windows_test_commands = {
+                    "tofile_curl": curl_cmd,
+                    "fluent/tdagent": "",
+                    "osquery": "",
+                    "telegraf": "",
+                    "tofile_telegraf_status": "",
+                    "tofile_osqueryd_status": "",
+                    "tofile_td-agent-fluent-bit_status": ""
+                }
+
+                if is_windows:
+                    test_commands = windows_test_commands
+                else:
+                    test_commands = linux_test_commands
 
                 # multitask pool - call doTest with parameters
                 pool.apply_async(
@@ -235,15 +267,7 @@ def test(
                             "host": hosts[key]["host"],
                             "user": hosts[key]["user"],
                             "connect_kwargs": hosts[key]["connect_kwargs"],
-                            "commands": {
-                                "tofile_curl": curl_cmd,
-                                "fluent/tdagent": "if systemctl is-active --quiet td-agent-bit || systemctl is-active --quiet fluent-bit; then echo PASS; else echo FAIL; fi",
-                                "osquery": "if systemctl is-active --quiet osqueryd; then echo PASS; else echo FAIL; fi",
-                                "telegraf": "if systemctl is-active --quiet telegraf; then echo PASS; else echo FAIL; fi",
-                                "tofile_telegraf_status": "sudo service telegraf status  | cat",
-                                "tofile_osqueryd_status": "sudo service osqueryd status  | cat",
-                                "tofile_td-agent-fluent-bit_status": "sudo service td-agent-bit status || true && sudo service fluent-bit status || true | cat",
-                            },
+                            "commands": test_commands,
                             "key": key,
                             "sleep": sleep,
                             "log_level": log_level,

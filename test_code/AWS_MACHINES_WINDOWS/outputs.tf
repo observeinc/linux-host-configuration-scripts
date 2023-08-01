@@ -30,19 +30,3 @@ output "fab_hosts" {
     
 }
 
-
-
-
-# # Path to the sshd_config file
-# $sshdConfigPath = "$env:ProgramData\ssh\sshd_config"
-
-# # Read the content of the sshd_config file
-# $configContent = Get-Content $sshdConfigPath
-
-# # Search for the line containing 'PasswordAuthentication yes' and replace it with 'PasswordAuthentication no'
-# $newConfigContent = $configContent -replace '#PasswordAuthentication yes', 'PasswordAuthentication no'
-
-# # Write the modified content back to the file
-# $newConfigContent | Set-Content $sshdConfigPath
-
-# Restart-Service sshd
