@@ -1,3 +1,4 @@
+
 output "ec2" {
   value = { for key, value in aws_instance.linux_host_integration :
     key => {
@@ -26,6 +27,7 @@ output "fab_hosts" {
       "sleep" : var.AWS_MACHINE_CONFIGS[key].sleep
     }
   }
+    
 }
 
 
