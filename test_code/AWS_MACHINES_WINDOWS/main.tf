@@ -39,11 +39,12 @@ resource "aws_instance" "linux_host_integration" {
   key_name               = aws_key_pair.ec2key.key_name
 
   user_data = file(each.value.user_data)
+  get_password_data = true
 
   root_block_device {
     volume_size = 30
   }
-
+  
   tags = merge(
     var.BASE_TAGS,
     {
