@@ -21,9 +21,7 @@ output "fab_hosts" {
       "user" = var.AWS_MACHINE_CONFIGS[key].default_user
       "connect_kwargs" = {
         "key_filename" : var.PRIVATE_KEY_PATH
-      }     
-      #"password_decrypted" = rsadecrypt(value.password_data, file(var.PRIVATE_KEY_PATH)) 
-      "password_decrypted" = can(regex("WINDOWS", key)) ? rsadecrypt(value.password_data, file(var.PRIVATE_KEY_PATH)) : null
+        "password" = can(regex("WINDOWS", key)) ? rsadecrypt(value.password_data, file(var.PRIVATE_KEY_PATH)) : null      }     
       "public_ssh_link" = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.AWS_MACHINE_CONFIGS[key].default_user}@${value.public_ip}"
       "sleep" : var.AWS_MACHINE_CONFIGS[key].sleep
     }
@@ -31,3 +29,18 @@ output "fab_hosts" {
 }
 
 
+
+
+# # Path to the sshd_config file
+# $sshdConfigPath = "$env:ProgramData\ssh\sshd_config"
+
+# # Read the content of the sshd_config file
+# $configContent = Get-Content $sshdConfigPath
+
+# # Search for the line containing 'PasswordAuthentication yes' and replace it with 'PasswordAuthentication no'
+# $newConfigContent = $configContent -replace '#PasswordAuthentication yes', 'PasswordAuthentication no'
+
+# # Write the modified content back to the file
+# $newConfigContent | Set-Content $sshdConfigPath
+
+# Restart-Service sshd
