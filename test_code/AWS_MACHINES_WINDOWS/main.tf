@@ -1,0 +1,57 @@
+locals {
+  # machine_loop = { for key, value in var.AWS_MACHINE_CONFIGS : key => value if key == var.AWS_MACHINE_FILTER || var.AWS_MACHINE_FILTER == true }
+
+  compute_instances = { for key, value in var.AWS_MACHINE_CONFIGS :
+  key => value if contains(var.AWS_MACHINE_FILTER, key) || length(var.AWS_MACHINE_FILTER) == 0 }
+
+}
+
+
+
+/* Locally generated private key*/
+resource "aws_key_pair" "ec2key" {
+  key_name   = format(var.name_format, "publicKey")
+  public_key = (var.CI) ? var.PUBLIC_KEY : file(var.PUBLIC_KEY_PATH)
+
+  tags = merge(
+    var.BASE_TAGS,
+    {
+      Name = format(var.name_format, "_publicKey")
+    },
+  )
+
+}
+
+
+
+# EC2 instance for linux host 
+resource "aws_instance" "linux_host_integration" {
+  for_each = local.compute_instances
+
+  ami           = each.value.ami_id
+  instance_type = each.value.ami_instance_type
+
+  associate_public_ip_address = true
+
+  subnet_id = data.aws_subnet.main.id
+
+  vpc_security_group_ids = [aws_security_group.ec2_public.id]
+  key_name               = aws_key_pair.ec2key.key_name
+
+  user_data = file(each.value.user_data)
+
+  root_block_device {
+    volume_size = 30
+  }
+
+  tags = merge(
+    var.BASE_TAGS,
+    {
+      Name                 = format(var.name_format, "_${each.key}_${random_string.output[each.key].id}")
+      OS_KEY               = each.key
+      OBSERVE_TEST_RUN_KEY = local.test_key_value[each.key]
+    },
+  )
+}
+
+
