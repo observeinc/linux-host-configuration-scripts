@@ -216,7 +216,7 @@ def test(
         # open output
         with open(fileName) as json_file:
             hosts = json.load(json_file)
-
+            logging.info("Host contains: ", hosts)
             # dict for results of commands
             test_results = {}
 
