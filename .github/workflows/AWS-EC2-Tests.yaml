@@ -107,6 +107,10 @@ jobs:
         with:
           ref: ${{ env.THIS_REPO_BRANCH }}
 
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
       - name: Set contexts
         run: |
           mkdir context 
