@@ -17,6 +17,14 @@ import logging
 import sys
 
 
+
+def mask_password(data):
+    masked_data = data.copy()
+    password = masked_data.get("password")
+    if password:
+        masked_data["password"] = "*" * 5
+    return masked_data
+
 def getPowerShellScript(service_name):
     powershell_script = f'''
     $serviceName = "{service_name}"
@@ -62,7 +70,7 @@ def getCurlCommand(options):
     if "FLAGS" in options:
         FLAGS.update(options["FLAGS"])
     if options["IS_WINDOWS"]:
-        curl_command = f'[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"; Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/observeinc/windows-host-configuration-scripts/main/agents.ps1" -outfile .\\agents.ps1; .\\agents.ps1  -ingest_token {OBSERVE_TOKEN} -customer_id {OBSERVE_CUSTOMER}  -observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ -config_files_clean {FLAGS["config_files_clean"]} -ec2metadata {FLAGS["ec2metadata"]} -datacenter {FLAGS["datacenter"]} -appgroup {FLAGS["appgroup"]} -cloud_metadata {FLAGS["cloud_metadata"]} -force TRUE'
+        curl_command = f'[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"; Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/observeinc/windows-host-configuration-scripts/{options["BRANCH"]}/agents.ps1" -outfile .\\agents.ps1; .\\agents.ps1  -ingest_token {OBSERVE_TOKEN} -customer_id {OBSERVE_CUSTOMER}  -observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ -config_files_clean {FLAGS["config_files_clean"]} -ec2metadata {FLAGS["ec2metadata"]} -datacenter {FLAGS["datacenter"]} -appgroup {FLAGS["appgroup"]} -cloud_metadata {FLAGS["cloud_metadata"]} -force TRUE'
     else:
         curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {OBSERVE_CUSTOMER} --ingest_token {OBSERVE_TOKEN} --observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
 
@@ -570,6 +578,8 @@ def doTest(options, t):
             # default to fail so failed connections aren't ignored
             t[key][cmd] = test_fail_message
 
+
+
             # info
             logging.debug(
                 f"""
@@ -578,7 +588,7 @@ def doTest(options, t):
 
                 host={options["host"]}
                 user={options["user"]}
-                connect_kwargs={options["connect_kwargs"]}
+                connect_kwargs={mask_password(options["connect_kwargs"])}
 
                 Running { options["commands"][cmd] }
                 #######################################"""
