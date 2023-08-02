@@ -17,6 +17,22 @@ import logging
 import sys
 
 
+def getPowerShellScript(service_name):
+    powershell_script = f'''
+    $serviceName = "{service_name}"
+
+    $service = Get-Service -Name $serviceName
+
+    if ($service -ne $null -and $service.Status -eq "Running") {{
+        Write-Output "PASS"
+    }} else {{
+        Write-Output "FAIL"
+    }}
+    '''
+
+    return powershell_script
+
+
 def getObserveConfig(config, environment):
     """Fetches config file"""
     # Set your Observe environment details in config\configfile.ini
@@ -46,7 +62,7 @@ def getCurlCommand(options):
     if "FLAGS" in options:
         FLAGS.update(options["FLAGS"])
     if options["IS_WINDOWS"]:
-        curl_command = f'[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"; Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/observeinc/windows-host-configuration-scripts/main/agents.ps1" -outfile .\\agents.ps1; .\\agents.ps1  -ingest_token {OBSERVE_TOKEN} -customer_id {OBSERVE_CUSTOMER} -config_files_clean {FLAGS["config_files_clean"]} -ec2metadata {FLAGS["ec2metadata"]} -datacenter {FLAGS["datacenter"]} -appgroup {FLAGS["appgroup"]} -cloud_metadata {FLAGS["cloud_metadata"]} -force TRUE'
+        curl_command = f'[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"; Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/observeinc/windows-host-configuration-scripts/main/agents.ps1" -outfile .\\agents.ps1; .\\agents.ps1  -ingest_token {OBSERVE_TOKEN} -customer_id {OBSERVE_CUSTOMER}  -observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ -config_files_clean {FLAGS["config_files_clean"]} -ec2metadata {FLAGS["ec2metadata"]} -datacenter {FLAGS["datacenter"]} -appgroup {FLAGS["appgroup"]} -cloud_metadata {FLAGS["cloud_metadata"]} -force TRUE'
     else:
         curl_command = f'curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/{options["BRANCH"]}/observe_configure_script.sh" | bash -s -- --customer_id {OBSERVE_CUSTOMER} --ingest_token {OBSERVE_TOKEN} --observe_host_name https://{OBSERVE_CUSTOMER}.collect.{DOMAIN}.com/ --config_files_clean {FLAGS["config_files_clean"]} --ec2metadata {FLAGS["ec2metadata"]} --datacenter {FLAGS["datacenter"]} --appgroup {FLAGS["appgroup"]} --cloud_metadata {FLAGS["cloud_metadata"]} --branch_input {options["BRANCH"]}'
 
@@ -244,14 +260,16 @@ def test(
                    "tofile_td-agent-fluent-bit_status": "sudo service td-agent-bit status || true && sudo service fluent-bit status || true | cat"
                 }
 
+
+
                 windows_test_commands = {
                     "tofile_curl": curl_cmd,
-                    "fluent/tdagent": "",
-                    "osquery": "",
-                    "telegraf": "",
-                    "tofile_telegraf_status": "",
-                    "tofile_osqueryd_status": "",
-                    "tofile_td-agent-fluent-bit_status": ""
+                    "fluent/tdagent": getPowerShellScript('fluent-bit'),
+                    "osquery": getPowerShellScript('osqueryd'),
+                    "telegraf": getPowerShellScript('telegraf'),
+                    "tofile_telegraf_status": "Get-Service telegraf ",
+                    "tofile_osqueryd_status": "Get-Service osqueryd",
+                    "tofile_td-agent-fluent-bit_status": "Get-Service fluent-bit"
                 }
 
                 if is_windows:
@@ -581,7 +599,7 @@ def doTest(options, t):
 
             if "tofile" not in cmd:
                 # if not writing to a file add command result dictionary
-                t[key][cmd] = result_msg.format(result)
+                t[key][cmd] = result_msg.format(result).strip()
             else:
                 # else add file path
                 file_name = f'file_outputs/{options["key"]}_{cmd}_results.txt'
