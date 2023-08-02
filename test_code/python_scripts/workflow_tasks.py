@@ -49,7 +49,7 @@ def tf_main_file(module="", main_file_path="../main.tf"):
                     PUBLIC_KEY_PATH  = var.PUBLIC_KEY_PATH
                     PRIVATE_KEY_PATH = var.PRIVATE_KEY_PATH
                     name_format        = local.name_format
-                    AWS_MACHINE_FILTER = []
+                    AWS_MACHINE_FILTER = ["WINDOWS_SERVER_2016_BASE"]
                     CI                 = var.CI
                     PUBLIC_KEY         = var.PUBLIC_KEY
 
