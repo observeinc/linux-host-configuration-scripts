@@ -165,14 +165,14 @@ jobs:
           pip3 install -r requirements.txt
 
           # run tests 
-          fab test -s 60 -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -w main -o "1: run fabric tests python script"
+          fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -w main -o "1: run fabric tests python script"
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: Retry tests
         if: ${{ env.TEST_RESULT == 'FAIL' }} 
         run: |
           # run tests
-          fab test -s 60 -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests" -w main -b ${{ env.THIS_REPO_BRANCH }}
+          fab test -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests" -w main -b ${{ env.THIS_REPO_BRANCH }}
           
         working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 
