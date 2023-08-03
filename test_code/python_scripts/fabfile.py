@@ -234,6 +234,8 @@ def test(
                 config_files_clean = "TRUE"
                 is_windows = True if "WINDOWS" in key.upper() else False
 
+                if "WINDOWS" in key:
+                    del hosts[key]["connect_kwargs"]['key_filename']
 
                 if "GCP" in key:
                     datacenter = "GCP"
