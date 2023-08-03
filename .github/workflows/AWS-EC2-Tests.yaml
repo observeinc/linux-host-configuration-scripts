@@ -8,6 +8,10 @@ on:
         type: string
         description: Select the branch to use from this repo
         default: main
+      windows_repo_branch:
+        type: string
+        description: Select the branch to use from windows-host-configuration repo
+        default: main
       terraform_run_destroy:
         type: choice
         options:
@@ -51,6 +55,7 @@ jobs:
     env:
       TF_VAR_REGION: "us-west-2"
       THIS_REPO_BRANCH: main
+      WINDOWS_REPO_BRANCH: main
       TERRAFORM_RUN_DESTROY: true
       FAIL_FIRST_TEST: false
       FAIL_SECOND_TEST: false
@@ -94,6 +99,7 @@ jobs:
         run: |
           if ${{ github.event.inputs.this_repo_branch != '' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
+            echo "WINDOWS_REPO_BRANCH=refs/heads/${{ github.event.inputs.windows_repo_branch }}" >> $GITHUB_ENV
           elif ${{ github.event_name == 'pull_request' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
           fi
@@ -165,14 +171,14 @@ jobs:
           pip3 install -r requirements.txt
 
           # run tests 
-          fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -w main -o "1: run fabric tests python script"
+          fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -w ${{ env.WINDOWS_REPO_BRANCH }} -o "1: run fabric tests python script"
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: Retry tests
         if: ${{ env.TEST_RESULT == 'FAIL' }} 
         run: |
           # run tests
-          fab test -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests" -w main -b ${{ env.THIS_REPO_BRANCH }}
+          fab test -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests" -w ${{ env.WINDOWS_REPO_BRANCH }} -b ${{ env.THIS_REPO_BRANCH }}
           
         working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 

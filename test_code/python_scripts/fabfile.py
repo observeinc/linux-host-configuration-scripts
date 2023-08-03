@@ -604,7 +604,7 @@ def doTest(options, t):
                 hide_run_output = False
 
             result = connect.run(
-                options["commands"][cmd], hide=hide_run_output, timeout=300
+                options["commands"][cmd], hide=hide_run_output, timeout=480
             )
 
             # format string for results
