@@ -1,11 +1,12 @@
 resource "aws_security_group" "ec2_public" {
   name   = format(var.name_format, "ec2_sg")
-  vpc_id = data.aws_vpc.main.id
+  vpc_id = aws_vpc.vpc_public.id  
   ingress {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
+    description = "Allow incomming SSH connections"
   }
 
    ingress {
