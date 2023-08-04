@@ -10,4 +10,5 @@ __pycache__
 test_code/python_scripts/testenv
 log_outputs
 /test_code/python_scripts/context
+/test_code/python_scripts/.idea
 /test_code/outputs.tf

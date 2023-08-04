@@ -21,6 +21,7 @@ output "fab_hosts" {
       "user" = var.AWS_MACHINE_CONFIGS[key].default_user
       "connect_kwargs" = {
         "key_filename" : var.PRIVATE_KEY_PATH
+        "password" = can(regex("WINDOWS", key)) ? rsadecrypt(value.password_data, file(var.PRIVATE_KEY_PATH)) : null     
       }
       "public_ssh_link" = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.AWS_MACHINE_CONFIGS[key].default_user}@${value.public_ip}"
       "sleep" : var.AWS_MACHINE_CONFIGS[key].sleep
