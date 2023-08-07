@@ -87,6 +87,8 @@ jobs:
             ARM_CLIENT_SECRET:content-eng-linux-host-test/ARM_CLIENT_SECRET
             ARM_SUBSCRIPTION_ID:content-eng-linux-host-test/ARM_SUBSCRIPTION_ID
             ARM_TENANT_ID:content-eng-linux-host-test/ARM_TENANT_ID
+            STAGE_USER_EMAIL:content-eng-linux-host-test/STAGE_USER_EMAIL
+            STAGE_USER_PASSWORD:content-eng-linux-host-test/STAGE_USER_PASSWORD
 
       # AWS Login - orig role - has to occur before checkout
       - name: Configure AWS Credentials
@@ -136,7 +138,7 @@ jobs:
 
           python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"${{ env.MODULE }}\")"
 
-          python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}\", domain=\"${{ steps.secrets.outputs.STAGE_DOMAIN }}\", token=\"${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}\")"
+          python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}\", domain=\"${{ steps.secrets.outputs.STAGE_DOMAIN }}\", token=\"${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}\",user_email=\"${{ steps.secrets.outputs.STAGE_USER_EMAIL }}\",user_password=\"${{ steps.secrets.outputs.STAGE_USER_PASSWORD }}\")"
 
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
@@ -192,10 +194,14 @@ jobs:
 
           sed -i 's/${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/file_outputs/*
           sed -i 's/${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/file_outputs/*
+          sed -i 's/${{ steps.secrets.outputs.STAGE_USER_EMAIL}}/******/g' ./python_scripts/file_outputs/*
+          sed -i 's/${{ steps.secrets.outputs.STAGE_USER_PASSWORD}}/******/g' ./python_scripts/file_outputs/*
 
           sed -i 's/${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/log_outputs/*
           sed -i 's/${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/log_outputs/*
-
+          sed -i 's/${{ steps.secrets.outputs.STAGE_USER_EMAIL }}/******/g' ./python_scripts/log_outputs/*
+          sed -i 's/${{ steps.secrets.outputs.STAGE_USER_PASSWORD }}/******/g' ./python_scripts/log_outputs/*
+          
         working-directory: "${{ env.WORK_DIR }}"
 
       - name: Archive test results

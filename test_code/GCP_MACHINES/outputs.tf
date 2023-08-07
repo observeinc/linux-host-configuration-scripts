@@ -2,6 +2,7 @@ output "fab_hosts" {
   value = { for key, value in google_compute_instance.instances :
     "GCP_${key}" => {
       "host" = value.network_interface[0].access_config[0].nat_ip
+      "name" = value.name
       "user" = var.GCP_MACHINE_CONFIGS[key].default_user
       "connect_kwargs" = {
         "key_filename" : var.PRIVATE_KEY_PATH

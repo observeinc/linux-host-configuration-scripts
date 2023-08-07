@@ -16,6 +16,8 @@ from fabric import task
 import logging
 import sys
 
+from validate_observe import validate_in_observe
+
 
 
 def mask_password(data):
@@ -117,7 +119,6 @@ def terraformOutput(fileName="tf_hosts.json"):
     os.system(
         f"cd ../; terraform output -json | jq -r '.fab_host_all.value' > python_scripts/{fileName}"
     )
-
 
 seperator = "################################"
 
@@ -273,7 +274,6 @@ def test(
                 }
 
 
-
                 windows_test_commands = {
                     "tofile_curl": curl_cmd,
                     "fluent/tdagent": getPowerShellScript('fluent-bit'),
@@ -309,6 +309,22 @@ def test(
             # wait for jobs to complete
             pool.close()
             pool.join()
+
+            logging.info("Sleeping for 180 seconds for Ingest Delay to Observe....")
+            time.sleep(180)
+            # Validate AWS EC2 <> Observe Data flow
+            if "AWS" in key:
+                for key in hosts: #For each AWS EC2 Host, verify if in Observe
+                    instance_id = hosts[key]['instance_id']
+                    validate_all_agents(instance_id, key, 'aws', test_results)
+            if "GCP" in key:
+                for key in hosts:  # For each GCP VM Host, verify if in Observe
+                    instance_id = hosts[key]['name']
+                    validate_all_agents(instance_id, key, 'gcp', test_results)
+            if "AZURE" in key:
+                for key in hosts:  # For each Azure VM Host, verify if in Observe
+                    instance_id = hosts[key]['name']
+                    validate_all_agents(instance_id, key, 'azure', test_results)
 
             small_result = {}
 
@@ -623,6 +639,39 @@ def doTest(options, t):
                 t[key][cmd] = file_name
     except Exception as e:
         traceback.print_exception(e)
+
+
+def validate_all_agents(instance_id: str, key: str,  cloud: str, test_results: object) -> object:
+    """
+    Validates and returns test_results for all 3 agents
+    @param instance_id: instance_id to look for in Observe
+    @param key: Host key from tf_hosts
+    @param cloud: cloud type (aws, azure, gcp)
+    @param test_results: dict containg test_results
+    @return:     test_results[key][agent_in_observe] with 'PASS' or 'FAIL'
+
+    """
+    try:
+        fluentbit_in_observe = validate_in_observe(instance_id=instance_id, type='fluentbit', cloud=cloud)
+        test_results[key]['fluentbit_in_observe'] = 'PASS' if fluentbit_in_observe else 'FAIL'
+    except:
+        logging.info("FluentBit Validation Failed")
+        test_results[key]['fluentbit_in_observe'] = 'FAIL'
+    try:
+        osquery_in_observe = validate_in_observe(instance_id=instance_id, type='osquery', cloud=cloud)
+        test_results[key]['osquery_in_observe'] = 'PASS' if osquery_in_observe else 'FAIL'
+    except:
+        logging.info("Osquery Validation Failed")
+        test_results[key]['osquery_in_observe'] = 'FAIL'
+    try:
+        telegraf_in_observe = validate_in_observe(instance_id=instance_id, type='telegraf', cloud=cloud)
+        test_results[key]['telegraf_in_observe'] = 'PASS' if telegraf_in_observe else 'FAIL'
+    except:
+        logging.info("Telegraf Validation Failed")
+        test_results[key]['telegraf_in_observe'] = 'FAIL'
+
+    return test_results
+
 
 
 # def tt():

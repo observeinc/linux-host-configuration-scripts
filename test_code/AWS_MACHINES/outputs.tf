@@ -17,7 +17,8 @@ output "ec2" {
 output "fab_hosts" {
   value = { for key, value in aws_instance.linux_host_integration :
     "AWS_${key}" => {
-      "host" = value.public_ip
+      "host"            = value.public_ip
+      "instance_id"     = value.id
       "user" = var.AWS_MACHINE_CONFIGS[key].default_user
       "connect_kwargs" = {
         "key_filename" : var.PRIVATE_KEY_PATH

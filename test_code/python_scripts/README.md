@@ -36,11 +36,14 @@ mkdir log_outputs
 
 ### create config.ini 
 You need to create a file with customer id and token for observe dataset for sending data
+Additionally you will need to add user_email and user_password to valid data in Observe that is being sent. 
 
 [target-stage-tenant]
 customer_id = 155575265738
 domain = observe-staging
 datastream_token = YOURS
+user_email = YOURS
+user_password = YOURS
 ### Run tests
 Run ```fab test -h ``` for options
 
