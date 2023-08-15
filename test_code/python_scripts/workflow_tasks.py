@@ -124,6 +124,8 @@ def config_ini(
     custid="",
     domain="",
     token="",
+    user_email="none",
+    user_password="none",
     config_file_path="config.ini",
     config_file_env="target-stage-tenant",
 ):
@@ -134,6 +136,8 @@ def config_ini(
                 customer_id = {custid}
                 domain = {domain}
                 datastream_token = {token}
+                user_email = {user_email}
+                user_password = {user_password}
             """
         )
 
