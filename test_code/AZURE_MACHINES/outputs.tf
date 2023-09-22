@@ -21,7 +21,7 @@ output "fab_hosts" {
       "connect_kwargs" = {
         "key_filename" : var.PRIVATE_KEY_PATH
       }
-      "public_ssh_link" = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.AZURE_MACHINE_CONFIGS[key].default_user}@${value.public_ip_address}"
+      "public_ssh_link" = "ssh -i ${var.PRIVATE_KEY_PATH} ${var.AZURE_WIN_MACHINE_CONFIGS[key].default_user}@${value.public_ip_address}"
       "sleep" : var.AZURE_WIN_MACHINE_CONFIGS[key].sleep
     }
   }

@@ -10,14 +10,10 @@ locals {
 
   combined_instances = merge(local.compute_instances, local.win_instances)
 
+  additional_custom_data = "Add-Content -Path c:\\users\\test-user\\.ssh\\authorized_keys -Value \"${(var.CI) ? var.PUBLIC_KEY : file(var.public_key_path)}\""
+
 }
 
-data "template_file" "init" {
-  template = "${file("${path.module}../user_data/azure_windows.ps.tpl")}"
-  vars = {
-    public_key = (var.CI) ? var.PUBLIC_KEY : file(var.public_key_path)
-  }
-}
 
 resource "azurerm_resource_group" "linux_host_test" {
   name     = format(var.name_format, "linux-host-test-resources")
@@ -59,7 +55,7 @@ resource "azurerm_linux_virtual_machine" "linux_host_test" {
   custom_data = filebase64(each.value.user_data)
 }
 
-resource "azurerm_windows_virtual_machine" "linux_host_test" {
+resource "azurerm_windows_virtual_machine" "windows_host_test" {
   # https://azapril.dev/2020/05/12/terraform-depends_on/
   depends_on = [
     azurerm_network_interface_security_group_association.linux_host_test
@@ -88,5 +84,6 @@ resource "azurerm_windows_virtual_machine" "linux_host_test" {
     version   = each.value.source_image_reference.version
   }
 
-  custom_data = filebase64(data.template_file.init.rendered)
+  # custom_data = filebase64("${each.value.user_data}\n${local.additional_custom_data}")
+  custom_data = base64encode("${file("${path.module}/../user_data/windows.ps")}\n${local.additional_custom_data}")
 }
