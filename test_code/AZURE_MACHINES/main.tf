@@ -23,8 +23,7 @@ resource "azurerm_linux_virtual_machine" "linux_host_test" {
     azurerm_network_interface_security_group_association.linux_host_test
   ]
   for_each            = local.compute_instances
-  name                = replace(format(var.name_format, "${each.key}-vm"), local.str_f, local.str_r)
-  computer_name       = each.key
+  name                = replace(format(var.name_format, "${each.key}-machine"), local.str_f, local.str_r)
   resource_group_name = azurerm_resource_group.linux_host_test.name
   location            = azurerm_resource_group.linux_host_test.location
   size                = each.value.machine_type
@@ -53,13 +52,14 @@ resource "azurerm_linux_virtual_machine" "linux_host_test" {
   custom_data = filebase64(each.value.user_data)
 }
 
-resource "azurerm_windows_virtual_machine" "linux_host_test" {
+resource "azurerm_windows_virtual_machine" "windows_host_test" {
   # https://azapril.dev/2020/05/12/terraform-depends_on/
   depends_on = [
     azurerm_network_interface_security_group_association.linux_host_test
   ]
   for_each            = local.win_instances
-  name                = replace(format(var.name_format, "${each.key}-machine"), local.str_f, local.str_r)
+  name                = replace(format(var.name_format, "${each.key}-vm"), local.str_f, local.str_r)
+  computer_name       = each.value.computer_name
   resource_group_name = azurerm_resource_group.linux_host_test.name
   location            = azurerm_resource_group.linux_host_test.location
   size                = each.value.machine_type

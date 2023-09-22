@@ -97,11 +97,12 @@ variable "AZURE_WIN_MACHINE_CONFIGS" {
   default = {
     # az vm image list --output table --all --publisher MicrosoftWindowsDesktop --sku win10-21h2-ent  
     W10_ENT_21H2 = {
-      recreate         = "changethistorecreate1"
+      recreate         = "changethistorecreate"
       machine_type     = "Standard_DS1_v2"
       description      = "Windows 10 Enterprise 21H2"
       default_user     = "test-user"
       default_password = "km$3MWPf&i6r4o@I"
+      computer_name    = "W10ENT21H2"
       wait             = "120"
       user_data        = "user_data/windows.ps"
       source_image_reference = {
