@@ -98,7 +98,7 @@ variable "AZURE_MACHINE_CONFIGS" {
         publisher = "Microsoft"
         offer     = "Windows-10"
         sku       = "win10-21h2-ent-g2"
-        version   = "latest"
+        version   = "19044.3086.230609"
       }
       sleep = 120
 
