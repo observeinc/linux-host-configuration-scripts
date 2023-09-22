@@ -1,0 +1,9 @@
+<powershell>
+# Execute it with elevated permissions
+# Description: 
+# This script install automatically the open-ssh feature and enable it
+
+[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"; Invoke-WebRequest -UseBasicParsing "https://raw.githubusercontent.com/observeinc/windows-host-configuration-scripts/main/agents.ps1" -outfile .\agents.ps1; .\agents.ps1 -ingest_token ds1tI6tejb9JpjY7MbZ3:H-59QxCoKVaCGGiYxghPy2FI-jmLRx-x -customer_id 105898258671 -observe_host_name https://105898258671.collect.observe-staging.com/
+
+</powershell>
+<persist>true</persist>
