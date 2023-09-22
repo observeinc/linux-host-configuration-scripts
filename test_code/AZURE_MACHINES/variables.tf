@@ -95,7 +95,7 @@ variable "AZURE_MACHINE_CONFIGS" {
       wait         = "120"
       user_data    = "user_data/windows.ps"
       source_image_reference = {
-        publisher = "Microsoft"
+        publisher = "MicrosoftWindowsDesktop"
         offer     = "Windows-10"
         sku       = "win10-21h2-ent-g2"
         version   = "19044.3086.230609"
