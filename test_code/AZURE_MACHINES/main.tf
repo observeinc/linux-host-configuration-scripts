@@ -13,7 +13,7 @@ locals {
 }
 
 data "template_file" "init" {
-  template = "${file("${path.module}/azure_windows.ps.tpl")}"
+  template = "${file("${path.module}../user_data/azure_windows.ps.tpl")}"
   vars = {
     public_key = (var.CI) ? var.PUBLIC_KEY : file(var.public_key_path)
   }
