@@ -1,6 +1,6 @@
 # tflint-ignore: terraform_naming_convention
 variable "AZURE_MACHINE_CONFIGS" {
-  description = "variable for what compute instances to create"
+  description = "variable for what linux compute instances to create"
   type        = map(any)
   default = {
     # https://az-vm-image.info/
@@ -87,13 +87,23 @@ variable "AZURE_MACHINE_CONFIGS" {
       sleep = 120
 
     }
-    WIN_10_ENT_21H2 = {
-      recreate     = "changethistorecreate1"
-      machine_type = "Standard_DS1_v2"
-      description  = "Windows 10 Enterprise 21H2"
-      default_user = "test-user"
-      wait         = "120"
-      user_data    = "user_data/windows.ps"
+  }
+}
+
+# tflint-ignore: terraform_naming_convention
+variable "AZURE_WIN_MACHINE_CONFIGS" {
+  description = "variable for what linux compute instances to create"
+  type        = map(any)
+  default = {
+    # az vm image list --output table --all --publisher MicrosoftWindowsDesktop --sku win10-21h2-ent  
+    W10_ENT_21H2 = {
+      recreate         = "changethistorecreate1"
+      machine_type     = "Standard_DS1_v2"
+      description      = "Windows 10 Enterprise 21H2"
+      default_user     = "test-user"
+      default_password = "km$3MWPf&i6r4o@I"
+      wait             = "120"
+      user_data        = "user_data/windows.ps"
       source_image_reference = {
         publisher = "MicrosoftWindowsDesktop"
         offer     = "Windows-10"
@@ -101,7 +111,6 @@ variable "AZURE_MACHINE_CONFIGS" {
         version   = "19044.3086.230609"
       }
       sleep = 120
-
     }
   }
 }

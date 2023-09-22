@@ -1,6 +1,6 @@
 # Create public IPs
 resource "azurerm_public_ip" "linux_host_test" {
-  for_each            = local.compute_instances
+  for_each            = local.combined_instances
   name                = format(var.name_format, "${each.key}_PublicIP")
   location            = azurerm_resource_group.linux_host_test.location
   resource_group_name = azurerm_resource_group.linux_host_test.name
@@ -8,7 +8,7 @@ resource "azurerm_public_ip" "linux_host_test" {
 }
 
 resource "azurerm_network_interface" "linux_host_test" {
-  for_each            = local.compute_instances
+  for_each            = local.combined_instances
   name                = format(var.name_format, "${each.key}_nic")
   location            = azurerm_resource_group.linux_host_test.location
   resource_group_name = azurerm_resource_group.linux_host_test.name
@@ -42,7 +42,7 @@ resource "azurerm_network_security_group" "linux_host_test" {
 
 # Connect the security group to the network interface
 resource "azurerm_network_interface_security_group_association" "linux_host_test" {
-  for_each                  = local.compute_instances
+  for_each                  = local.combined_instances
   network_interface_id      = azurerm_network_interface.linux_host_test[each.key].id
   network_security_group_id = azurerm_network_security_group.linux_host_test.id
 }
