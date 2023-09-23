@@ -85,5 +85,5 @@ resource "azurerm_windows_virtual_machine" "windows_host_test" {
   }
 
   # custom_data = filebase64("${each.value.user_data}\n${local.additional_custom_data}")
-  custom_data = base64encode("${file("${path.module}/../user_data/windows.ps")}\n${local.additional_custom_data}")
+  custom_data = base64encode("${file("${path.module}/../user_data/windows_azure.ps")}\n</powershell>\n<persist>true</persist>\n${local.additional_custom_data}")
 }
