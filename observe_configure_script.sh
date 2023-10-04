@@ -208,18 +208,6 @@ generateSpacer(){
   echo "###########################################"
 }
 
-curlObserve(){
-  local message="$1"
-  local path_suffix="$2"
-  local result="$3"
-
-  curl https://"${OBSERVE_ENVIRONMENT}"/v1/http/script_validation/"${path_suffix}" \
-  -H "Authorization: Bearer ${ingest_token}" \
-  -H "Content-type: application/json" \
-  -d "{\"data\": {\"datacenter\": \"${DEFAULT_OBSERVE_DATA_CENTER}\", \"host\": \"${DEFAULT_OBSERVE_HOSTNAME}\",\"result\": \"${result}\",\"message\": \"${message}\", \"os\": \"${TERRAFORM_REPLACE_OS_VALUE}\" }}"
-
-}
-
 printHelp(){
       log "$SPACER"
       log "## HELP CONTENT"
@@ -579,14 +567,15 @@ if [ "$validate_endpoint" == TRUE ]; then
     log "$SPACER"
     log
 
-    curl_endpoint=$(curl https://"${OBSERVE_ENVIRONMENT}"/v1/http/script_validation \
+    # Send the HEAD request so we aren't posting data
+    curl_endpoint=$(curl -I https://"${OBSERVE_ENVIRONMENT}"/ \
     -H "Authorization: Bearer ${ingest_token}" \
-    -H "Content-type: application/json" \
-    -d "{\"data\": {  \"datacenter\": \"${DEFAULT_OBSERVE_DATA_CENTER}\",\"host\": \"${DEFAULT_OBSERVE_HOSTNAME}\",\"message\": \"validating customer id and token\", \"os\": \"${TERRAFORM_REPLACE_OS_VALUE}\", \"result\": \"SUCCESS\",  \"script_run\": \"${DEFAULT_OBSERVE_DATA_CENTER}\" ,  \"OBSERVE_TEST_RUN_KEY\": \"${OBSERVE_TEST_RUN_KEY}\"}}")
+    -H "Content-type: application/json")
 
-    validate_endpoint_result=$(echo "$curl_endpoint" | grep -c -Po '(?<="ok":)(true)')
+    # Extract HTTP response code
+    http_code=$(echo "$curl_endpoint" | grep -i -m 1 -o -E 'HTTP/[0-9.]+ [0-9]+' | awk '{print $2}')
 
-    if ((validate_endpoint_result != 1 )); then
+    if ((http_code != "200" )); then
         log "$SPACER"
         log "Endpoint Validation failed with:"
         log "$curl_endpoint"
@@ -1156,14 +1145,8 @@ if [ "$fluentbitinstall" == TRUE ]; then
 
     if systemctl is-active --quiet fluent-bit; then
       log fluent-bit is running
-
-      curlObserve "fluent-bit is running" "fluent-bit" "SUCCESS"
-
     else
       log fluent-bit is NOT running
-
-      curlObserve "fluent-bit is NOT running" "fluent-bit" "FAILURE"
-
       sudo service fluent-bit status
     fi
 
@@ -1176,14 +1159,8 @@ if [ "$fluentbitinstall" == TRUE ]; then
 
     if systemctl is-active --quiet td-agent-bit; then
       log td-agent-bit is running
-
-      curlObserve "td-agent-bit is running" "td-agent-bit" "SUCCESS"
-
     else
       log td-agent-bit is NOT running
-
-      curlObserve "td-agent-bit is NOT running" "td-agent-bit" "FAILURE"
-
       sudo service td-agent-bit status
     fi
 
@@ -1203,14 +1180,8 @@ if [ "$osqueryinstall" == TRUE ]; then
 
   if systemctl is-active --quiet osqueryd; then
     log osqueryd is running
-
-  curlObserve "osqueryd is running" "osqueryd" "SUCCESS"
-
   else
     log osqueryd is NOT running
-
-    curlObserve "osqueryd is NOT running" "osqueryd" "FAILURE"
-
     sudo service osqueryd status
   fi
   log "$SPACER"
@@ -1229,14 +1200,8 @@ if [ "$telegrafinstall" == TRUE ]; then
 
     if systemctl is-active --quiet telegraf; then
       log telegraf is running
-
-      curlObserve "telegraf is running" "telegraf" "SUCCESS"
-
     else
       log telegraf is NOT running
-
-      curlObserve "telegraf is NOT running" "telegraf" "FAILURE"
-
       sudo service telegraf status
     fi
     log "$SPACER"
