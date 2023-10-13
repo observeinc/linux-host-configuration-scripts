@@ -256,7 +256,7 @@ printVariables(){
       log "* VARIABLES *"
       log "$SPACER"
       log "customer_id: $customer_id"
-      log "ingest_token: $ingest_token"
+      log "ingest_token: $masked_token"
       log "observe_host_name: $observe_host_name"
       log "config_files_clean: $config_files_clean"
       log "ec2metadata: $ec2metadata"
@@ -426,6 +426,26 @@ printMessage(){
   log
 }
 
+mask_token() {
+  local ingest_token="$1"
+  local masked_token="${ingest_token%%:*}:"
+  local length=${#ingest_token}
+  local colon_found=false
+
+  for ((i=0; i<length; i++)); do
+    if [ "$colon_found" = true ]; then
+      masked_token="${masked_token}X"
+    fi
+
+    if [ "${ingest_token:i:1}" = ":" ]; then
+      colon_found=true
+    fi
+  done
+ 
+    echo "$masked_token"
+}
+
+
 SPACER=$(generateSpacer)
 
 log "$SPACER"
@@ -529,10 +549,10 @@ fi
 validateObserveHostName "$observe_host_name_base"
 
 observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
-
+masked_token=$(mask_token "$ingest_token")
 log "$SPACER"
 log "customer_id: ${customer_id}"
-log "ingest_token: ${ingest_token}"
+log "ingest_token: ${masked_token}"
 log "observe_host_name_base: ${observe_host_name_base}"
 log "observe_host_name: ${observe_host_name}"
 log "config_files_clean: ${config_files_clean}"
@@ -603,7 +623,7 @@ log "    Hostname:  $DEFAULT_OBSERVE_HOSTNAME"
 log
 log "    Customer ID:  $customer_id"
 log
-log "    Customer Ingest Token:  $ingest_token"
+log "    Customer Ingest Token:  $masked_token"
 
 testEject "${testeject}" "EJECT1"
 
