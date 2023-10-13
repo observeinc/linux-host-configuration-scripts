@@ -256,7 +256,6 @@ printVariables(){
       log "* VARIABLES *"
       log "$SPACER"
       log "customer_id: $customer_id"
-      log "ingest_token: $ingest_token"
       log "observe_host_name: $observe_host_name"
       log "config_files_clean: $config_files_clean"
       log "ec2metadata: $ec2metadata"
@@ -529,10 +528,8 @@ fi
 validateObserveHostName "$observe_host_name_base"
 
 observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
-
 log "$SPACER"
 log "customer_id: ${customer_id}"
-log "ingest_token: ${ingest_token}"
 log "observe_host_name_base: ${observe_host_name_base}"
 log "observe_host_name: ${observe_host_name}"
 log "config_files_clean: ${config_files_clean}"
@@ -602,8 +599,6 @@ log
 log "    Hostname:  $DEFAULT_OBSERVE_HOSTNAME"
 log
 log "    Customer ID:  $customer_id"
-log
-log "    Customer Ingest Token:  $ingest_token"
 
 testEject "${testeject}" "EJECT1"
 
