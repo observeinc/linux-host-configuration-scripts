@@ -42,6 +42,25 @@ def getPowerShellScript(service_name):
 
     return powershell_script
 
+# Windows doesn't set services to restart
+# on failure by default so we need to make sure that
+# when we create these, they are set to do so.
+def windowsFailureStatus(service_name):
+    powershell_script = f'''
+    $serviceName = "{service_name}"
+
+    $serviceFailure = & sc.exe qFailure $serviceName
+
+    if (($serviceFailure | Select-String -Pattern "RESTART" -SimpleMatch -Quiet) -and
+        ($serviceFailure | Select-String -Pattern "DELAY = 5000 milliseconds" -SimpleMatch -Quiet)) {{
+        Write-Output "PASS"
+    }} else {{
+        Write-Output "FAIL"
+    }}
+    '''
+
+    return powershell_script
+
 
 def getObserveConfig(config, environment):
     """Fetches config file"""
@@ -281,7 +300,11 @@ def test(
                     "telegraf": getPowerShellScript('telegraf'),
                     "tofile_telegraf_status": "Get-Service telegraf ",
                     "tofile_osqueryd_status": "Get-Service osqueryd",
-                    "tofile_td-agent-fluent-bit_status": "Get-Service fluent-bit"
+                    "tofile_td-agent-fluent-bit_status": "Get-Service fluent-bit",
+                    "tofile_telegraf_failure_status": "sc qFailure telegraf",
+                    "fluent_failure_behavior": windowsFailureStatus('fluent-bit'),
+                    "osquery_failure_behavior": windowsFailureStatus('osqueryd'),
+                    "telegraf_failure_behavior": windowsFailureStatus('telegraf'),
                 }
 
                 if is_windows:
