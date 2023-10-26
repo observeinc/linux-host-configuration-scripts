@@ -11,9 +11,12 @@ module "aws_machines" {
   # AWS_MACHINE_FILTER = ["AMAZON_LINUX_2", "UBUNTU_18_04_LTS", "UBUNTU_20_04_LTS", "RHEL_8_4_0", "CENT_OS_7", "AMAZON_LINUX_2023", "WINDOWS_SERVER_2019_BASE", "WINDOWS_SERVER_2022_BASE"]
   AWS_MACHINE_FILTER  = ["UBUNTU_20_04_LTS", "UBUNTU_18_04_LTS"]
   AWS_MACHINE_CONFIGS = var.AWS_MACHINE_CONFIGS
-  # AWS_MACHINE_FILTER = ["WINDOWS_SERVER_2019_BASE", "WINDOWS_SERVER_2022_BASE"]
-  CI         = var.CI
-  PUBLIC_KEY = var.PUBLIC_KEY
+  CI                  = var.CI
+  PUBLIC_KEY          = var.PUBLIC_KEY
+  USERDATA = templatefile("${path.module}/user_data/aptbased.sh", {
+    OBSERVE_ENDPOINT = var.OBSERVE_ENDPOINT
+    OBSERVE_TOKEN    = var.OBSERVE_TOKEN
+  })
 
   providers = {
     aws = aws

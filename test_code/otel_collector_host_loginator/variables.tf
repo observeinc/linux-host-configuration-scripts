@@ -78,3 +78,17 @@ variable "PUBLIC_KEY" {
   default     = null
   type        = string
 }
+
+variable "OBSERVE_ENDPOINT" {
+  description = "A string like this with your values substituted https://[CUSTOMERID].collect.[DOMAIN].com"
+  nullable    = true
+  default     = null
+  type        = string
+}
+
+variable "OBSERVE_TOKEN" {
+  description = "A datastream token"
+  nullable    = true
+  default     = null
+  type        = string
+}

@@ -143,7 +143,7 @@ variable "AWS_MACHINE_CONFIGS" {
       default_user      = "Administrator"
       sleep             = 120
       user_data         = "user_data/windows.ps"
-    }  
+    }
 
     WINDOWS_SERVER_2019_BASE = {
       ami_instance_type = "t3.small"
@@ -152,8 +152,8 @@ variable "AWS_MACHINE_CONFIGS" {
       default_user      = "Administrator"
       sleep             = 120
       user_data         = "user_data/windows.ps"
-    }  
-    
+    }
+
     WINDOWS_SERVER_2022_BASE = {
       ami_instance_type = "t3.small"
       ami_id            = "ami-06810ab448caa0133"
@@ -161,9 +161,9 @@ variable "AWS_MACHINE_CONFIGS" {
       default_user      = "Administrator"
       sleep             = 120
       user_data         = "user_data/windows.ps"
-    }  
+    }
 
-    
+
   }
 }
 
@@ -174,4 +174,9 @@ variable "AWS_MACHINE_FILTER" {
   type        = any
 }
 
+variable "USERDATA" {
+  type     = any
+  nullable = true
+  default  = null
+}
 

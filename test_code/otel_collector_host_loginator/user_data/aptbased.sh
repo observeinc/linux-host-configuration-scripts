@@ -1,4 +1,9 @@
 #!/bin/bash
+
+################################
+# WARNING USING THIS AS TEMPLATE FILE FOR TERRAFORM
+# Percent signs are doubled to escape them
+################################
 apt-get update -y
 
 apt-get install wget curl -y
@@ -29,17 +34,17 @@ exporters:
   logging:
     loglevel:
   elasticsearch/log:
-    endpoints: "https://123578675166.collect.observe-staging.comm/v1/elastic"
+    endpoints: "${OBSERVE_ENDPOINT}/v1/elastic"
     headers:
-      authorization: "Bearer ds1EUKnhrcKZNuv0MQR4:TVKzB8ei5PkiqxOlE5oDWobT5lCtQ5uh"
+      authorization: "Bearer ${OBSERVE_TOKEN}"
   otlphttp:
-    endpoint: "https://123578675166.collect.observe-staging.com/v1/otel"
+    endpoint: "${OBSERVE_ENDPOINT}/v1/otel"
     headers:
-      authorization: "Bearer ds1EUKnhrcKZNuv0MQR4:TVKzB8ei5PkiqxOlE5oDWobT5lCtQ5uh"
+      authorization: "Bearer ${OBSERVE_TOKEN}"
   prometheusremotewrite:
-    endpoint: "https://123578675166.collect.observe-staging.com/v1/prometheus"
+    endpoint: "${OBSERVE_ENDPOINT}/v1/prometheus"
     headers:
-      authorization: "Bearer ds1EUKnhrcKZNuv0MQR4:TVKzB8ei5PkiqxOlE5oDWobT5lCtQ5uh"
+      authorization: "Bearer ${OBSERVE_TOKEN}"
     resource_to_telemetry_conversion:
       enabled: true
     add_metric_suffixes: true
@@ -90,7 +95,7 @@ service:
     metrics:
       receivers: [hostmetrics, otlp]
       processors: [resourcedetection]
-      exporters: [prometheusremotewrite, logging]
+      exporters: [prometheusremotewrite, logging, otlphttp]
 EOT
 
 
@@ -102,8 +107,8 @@ sudo apt install cron -y
 # install lignator log generator
 # https://github.com/microsoft/lignator
 # sample commands
-## lignator -t "timestamp: %{utcnow()}%" --token-opening "%{" --token-closing "}%" -o /home/ubuntu/testlogs
-## lignator -t "[%{utcnow()}%] - [%{randomitem(INFO ,WARN ,ERROR)}%] - I am a log for request with id: %{uuid}%" --token-opening "%{" --token-closing "}%" -o /home/ubuntu/testlogs
+## lignator -t "timestamp: %%{utcnow()}%%" --token-opening "%%{" --token-closing "}%%" -o /home/ubuntu/testlogs
+## lignator -t "[%%{utcnow()}%%] - [%%{randomitem(INFO ,WARN ,ERROR)}%%] - I am a log for request with id: %%{uuid}%%" --token-opening "%%{" --token-closing "}%%" -o /home/ubuntu/testlogs
 
 wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
 sudo dpkg -i packages-microsoft-prod.deb
@@ -125,17 +130,17 @@ mkdir templates
 
 # create lignator templates
 tee /home/ubuntu/templates/nginx_access.template > /dev/null << EOT
-192.168.%{randombetween(0, 9)}%%{randombetween(0, 9)}%.1 - - [%{utcnow()}%] "GET / HTTP/1.1" 200 396 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
+192.168.%%{randombetween(0, 9)}%%%%{randombetween(0, 9)}%%.1 - - [%%{utcnow()}%%] "GET / HTTP/1.1" 200 396 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
 EOT
 
 tee /home/ubuntu/templates/nginx_error.template > /dev/null << EOT
-[%{utcnow()}%] - [%{randomitem(INFO ,WARN ,ERROR)}%] - I am a log for request with id: %{uuid}%
+[%%{utcnow()}%%] - [%%{randomitem(INFO ,WARN ,ERROR)}%%] - I am a log for request with id: %%{uuid}%%
 EOT
 
 # create script to generate logs using templates
 tee /home/ubuntu/genlogs.sh > /dev/null << EOT
 #!/bin/bash
-/usr/local/bin/lignator -t /home/ubuntu/templates --token-opening "%{" --token-closing "}%" -l 50 -o /home/ubuntu/logs
+/usr/local/bin/lignator -t /home/ubuntu/templates --token-opening "%%{" --token-closing "}%%" -l 50 -o /home/ubuntu/logs
 EOT
 
 # create cron jobs to generate logs and system stress
