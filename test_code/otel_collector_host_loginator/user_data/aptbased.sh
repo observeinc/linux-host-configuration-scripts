@@ -126,7 +126,7 @@ wget https://github.com/microsoft/lignator/archive/v0.8.0.tar.gz \
 
 sudo su ubuntu
 
-mkdir templates
+mkdir /home/ubuntu/templates
 
 # create lignator templates
 tee /home/ubuntu/templates/nginx_access.template > /dev/null << EOT
@@ -142,6 +142,8 @@ tee /home/ubuntu/genlogs.sh > /dev/null << EOT
 #!/bin/bash
 /usr/local/bin/lignator -t /home/ubuntu/templates --token-opening "%%{" --token-closing "}%%" -l 50 -o /home/ubuntu/logs
 EOT
+
+sudo chmod 777 /home/ubuntu/genlogs.sh
 
 # create cron jobs to generate logs and system stress
 (crontab -l 2>/dev/null; echo "* * * * * /home/ubuntu/genlogs.sh >> /home/ubuntu/cron_gen.log 2>&1") | crontab -
