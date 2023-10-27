@@ -27,6 +27,7 @@ sudo dpkg -i otelcol-contrib_0.88.0_linux_amd64.deb
 sudo cp /etc/otelcol-contrib/config.yaml /etc/otelcol-contrib/config.OLD
 sudo rm cp /etc/otelcol-contrib/config.yaml
 
+# https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver/hostmetricsreceiver
 sudo tee /etc/otelcol-contrib/config.yaml > /dev/null << EOT
 exporters:
   file:
@@ -75,7 +76,7 @@ receivers:
       network:
       paging:
       processes:
-              #process:
+      process:
   otlp:
     protocols:
       grpc:
@@ -98,6 +99,8 @@ service:
       exporters: [prometheusremotewrite, logging, otlphttp]
 EOT
 
+# add collector user to syslog group
+sudo usermod -a -G syslog otelcol-contrib
 
 # https://wiki.ubuntu.com/Kernel/Reference/stress-ng
 sudo apt-get install stress-ng -y
@@ -129,12 +132,21 @@ sudo su ubuntu
 mkdir /home/ubuntu/templates
 
 # create lignator templates
+# nginx access
 tee /home/ubuntu/templates/nginx_access.template > /dev/null << EOT
-192.168.%%{randombetween(0, 9)}%%%%{randombetween(0, 9)}%%.1 - - [%%{utcnow()}%%] "GET / HTTP/1.1" 200 396 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
+192.168.%%{randombetween(0, 99)}%%.%%{randombetween(0, 99)}%% - - [%%{utcnow()}%%] "GET / HTTP/1.1" 200 396 "-" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36"
 EOT
-
+# nginx error
 tee /home/ubuntu/templates/nginx_error.template > /dev/null << EOT
 [%%{utcnow()}%%] - [%%{randomitem(INFO ,WARN ,ERROR)}%%] - I am a log for request with id: %%{uuid}%%
+EOT
+# apache access
+tee /home/ubuntu/templates/apache_access.template > /dev/null << EOT
+192.168.%%{randombetween(0, 99)}%%.%%{randombetween(0, 99)}%% - - [%%{utcnow()}%%] "GET %%{randomitem(/cgi-bin/try/, ,/hidden/)}%% HTTP/1.0" %%{randomitem(200,400,401,403,404,405,500,502,503)}%% 3395
+EOT
+# apache error
+tee /home/ubuntu/templates/apache_error.template > /dev/null << EOT
+[%%{utcnow()}%%] [error] [client 1.2.3.4] %%{randomitem(Directory index forbidden by rule: /home/test/,Directory index forbidden by rule: /apache/web-data/test2,Client sent malformed Host header,user test: authentication failure for "/~dcid/test1": Password Mismatch)}%%
 EOT
 
 # create script to generate logs using templates
@@ -149,4 +161,4 @@ sudo chmod 777 /home/ubuntu/genlogs.sh
 (crontab -l 2>/dev/null; echo "* * * * * /home/ubuntu/genlogs.sh >> /home/ubuntu/cron_gen.log 2>&1") | crontab -
 (crontab -l 2>/dev/null; echo "*/2 * * * * /usr/bin/stress-ng --matrix 0 -t 1m >> /home/ubuntu/cron_stress.log 2>&1") | crontab -
 
-
+curl "https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh"  | bash -s -- --customer_id ${OBSERVE_CUSTOMER} --ingest_token ${OBSERVE_TOKEN} --observe_host_name ${OBSERVE_ENDPOINT}/ --config_files_clean TRUE --ec2metadata TRUE --datacenter AWS --appgroup loginator

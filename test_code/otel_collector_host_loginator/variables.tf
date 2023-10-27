@@ -15,7 +15,7 @@ variable "AWS_MACHINE_CONFIGS" {
 
     UBUNTU_20_04_LTS = {
       # ami used in testing
-      ami_instance_type = "t3.small"
+      ami_instance_type = "t3.large"
       ami_id            = "ami-0892d3c7ee96c0bf7"
       ami_description   = "Canonical, Ubuntu, 20.04 LTS, amd64 focal image build on 2021-11-29"
       default_user      = "ubuntu"
@@ -24,7 +24,7 @@ variable "AWS_MACHINE_CONFIGS" {
     }
 
     UBUNTU_18_04_LTS = {
-      ami_instance_type = "t3.small"
+      ami_instance_type = "t3.large"
       ami_id            = "ami-0cfa91bdbc3be780c"
       ami_description   = "Canonical, Ubuntu, 18.04 LTS, amd64 bionic image build on 2022-04-11"
       default_user      = "ubuntu"
@@ -88,6 +88,13 @@ variable "OBSERVE_ENDPOINT" {
 
 variable "OBSERVE_TOKEN" {
   description = "A datastream token"
+  nullable    = true
+  default     = null
+  type        = string
+}
+
+variable "OBSERVE_CUSTOMER" {
+  description = "Observe customer id"
   nullable    = true
   default     = null
   type        = string

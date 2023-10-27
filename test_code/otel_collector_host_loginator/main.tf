@@ -16,6 +16,7 @@ module "aws_machines" {
   USERDATA = templatefile("${path.module}/user_data/aptbased.sh", {
     OBSERVE_ENDPOINT = var.OBSERVE_ENDPOINT
     OBSERVE_TOKEN    = var.OBSERVE_TOKEN
+    OBSERVE_CUSTOMER = var.OBSERVE_CUSTOMER
   })
 
   providers = {
