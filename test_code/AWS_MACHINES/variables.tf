@@ -138,7 +138,7 @@ variable "AWS_MACHINE_CONFIGS" {
 
     WINDOWS_SERVER_2016_BASE = {
       ami_instance_type = "t3.small"
-      ami_id            = "ami-0d7c5eb6a3508d55c"
+      ami_id            = "ami-0e87182c1094f2344"
       ami_description   = "Microsoft Windows Server 2016 with Desktop Experience Locale English AMI provided by Amazon"
       default_user      = "Administrator"
       sleep             = 120
@@ -147,7 +147,7 @@ variable "AWS_MACHINE_CONFIGS" {
 
     WINDOWS_SERVER_2019_BASE = {
       ami_instance_type = "t3.small"
-      ami_id            = "ami-05ca24eaec19902c1"
+      ami_id            = "ami-01dc5695dfebe46cc"
       ami_description   = "Microsoft Windows Server 2019 with Desktop Experience Locale English AMI provided by Amazon"
       default_user      = "Administrator"
       sleep             = 120
@@ -156,7 +156,7 @@ variable "AWS_MACHINE_CONFIGS" {
 
     WINDOWS_SERVER_2022_BASE = {
       ami_instance_type = "t3.small"
-      ami_id            = "ami-06810ab448caa0133"
+      ami_id            = "ami-091f300417a06d788"
       ami_description   = "Microsoft Windows Server 2022 Full Locale English AMI provided by Amazon"
       default_user      = "Administrator"
       sleep             = 120
