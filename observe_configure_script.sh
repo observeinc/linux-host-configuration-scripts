@@ -232,6 +232,9 @@ printHelp(){
       log "    - Optional module flag: jenkins adds a config to fluent-bit or td-agent-bit. If jenkins is specified without linux_host, only fluent-bit or td-agent-bit will be installed."
       log "- Optional --observe_jenkins_path used in combination with jenkins module - location of jenkins logs"
       log "- Optional --custom_fluentbit_config add an additional configuration file for fluentbit or td-agent-bit"
+      log "- Optional --osquery_version value for which osquery version to install (defaults to "latest"). Note this needs to be the full version number: i.e. '5.9.1-1.linux'"
+      log "- Optional --telegraf_version value for which telegraf version to install (defaults to "latest"). Note this needs to be the full version number: i.e. '1.28.2-1'"
+      log "- Optional --fluentbit_version value for which fluentbit version to install (defaults to "latest"). Note this needs to be the full version number: i.e. '2.1.10'"
       log "***************************"
       log "### Sample command:"
       log "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id OBSERVE_CUSTOMER --ingest_token OBSERVE_TOKEN --observe_host_name https://<OBSERVE_CUSTOMER>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
@@ -267,6 +270,9 @@ printVariables(){
       log "branch_input: $branch_input"
       log "module: $module"
       log "observe_jenkins_path: ${observe_jenkins_path}"
+      log "osquery_version: ${osquery_version}"
+      log "telegraf_version: ${telegraf_version}"
+      log "fluentbit_version: ${fluentbit_version}"
       log "$SPACER"
 }
 
@@ -416,6 +422,19 @@ setInstallFlags(){
   done
 }
 
+
+validateFluentbitVersion(){
+  local version="$1"
+  if [[ $version == "1."* ]] || [[ $version == "0."* ]] ; then
+    log
+    log "$SPACER"
+    log "Unable to install version $version of fluent-bit, due to the service name change in 1.9"
+    log "  see https://docs.fluentbit.io/manual/installation/upgrade-notes#fluent-bit-v1.9.9"
+    log "$SPACER"
+    exit 1
+  fi
+}
+
 printMessage(){
   local message="$1"
   log
@@ -448,6 +467,9 @@ module="linux_host"
 osqueryinstall="FALSE"
 telegrafinstall="FALSE"
 fluentbitinstall="FALSE"
+osquery_version="latest"
+telegraf_version="latest"
+fluentbit_version="latest"
 observe_jenkins_path="/var/lib/jenkins/"
 
 
@@ -509,6 +531,15 @@ fi
         --custom_fluentbit_config)
           custom_fluentbit_config="$2"
           ;;
+        --osquery_version)
+          osquery_version="$2"
+          ;;
+        --telegraf_version)
+          telegraf_version="$2"
+          ;;
+        --fluentbit_version)
+          fluentbit_version="$2"
+          ;;
         *)
 
       esac
@@ -528,6 +559,9 @@ fi
 validateObserveHostName "$observe_host_name_base"
 
 observe_host_name=$(echo "$observe_host_name_base" | sed -e 's|^[^/]*//||' -e 's|/.*$||')
+
+validateFluentbitVersion "$fluentbit_version"
+
 log "$SPACER"
 log "customer_id: ${customer_id}"
 log "observe_host_name_base: ${observe_host_name_base}"
@@ -543,13 +577,15 @@ log "branch_input: ${branch_input}"
 log "module: ${module}"
 log "observe_jenkins_path: ${observe_jenkins_path}"
 log "custom_fluentbit_config: ${custom_fluentbit_config}"
+log "osquery_version: ${osquery_version}"
+log "telegraf_version: ${telegraf_version}"
+log "fluentbit_version: ${fluentbit_version}"
 
 setInstallFlags
 
 printMessage "osqueryinstall = $osqueryinstall"
 printMessage "telegrafinstall = $telegrafinstall"
 printMessage "fluentbitinstall = $fluentbitinstall"
-
 
 OBSERVE_ENVIRONMENT="$observe_host_name"
 
@@ -672,6 +708,24 @@ testEject "${testeject}" "EJECT2"
 # BASELINEINSTALL - START
 #####################################
 
+if [[ "$osquery_version" == latest ]] || [[ "$osquery_version" == "" ]]; then
+  osquery_version="osquery"
+else
+  osquery_version="osquery=${osquery_version}"
+fi
+
+if [[ "$telegraf_version" == latest ]] || [[ "$telegraf_version" == "" ]]; then
+  telegraf_version="telegraf"
+else
+  telegraf_version="telegraf=${telegraf_version}"
+fi
+
+if [[ "$fluentbit_version" == latest ]] || [[ "$fluentbit_version" == "" ]]; then
+  fluentbit_version="fluent-bit"
+else
+  fluentbit_version="fluent-bit=${fluentbit_version}"
+fi
+
 case ${OS} in
     amzn|amazonlinux)
 
@@ -684,18 +738,18 @@ case ${OS} in
       #####################################
       if [ "$osqueryinstall" == TRUE ]; then
 
-        printMessage "osquery"
+        printMessage "${osquery_version/=/-}"
 
         curl -L https://pkg.osquery.io/rpm/GPG | sudo tee /etc/pki/rpm-gpg/RPM-GPG-KEY-osquery
 
         if [[ $AL_VERSION == "2023" ]]; then
           sudo dnf config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
           sudo dnf config-manager --enable osquery-s3-rpm-repo
-          sudo dnf install osquery -y
+          sudo dnf install "${osquery_version/=/-}" -y
         else
           sudo yum-config-manager --add-repo https://pkg.osquery.io/rpm/osquery-s3-rpm.repo
           sudo yum-config-manager --enable osquery-s3-rpm-repo
-          sudo yum install osquery -y
+          sudo yum install "${osquery_version/=/-}" -y
         fi
 
         sudo service osqueryd start 2>/dev/null || true
@@ -734,7 +788,7 @@ case ${OS} in
       # #####################################
       if [ "$fluentbitinstall" == TRUE ]; then
 
-      printMessage "fluent"
+      printMessage "${fluentbit_version}"
 
       if [[ $AL_VERSION == "2023" ]]; then
 sudo tee /etc/yum.repos.d/fluent-bit.repo > /dev/null << EOT
@@ -745,59 +799,40 @@ gpgcheck=1
 gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
 EOT
-
-        sudo yum install fluent-bit-2.0.14 -y
-
-        sourcefilename=$config_file_directory/fluent-bit.conf
-        filename=/etc/fluent-bit/fluent-bit.conf
-
-        fluent_bit_filename=/etc/fluent-bit/fluent-bit.conf
-
-        if [ -f "$filename" ]; then
-            sudo mv "$filename"  "$filename".OLD
-        fi
-
-        sudo cp "$sourcefilename" "$filename"
-
-        includeFilefluentAgent
-
-        sudo service fluent-bit restart
-        sudo systemctl enable fluent-bit
       else
-sudo tee /etc/yum.repos.d/td-agent-bit.repo > /dev/null << EOT
-[td-agent-bit]
-name = TD Agent Bit
-baseurl = https://packages.fluentbit.io/amazonlinux/2/\$basearch/
+sudo tee /etc/yum.repos.d/fluent-bit.repo > /dev/null << EOT
+[fluent-bit]
+name = Fluent Bit
+baseurl = https://packages.fluentbit.io/amazonlinux/2/
 gpgcheck=1
 gpgkey=https://packages.fluentbit.io/fluentbit.key
 enabled=1
 EOT
-
-        sudo yum install td-agent-bit-1.9.10 -y
-
-        sourcefilename=$config_file_directory/td-agent-bit.conf
-        filename=/etc/td-agent-bit/td-agent-bit.conf
-
-        td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
-
-        if [ -f "$filename" ]; then
-            sudo mv "$filename"  "$filename".OLD
-        fi
-
-        sudo cp "$sourcefilename" "$filename"
-
-        includeFiletdAgent
-
-        sudo service td-agent-bit restart
-        sudo systemctl enable td-agent-bit
       fi
+      sudo yum install "${fluentbit_version/=/-}" -y
+
+      sourcefilename=$config_file_directory/fluent-bit.conf
+      filename=/etc/fluent-bit/fluent-bit.conf
+
+      fluent_bit_filename=/etc/fluent-bit/fluent-bit.conf
+
+      if [ -f "$filename" ]; then
+          sudo mv "$filename"  "$filename".OLD
+      fi
+
+      sudo cp "$sourcefilename" "$filename"
+
+      includeFilefluentAgent
+
+      sudo service fluent-bit restart
+      sudo systemctl enable fluent-bit
     fi
       # #####################################
       # # telegraf
       # #####################################
       if [ "$telegrafinstall" == TRUE ]; then
 
-      printMessage "telegraf"
+      printMessage "${telegraf_version}"
 
 cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
 [influxdb]
@@ -817,7 +852,7 @@ EOF
 # gpgkey = https://repos.influxdata.com/influxdb.key
 # EOT
 
-      sudo yum install telegraf -y
+      sudo yum install "${telegraf_version/=/-}" -y
 
       sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
@@ -852,7 +887,7 @@ EOF
       # osquery
       #####################################
       if [ "$osqueryinstall" == TRUE ]; then
-        printMessage "osquery"
+        printMessage "${osquery_version}"
 
         sudo yum install yum-utils -y
 
@@ -862,7 +897,7 @@ EOF
 
         sudo yum-config-manager --enable osquery-s3-rpm-repo
 
-        sudo yum install osquery -y
+        sudo yum install "${osquery_version/=/-}" -y
 
 
         # ################
@@ -897,26 +932,26 @@ EOF
       # # fluent
       # #####################################
       if [ "$fluentbitinstall" == TRUE ]; then
-      printMessage "fluent"
+      printMessage "${fluentbit_version}"
 
-cat << EOF | sudo tee /etc/yum.repos.d/td-agent-bit.repo
-[td-agent-bit]
-name = TD Agent Bit
-baseurl = https://packages.fluentbit.io/centos/\$releasever/\$basearch/
+cat << EOF | sudo tee /etc/yum.repos.d/fluent-bit.repo
+[fluent-bit]
+name = Fluent Bit
+baseurl = https://packages.fluentbit.io/centos/$releasever/
 gpgcheck=1
-repo_gpgcheck=1
 gpgkey=https://packages.fluentbit.io/fluentbit.key
+repo_gpgcheck=1
 enabled=1
 EOF
 
-      sudo yum install td-agent-bit-1.9.10 -y
+      sudo yum install "${fluentbit_version/=/-}" -y
 
-      sudo service td-agent-bit start
+      sudo service fluent-bit start
 
-      sourcefilename=$config_file_directory/td-agent-bit.conf
-      filename=/etc/td-agent-bit/td-agent-bit.conf
+      sourcefilename=$config_file_directory/fluent-bit.conf
+      filename=/etc/fluent-bit/fluent-bit.conf
 
-      td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
+      fluent_bit_filename=/etc/fluent-bit/fluent-bit.conf
 
       if [ -f "$filename" ]
       then
@@ -925,17 +960,17 @@ EOF
 
       sudo cp "$sourcefilename" "$filename"
 
-      includeFiletdAgent
+      includeFilefluentAgent
 
-      sudo service td-agent-bit restart
-      sudo systemctl enable td-agent-bit
+      sudo service fluent-bit restart
+      sudo systemctl enable fluent-bit
 
     fi
       # #####################################
       # # telegraf
       # #####################################
       if [ "$telegrafinstall" == TRUE ]; then
-      printMessage "telegraf"
+      printMessage "${telegraf_version}"
 
 cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
 [influxdb]
@@ -955,7 +990,7 @@ EOF
 # gpgkey = https://repos.influxdata.com/influxdb.key
 # EOF
 
-      sudo yum install telegraf -y
+      sudo yum install "${telegraf_version/=/-}" -y
 
       sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
@@ -987,7 +1022,7 @@ EOF
       #####################################
       if [ "$osqueryinstall" == TRUE ]; then
 
-      printMessage "osquery"
+      printMessage "${osquery_version}"
 
       sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 1484120AC4E9F8A1A577AEEE97A80C63C9D8B80B
 
@@ -997,7 +1032,7 @@ EOF
       fi
 
       sudo apt-get update
-      sudo apt-get install -y osquery
+      sudo apt-get install -y "${osquery_version}"
       sudo service osqueryd start 2>/dev/null || true
 
       # ################
@@ -1034,23 +1069,22 @@ EOF
       # # fluent
       # #####################################
       if [ "$fluentbitinstall" == TRUE ]; then
-      printMessage "fluent"
+      printMessage "${fluentbit_version}"
 
       wget -qO - https://packages.fluentbit.io/fluentbit.key | sudo apt-key add -
       if ! grep -Fq "deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main" /etc/apt/sources.list
       then
         echo deb https://packages.fluentbit.io/"${OS}"/"${CODENAME}" "${CODENAME}" main | sudo tee -a /etc/apt/sources.list
       fi
-      
 
       sudo apt-get update
-      sudo apt-get install -y td-agent-bit=1.9.10
-      sudo service td-agent-bit start
+      sudo apt-get install -y "${fluentbit_version}"
+      sudo service fluent-bit start
 
-      sourcefilename=$config_file_directory/td-agent-bit.conf
-      filename=/etc/td-agent-bit/td-agent-bit.conf
+      sourcefilename=$config_file_directory/fluent-bit.conf
+      filename=/etc/fluent-bit/fluent-bit.conf
 
-      td_agent_bit_filename=/etc/td-agent-bit/td-agent-bit.conf
+      fluent_bit_filename=/etc/fluent-bit/fluent-bit.conf
 
       if [ -f "$filename" ]
       then
@@ -1059,17 +1093,17 @@ EOF
 
       sudo cp "$sourcefilename" "$filename"
 
-      includeFiletdAgent
+      includeFilefluentAgent
 
-      sudo service td-agent-bit restart
-      sudo systemctl enable td-agent-bit
+      sudo service fluent-bit restart
+      sudo systemctl enable fluent-bit
 
-    fi
+      fi
       # #####################################
       # # telegraf
       # #####################################
       if [ "$telegrafinstall" == TRUE ]; then
-      printMessage "telegraf"
+      printMessage "${telegraf_version}"
       # 2027/01/27 - Comment out old key approach
       # https://www.influxdata.com/blog/linux-package-signing-key-rotation/
       # wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
@@ -1096,7 +1130,7 @@ EOF
       #       fi
 
       sudo apt-get update
-      sudo apt-get install -y telegraf
+      sudo apt-get install -y "${telegraf_version}"
       sudo apt-get install -y ntp
 
       sourcefilename=$config_file_directory/telegraf.conf
@@ -1135,39 +1169,19 @@ if [ "$fluentbitinstall" == TRUE ]; then
   log "$SPACER"
   log
   log "$SPACER"
-  if [[ $AL_VERSION == "2023" ]]; then
-    log "fluent-bit status"
-
-    if systemctl is-active --quiet fluent-bit; then
-      log fluent-bit is running
-    else
-      log fluent-bit is NOT running
-      sudo service fluent-bit status
-    fi
-
-    log "$SPACER"
-    log "Check status - sudo service fluent-bit status"
-    log "Config file location: ${fluent_bit_filename}"
-    log
+  log "fluent-bit status"
+  if systemctl is-active --quiet fluent-bit; then
+    log fluent-bit is running
   else
-    log "td-agent-bit status"
-
-    if systemctl is-active --quiet td-agent-bit; then
-      log td-agent-bit is running
-    else
-      log td-agent-bit is NOT running
-      sudo service td-agent-bit status
-    fi
-
-    log "$SPACER"
-    log "Check status - sudo service td-agent-bit status"
-    log "Config file location: ${td_agent_bit_filename}"
-    log
+    log fluent-bit is NOT running
+    sudo service fluent-bit status
   fi
-
-
-
+  log "$SPACER"
+  log "Check status - sudo service fluent-bit status"
+  log "Config file location: ${fluent_bit_filename}"
+  log
 fi
+
 log "$SPACER"
 
 if [ "$osqueryinstall" == TRUE ]; then
