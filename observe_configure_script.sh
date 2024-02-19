@@ -662,6 +662,7 @@ fi
 
 if [ "$appgroup" != UNSET ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/Record appgroup ${appgroup}/g" ./*
+    sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_TELEGRAF_OPTION/appgroup = \"${appgroup}\"/g" ./*
 fi
 
 metadata_buffer_size="8mb"
