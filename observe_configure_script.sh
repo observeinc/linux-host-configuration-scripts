@@ -884,7 +884,6 @@ EOF
     rhel|centos)
       log "RHEL OS"
 
-      # releasever=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
       #####################################
       # osquery
       #####################################
