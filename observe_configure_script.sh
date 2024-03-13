@@ -1108,9 +1108,10 @@ EOF
       # 2027/01/27 - Comment out old key approach
       # https://www.influxdata.com/blog/linux-package-signing-key-rotation/
       # wget -qO- https://repos.influxdata.com/influxdb.key | sudo apt-key add -
-      wget -qO- https://repos.influxdata.com/influxdata-archive_compat.key | sudo apt-key add -
-      
-      # sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg >/dev/null
+      # wget -qO- https://repos.influxdata.com/influxdata-archive_compat.key | sudo apt-key add -
+  
+      wget -q https://repos.influxdata.com/influxdata-archive_compat.key
+      echo '393e8779c89ac8d958f81f942f9ad7fb82a25e133faddaf92e15b16e6ac9ce4c influxdata-archive_compat.key' | sha256sum -c && cat influxdata-archive_compat.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg > /dev/null
 
       #shellcheck disable=SC1091
       # 2027/01/27 - Comment out old key approach
@@ -1118,9 +1119,9 @@ EOF
       source /etc/os-release
 
       # 2027/01/27 - Comment out old key approach
-      if ! grep -Fq "deb https://repos.influxdata.com/${ID} ${CODENAME} stable" /etc/apt/sources.list.d/influxdb.list
+      if ! grep -Fq "deb https://repos.influxdata.com/${ID} stable main" /etc/apt/sources.list.d/influxdata.list
       then
-        echo "deb https://repos.influxdata.com/${ID} ${CODENAME} stable" | sudo tee /etc/apt/sources.list.d/influxdb.list
+        echo "deb [signed-by=/etc/apt/trusted.gpg.d/influxdata-archive_compat.gpg] deb https://repos.influxdata.com/${ID} stable main" | sudo tee /etc/apt/sources.list.d/influxdata.list
       fi
       
       #       if ! grep -Fq https://repos.influxdata.com/"${DISTRIB_ID,,}" /etc/apt/sources.list.d/influxdb.list
