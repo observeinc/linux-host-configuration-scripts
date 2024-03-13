@@ -884,7 +884,7 @@ EOF
     rhel|centos)
       log "RHEL OS"
 
-      releasever=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
+      # releasever=$(grep VERSION_ID /etc/os-release | cut -d '=' -f2 | tr -d '"')
       #####################################
       # osquery
       #####################################
@@ -939,7 +939,7 @@ EOF
 cat << EOF | sudo tee /etc/yum.repos.d/fluent-bit.repo
 [fluent-bit]
 name = Fluent Bit
-baseurl = https://packages.fluentbit.io/centos/$releasever/
+baseurl = https://packages.fluentbit.io/centos/\$releasever/
 gpgcheck=1
 gpgkey=https://packages.fluentbit.io/fluentbit.key
 repo_gpgcheck=1
