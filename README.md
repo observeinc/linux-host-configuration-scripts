@@ -1,8 +1,3 @@
-![Pass/Fail Tests - AWS](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/AWS-EC2-Tests.yaml/badge.svg?branch=main)
-
-![Pass/Fail Tests - Azure](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/Azure-Compute-Tests.yaml/badge.svg?branch=main)
-
-![Pass/Fail Tests - GCP](https://github.com/observeinc/linux-host-configuration-scripts/actions/workflows/GCP-Compute-Tests.yaml/badge.svg?branch=main)
 # Configuration script for Linux
 ## Assumptions:
 - Assumes user running script can use passwordless sudo
