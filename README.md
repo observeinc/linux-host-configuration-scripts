@@ -53,3 +53,5 @@ Run --help command for list of flags and options
 ``` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id OBSERVE_CUSTOMER --ingest_token OBSERVE_TOKEN --observe_host_name https://<OBSERVE_CUSTOMER>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP```
 ***************************
 
+## Other Configs:
+Other configs are files used in use case specific scenarios and should only be used when advised by Observe personnel
