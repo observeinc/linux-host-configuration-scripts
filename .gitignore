@@ -3,8 +3,7 @@
 override.tf
 *.tfvars
 .terraform*
-terraform.tfstate
-terraform.tfstate.backup
+terraform.tfstate*
 tf_hosts.json
 __pycache__
 /test_code/python_scripts/file_outputs
@@ -14,3 +13,8 @@ log_outputs
 /test_code/python_scripts/context
 /test_code/python_scripts/.idea
 /test_code/outputs.tf
+/test_code_v2/python/.*env
+observe_datastream_token_hostmon
+observe_name_format_hostmon
+aws_machines*
+ephemeral_key
