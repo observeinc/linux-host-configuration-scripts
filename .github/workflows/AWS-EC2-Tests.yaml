@@ -1,36 +1,9 @@
 run-name: AWS EC2 - ${{ github.event_name }} by @${{ github.actor }}
-# name: Fabric Build
+name: PR Tests V2
 concurrency: aws-workflow
 on: 
   workflow_dispatch:
-    inputs:
-      this_repo_branch:
-        type: string
-        description: Select the branch to use from this repo
-        default: main
-      windows_repo_branch:
-        type: string
-        description: Select the branch to use from windows-host-configuration repo
-        default: main
-      terraform_run_destroy:
-        type: choice
-        options:
-        - true
-        - false
-      fail_first_test:
-        type: choice
-        options:
-        - false
-        - true
-      fail_second_test:
-        type: choice
-        options:
-        - false
-        - true
-  push:
-    branches:    
-      - 'arthur/secret-manager'
-  pull_request:
+  # pull_request:
 
   schedule:
     # only runs on default branch
@@ -54,179 +27,45 @@ jobs:
       checks: write
     env:
       TF_VAR_REGION: "us-west-2"
-      THIS_REPO_BRANCH: main
-      WINDOWS_REPO_BRANCH: main
-      TERRAFORM_RUN_DESTROY: true
-      FAIL_FIRST_TEST: false
-      FAIL_SECOND_TEST: false
-      WORK_DIR: test_code
-      CLOUD: aws
-      MODULE: aws_machines
+      WORK_DIR: test_code_v2
       # TF_LOG: DEBUG
 
     steps:
-      # GCP Login
-      # This is key generated in GCP console for service account
-      - id: 'auth'
-        uses: 'google-github-actions/auth@v0'
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-
-      - name: 'Set up Cloud SDK'
-        uses: 'google-github-actions/setup-gcloud@v0'
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-  
-      - id: 'secrets'
-        uses: 'google-github-actions/get-secretmanager-secrets@v1'
-        with:
-          secrets: |-
-            TF_VAR_PUBLIC_KEY:projects/896946759488/secrets/TF_VAR_PUBLIC_KEY
-            THUNDERDOME_AWS_ROLE:projects/896946759488/secrets/THUNDERDOME_AWS_ROLE
-            PRIVATE_KEY:projects/896946759488/secrets/PRIVATE_KEY
-            STAGE_CUSTOMER_ID:projects/896946759488/secrets/STAGE_CUSTOMER_ID
-            STAGE_DATASTREAM_TOKEN:projects/896946759488/secrets/STAGE_DATASTREAM_TOKEN
-            STAGE_DOMAIN:projects/896946759488/secrets/STAGE_DOMAIN
-            STAGE_USER_EMAIL:projects/896946759488/secrets/STAGE_USER_EMAIL
-            STAGE_USER_PASSWORD:projects/896946759488/secrets/STAGE_USER_PASSWORD
-
-
-
       # AWS Login - orig role - has to occur before checkout
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: ${{ steps.secrets.outputs.THUNDERDOME_AWS_ROLE }}
+          role-to-assume: ${{ secrets.THUNDERDOME_AWS_ROLE }}
           aws-region: ${{ env.TF_VAR_REGION }}
 
-      - name: Set code repo #Set branches based on via Workflow Dispatch or Pull Request 
-        run: | 
-          if ${{ github.event.inputs.this_repo_branch != '' }}; then  
-            echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
-            echo "WINDOWS_REPO_BRANCH=refs/heads/${{ github.event.inputs.windows_repo_branch }}" >> $GITHUB_ENV
-          elif ${{ github.event_name == 'pull_request' }}; then
-            echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
-            echo "WINDOWS_REPO_BRANCH=refs/heads/${{ env.WINDOWS_REPO_BRANCH}}" >> $GITHUB_ENV
-          fi
-
-      - name: Set env var
-        run: |
-          echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
 
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          ref: ${{ env.THIS_REPO_BRANCH }}
-    
-      - name: Set contexts
+          python-version: '3.10' 
+
+      - name: Run Tests
         run: |
-          mkdir context 
-          echo '${{ toJSON(github) }}' > context/github_context.json   
-          echo '${{ toJSON(matrix) }}' > context/matrix_context.json 
-          echo '${{ steps.secrets.outputs.PRIVATE_KEY }}' > context/private_key 
-   
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
-
-      - name: workflow helper
-        run: |
-          python3 -c "from workflow_tasks import set_custom_vars; set_custom_vars(context_dir='context')"
-
-          python3 -c "from workflow_tasks import tf_override_file; tf_override_file(cloud=\"${{ env.CLOUD }}\", test_group=\"${{ matrix.test_groups }}\")"
-
-          # !!! vvvvv THIS OVERWRITES MAIN.TF FILE for specific cloud module vvvvv !!! 
-          python3 -c "from workflow_tasks import tf_main_file; tf_main_file(module=\"${{ env.MODULE }}\")"
-
-          python3 -c "from workflow_tasks import tf_output_file; tf_output_file(module=\"${{ env.MODULE }}\")"
-
-          python3 -c "from workflow_tasks import config_ini; config_ini(custid=\"${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}\", domain=\"${{ steps.secrets.outputs.STAGE_DOMAIN }}\", token=\"${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}\",user_email=\"${{ steps.secrets.outputs.STAGE_USER_EMAIL }}\",user_password=\"${{ steps.secrets.outputs.STAGE_USER_PASSWORD }}\")"
-
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
+          pip install -r requirements.txt
+          python main.py
+        working-directory: "${{ env.WORK_DIR }}/python"
+        env:
+          OBSERVE_CUSTOMER: ${{ secrets.TERRAFORM_MODULES_TEST_OBSERVE_CUSTOMER }}
+          OBSERVE_DOMAIN: ${{ secrets.TERRAFORM_MODULES_TEST_OBSERVE_DOMAIN }}
+          OBSERVE_USER_EMAIL: ${{ secrets.TERRAFORM_MODULES_TEST_OBSERVE_USER_EMAIL }}
+          OBSERVE_USER_PASSWORD: ${{ secrets.TERRAFORM_MODULES_TEST_OBSERVE_USER_PASSWORD }}
+          O2_OBSERVE_TOKEN: ${{ secrets.O2_OBSERVE_TOKEN }}
 
       - name: Print Environment Variables - troubleshooting
         run: |
           env | sort -f
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-        with:
-          terraform_wrapper: false
-        
-      - name: terraform tasks
-        run: |
-          terraform version
-
-          terraform init
-
-          terraform validate
-        working-directory: "${{ env.WORK_DIR }}"
-
-      - name: terraform apply
-        run: |
-          terraform apply -auto-approve
-        working-directory: "${{ env.WORK_DIR }}"
-
-      # Run tests
-      - name: run fabric tests python script
-        run: |
-          # create output directory for archive files
-          mkdir file_outputs
-          mkdir log_outputs
-          
-          # install dependencies
-          pip3 install -r requirements.txt
-
-          # run tests 
-          fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -w ${{ env.WINDOWS_REPO_BRANCH }} -o "1: run fabric tests python script"
-        working-directory: "${{ env.WORK_DIR }}/python_scripts"
-
-      - name: Retry tests
-        if: ${{ env.TEST_RESULT == 'FAIL' }} 
-        run: |
-          # run tests
-          fab test -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests" -w ${{ env.WINDOWS_REPO_BRANCH }} -b ${{ env.THIS_REPO_BRANCH }}
-          
-        working-directory: "${{ env.WORK_DIR }}/python_scripts" 
-
-      - name: cleanup
-        if: always()
-        run: |
-          rm -f python_scripts/config.ini
-
-          sed -i 's/${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/file_outputs/*
-          sed -i 's/${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/file_outputs/*
-          sed -i 's/${{ steps.secrets.outputs.STAGE_USER_EMAIL}}/******/g' ./python_scripts/file_outputs/*
-          sed -i 's/${{ steps.secrets.outputs.STAGE_USER_PASSWORD}}/******/g' ./python_scripts/file_outputs/*
-
-
-          sed -i 's/${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/log_outputs/*
-          sed -i 's/${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/log_outputs/*
-          sed -i 's/${{ steps.secrets.outputs.STAGE_USER_EMAIL }}/******/g' ./python_scripts/log_outputs/*
-          sed -i 's/${{ steps.secrets.outputs.STAGE_USER_PASSWORD }}/******/g' ./python_scripts/log_outputs/*
-
-        working-directory: "${{ env.WORK_DIR }}"
-
-      - name: Archive test results
-        uses: actions/upload-artifact@v3
-        with:
-          name: file_outputs
-          path: | 
-            /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/file_outputs/
-            /home/runner/work/linux-host-configuration-scripts/linux-host-configuration-scripts/test_code/python_scripts/log_outputs/
-          retention-days: 1
-
-      - name: terraform destroy
-        if: always()
-        run: |
-          echo "Value of input ${{ env.TERRAFORM_RUN_DESTROY == 'true' }}"
-          
-          if ${{ env.TERRAFORM_RUN_DESTROY == 'true' }}; then
-            terraform destroy -auto-approve
-          fi
-        working-directory: "${{ env.WORK_DIR }}"
 
       - name: Fail Check
         if: ${{ env.TEST_RESULT == 'FAIL' }} 
         uses: actions/github-script@v3
         with:
           script: |
-              core.setFailed('Fabric tests failed')
+              core.setFailed('Integration tests failed')

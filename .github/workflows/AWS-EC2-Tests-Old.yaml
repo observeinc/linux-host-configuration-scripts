@@ -1,12 +1,16 @@
-run-name: Azure Compute - ${{ github.event_name }} by @${{ github.actor }}
+run-name: AWS EC2 - ${{ github.event_name }} by @${{ github.actor }}
 # name: Fabric Build
-concurrency: azure-workflow
+concurrency: aws-workflow
 on: 
   workflow_dispatch:
     inputs:
       this_repo_branch:
         type: string
         description: Select the branch to use from this repo
+        default: main
+      windows_repo_branch:
+        type: string
+        description: Select the branch to use from windows-host-configuration repo
         default: main
       terraform_run_destroy:
         type: choice
@@ -23,15 +27,15 @@ on:
         options:
         - false
         - true
-  # push:
-  #   branches:    
-  #     - 'arthur/secret-manager'
+  push:
+    branches:    
+      - 'arthur/secret-manager'
   # pull_request:
 
   schedule:
     # only runs on default branch
     # * is a special character in YAML so you have to quote this string
-    - cron:  '0 */12 * * *'
+    - cron:  '15 */12 * * *'
 
 jobs:
   
@@ -51,16 +55,16 @@ jobs:
     env:
       TF_VAR_REGION: "us-west-2"
       THIS_REPO_BRANCH: main
+      WINDOWS_REPO_BRANCH: main
       TERRAFORM_RUN_DESTROY: true
       FAIL_FIRST_TEST: false
       FAIL_SECOND_TEST: false
       WORK_DIR: test_code
-      CLOUD: azure
-      MODULE: azure_machines
+      CLOUD: aws
+      MODULE: aws_machines
       # TF_LOG: DEBUG
 
     steps:
-
       # GCP Login
       # This is key generated in GCP console for service account
       - id: 'auth'
@@ -77,18 +81,16 @@ jobs:
         uses: 'google-github-actions/get-secretmanager-secrets@v1'
         with:
           secrets: |-
-            TF_VAR_PUBLIC_KEY:content-eng-linux-host-test/TF_VAR_PUBLIC_KEY
-            THUNDERDOME_AWS_ROLE:content-eng-linux-host-test/THUNDERDOME_AWS_ROLE
-            PRIVATE_KEY:content-eng-linux-host-test/PRIVATE_KEY
-            STAGE_CUSTOMER_ID:content-eng-linux-host-test/STAGE_CUSTOMER_ID
-            STAGE_DATASTREAM_TOKEN:content-eng-linux-host-test/STAGE_DATASTREAM_TOKEN
-            STAGE_DOMAIN:content-eng-linux-host-test/STAGE_DOMAIN
-            ARM_CLIENT_ID:content-eng-linux-host-test/ARM_CLIENT_ID
-            ARM_CLIENT_SECRET:content-eng-linux-host-test/ARM_CLIENT_SECRET
-            ARM_SUBSCRIPTION_ID:content-eng-linux-host-test/ARM_SUBSCRIPTION_ID
-            ARM_TENANT_ID:content-eng-linux-host-test/ARM_TENANT_ID
-            STAGE_USER_EMAIL:content-eng-linux-host-test/STAGE_USER_EMAIL
-            STAGE_USER_PASSWORD:content-eng-linux-host-test/STAGE_USER_PASSWORD
+            TF_VAR_PUBLIC_KEY:projects/896946759488/secrets/TF_VAR_PUBLIC_KEY
+            THUNDERDOME_AWS_ROLE:projects/896946759488/secrets/THUNDERDOME_AWS_ROLE
+            PRIVATE_KEY:projects/896946759488/secrets/PRIVATE_KEY
+            STAGE_CUSTOMER_ID:projects/896946759488/secrets/STAGE_CUSTOMER_ID
+            STAGE_DATASTREAM_TOKEN:projects/896946759488/secrets/STAGE_DATASTREAM_TOKEN
+            STAGE_DOMAIN:projects/896946759488/secrets/STAGE_DOMAIN
+            STAGE_USER_EMAIL:projects/896946759488/secrets/STAGE_USER_EMAIL
+            STAGE_USER_PASSWORD:projects/896946759488/secrets/STAGE_USER_PASSWORD
+
+
 
       # AWS Login - orig role - has to occur before checkout
       - name: Configure AWS Credentials
@@ -97,27 +99,25 @@ jobs:
           role-to-assume: ${{ steps.secrets.outputs.THUNDERDOME_AWS_ROLE }}
           aws-region: ${{ env.TF_VAR_REGION }}
 
-      - name: Set code repo
-        run: |
-          if ${{ github.event.inputs.this_repo_branch != '' }}; then
+      - name: Set code repo #Set branches based on via Workflow Dispatch or Pull Request 
+        run: | 
+          if ${{ github.event.inputs.this_repo_branch != '' }}; then  
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.event.inputs.this_repo_branch }}" >> $GITHUB_ENV
+            echo "WINDOWS_REPO_BRANCH=refs/heads/${{ github.event.inputs.windows_repo_branch }}" >> $GITHUB_ENV
           elif ${{ github.event_name == 'pull_request' }}; then
             echo "THIS_REPO_BRANCH=refs/heads/${{ github.head_ref }}" >> $GITHUB_ENV
+            echo "WINDOWS_REPO_BRANCH=refs/heads/${{ env.WINDOWS_REPO_BRANCH}}" >> $GITHUB_ENV
           fi
 
       - name: Set env var
         run: |
-            echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
-            echo "ARM_CLIENT_ID=${{ steps.secrets.outputs.ARM_CLIENT_ID }}" >> $GITHUB_ENV
-            echo "ARM_CLIENT_SECRET=${{ steps.secrets.outputs.ARM_CLIENT_SECRET }}" >> $GITHUB_ENV
-            echo "ARM_SUBSCRIPTION_ID=${{ steps.secrets.outputs.ARM_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
-            echo "ARM_TENANT_ID=${{ steps.secrets.outputs.ARM_TENANT_ID }}" >> $GITHUB_ENV
+          echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
 
       - name: Check out repository code
         uses: actions/checkout@v3
         with:
           ref: ${{ env.THIS_REPO_BRANCH }}
-
+    
       - name: Set contexts
         run: |
           mkdir context 
@@ -171,19 +171,19 @@ jobs:
           # create output directory for archive files
           mkdir file_outputs
           mkdir log_outputs
-
+          
           # install dependencies
           pip3 install -r requirements.txt
 
           # run tests 
-          fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -o "1: run fabric tests python script"
+          fab test -a ${{ env.FAIL_FIRST_TEST }} -b ${{ env.THIS_REPO_BRANCH }} -w ${{ env.WINDOWS_REPO_BRANCH }} -o "1: run fabric tests python script"
         working-directory: "${{ env.WORK_DIR }}/python_scripts"
 
       - name: Retry tests
         if: ${{ env.TEST_RESULT == 'FAIL' }} 
         run: |
           # run tests
-          fab test -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests"  -b ${{ env.THIS_REPO_BRANCH }}
+          fab test -a ${{ env.FAIL_SECOND_TEST }} -o "2: Retry tests" -w ${{ env.WINDOWS_REPO_BRANCH }} -b ${{ env.THIS_REPO_BRANCH }}
           
         working-directory: "${{ env.WORK_DIR }}/python_scripts" 
 
@@ -197,11 +197,12 @@ jobs:
           sed -i 's/${{ steps.secrets.outputs.STAGE_USER_EMAIL}}/******/g' ./python_scripts/file_outputs/*
           sed -i 's/${{ steps.secrets.outputs.STAGE_USER_PASSWORD}}/******/g' ./python_scripts/file_outputs/*
 
+
           sed -i 's/${{ steps.secrets.outputs.STAGE_DATASTREAM_TOKEN }}/******/g' ./python_scripts/log_outputs/*
           sed -i 's/${{ steps.secrets.outputs.STAGE_CUSTOMER_ID }}/******/g' ./python_scripts/log_outputs/*
           sed -i 's/${{ steps.secrets.outputs.STAGE_USER_EMAIL }}/******/g' ./python_scripts/log_outputs/*
           sed -i 's/${{ steps.secrets.outputs.STAGE_USER_PASSWORD }}/******/g' ./python_scripts/log_outputs/*
-          
+
         working-directory: "${{ env.WORK_DIR }}"
 
       - name: Archive test results

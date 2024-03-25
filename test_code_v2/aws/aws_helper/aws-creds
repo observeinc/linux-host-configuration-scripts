@@ -1,0 +1,283 @@
+#!/usr/bin/env bash
+# helper script for managing awscli profiles with pybritive
+# https://www.notion.so/observeinc/How-to-Use-Britive-Access-Management-36393b713cbf41ada73a846ddabfea21
+
+set -eu
+set -o pipefail
+OBSERVE_ROOT=$(realpath "$(dirname "$0")"/..)
+
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+
+
+# shellcheck source=/home/dev/observe/s/functions.sh
+# source "$parent_path/functions.sh"
+
+# format: alias|pybritive profile name
+# a pybritive profile can be listed multiple times to have multiple aliases for 'checkout'.
+# checking out any of the aliases will checkout creds to all aliases for a given account.
+aliases="
+prod-cap1|AWS Cap1 Account/238922581007 (AWS Cap1)/BritiveCap1-FullAWSAdmin
+prod|AWS Observe Organization/158067661102 (Observe Prod)/BritiveProd-FullAWSAdmin
+prod-ap-1|AWS Observe Organization/368861046847 (observe-prod-ap-1)/BritiveAP1-FullAWSAdmin
+sockshop|AWS Observe Organization/384876807807 (sockshop)/BritiveSockshop-FullAWSAdmin
+o2|AWS Observe Organization/623960370597 (O2)/BritiveO2-FullAWSAdmin
+default|AWS Observe Organization/723346149663 (observe)/BritiveEng-FullAWSAdmin
+eng|AWS Observe Organization/723346149663 (observe)/BritiveEng-FullAWSAdmin
+thunderdome|AWS Observe Organization/739672403694 (observe-thunderdome)/BritiveThunderdome-FullAWSAdmin
+staging|AWS Observe Organization/802757454165 (Observe Staging)/BritiveStaging-FullAWSAdmin
+tf-account|AWS Observe Organization/989541196905 (observe-tf-account)/Britivetf-FullAWSAdmin
+ops|AWS Observe Organization/677999842303 (observe-ops)/BritiveOps-FullAWSAdmin
+marketplace|AWS Observe Organization/608198493184 (observe-marketplace)/BritiveMarketplace-FullAWSAdmin
+costbench|AWS Observe Organization/864418771691 (observe-costbench)/BritiveCostbench-FullAWSAdmin
+demo|AWS Observe Organization/039787680367 (observe-demo)/BritiveDemo-FullAWSAdmin
+blunderdome|AWS Blunderdome Organization/460044344528 (observe-blunderdome)/BritiveBlunderdome-FullAWSAdmin
+blunderdome-user|AWS Blunderdome Organization/460044344528 (observe-blunderdome)/BritiveBlunderdome-User
+"
+
+MODES=(
+    aliases
+    checkin
+    checkout
+    console
+    list
+)
+
+export BRITIVE_TENANT=observe
+
+function debug() {
+    if [[ -v DEBUG && "${DEBUG}" == "true" ]]; then
+        echo -e "DEBUG - $*" >&2
+    fi
+}
+
+# Make sure pybritive is installed, configured for the observe tenant, and logged in.
+function britive_setup() {
+    # virtualenv users do not need help with PATH
+    if [[ -z "${VIRTUAL_ENV:-}" ]]; then
+        local py3_user_bin
+        py3_user_bin="$(python3 -m site --user-base)/bin"
+        if [[ -d $py3_user_bin ]]; then
+            export PATH="${py3_user_bin}:${PATH}"
+        fi
+    fi
+
+    if ! command -v pybritive >/dev/null; then
+        echo -n "pybritive is not installed; try running: " >&2
+
+        if [[ "$(uname -o)" = "Darwin" ]]; then
+            # OS X default python has some oddity with both the bundled and latest urllib3 version,
+            # so pin a working one for now.
+            echo "pip3 install click pybritive urllib3==1.26.6" >&2
+        else
+            # we have to upgrade system pyopenssl because of https://github.com/pyca/pyopenssl/issues/1143
+            echo "sudo pip3 install -U pyopenssl && pip3 install -U click pybritive" >&2
+        fi
+        exit 1
+    fi
+
+    # Ensure we have a proper tenant configured. We use the alias in $BRITIVE_TENANT to ensure
+    # what we configure here is what gets used in later commands.
+    pybritive configure tenant -P -t "${BRITIVE_TENANT}.britive-app.com" -a "${BRITIVE_TENANT}" -f list
+
+    # Ensure we have a valid login session. If we're not logged in (or our previous token has
+    # expired) pybritive opens a browser, this commands lets the user auth and grabs new tokens.
+    pybritive login
+
+    # There's a bug where 'pybritive login' exits 0 but we're not actually logged in. Try to catch
+    # that and run logout/login.
+    if pybritive ls profiles 2>&1 | grep -q -e 'You have logged out of Britive' -e 'Please login again'; then
+        pybritive logout || true
+        pybritive cache clear || true
+        pybritive login
+    fi
+}
+
+# translate from alias -> Britive profile
+function lookup_alias() {
+    local alias="$1"
+    awk -F'|' '$1 == "'"${alias}"'" {print $2; exit;}' <(echo "${aliases}")
+}
+
+# translate from Britive profile -> main awscli profile
+# if a profile is listed more than once in $aliases, we only return the first one.
+function lookup_profile() {
+    local profile="$1"
+    awk -F'|' '$2 == "'"${profile}"'" {print $1; exit;}' <(echo "${aliases}")
+}
+
+# translate from Britive profile -> list of awscli profile aliases
+# if a profile is listed more than once in $aliases, we return all of the names excluding the first one.
+function lookup_profile_aliases() {
+    local profile="$1"
+    awk -F'|' '$2 == "'"${profile}"'" {print $1;}' <(echo "${aliases}") | sed -e 1d
+}
+
+# find the right Britive profile to use given user input. If the input does not
+# match an alias (in $aliases), match against all available pybritive profiles.
+function find_profile() {
+    local account="$1"
+
+    # see if we were given an alias
+    local profile
+    profile=$(lookup_alias "${account}")
+
+    # if we didn't match an alias, try to match a pybritive profile
+    if [[ -z $profile ]]; then
+        debug "No alias match, matching against pybritive profiles"
+        profile=$(pybritive ls profiles | grep -i -F "${account}" || true)
+        local match_count
+        match_count=$(echo "${profile}" | wc -l)
+        if [[ -z $profile ]]; then
+            echo "No profiles match ${account}" >&2
+            exit 2
+        elif [[ $match_count -gt 1 ]]; then
+            debug "Matching profiles (${match_count}):\n${profile}"
+            echo "Too many profiles match ${account}" >&2
+            exit 2
+        fi
+    fi
+
+    debug "matched input '${account}' to profile '${profile}'"
+    echo "${profile}"
+}
+
+function mode_aliases() {
+    echo -e "alias|profile\n${aliases}" | column -t -s"|"
+}
+
+function usage_aliases() {
+    echo "aws-creds aliases"
+    echo -e "\t Display Britive profile aliases"
+}
+
+function mode_checkin() {
+    [[ $# -eq 0 ]] && set -- default
+    for account; do
+        pybritive_checkin "$account"
+    done
+}
+
+function pybritive_checkin() {
+    local profile
+    profile=$(find_profile "$1")
+    pybritive checkin "${profile}"
+    echo "Checked in profile ${profile}"
+}
+
+function usage_checkin() {
+    echo "aws-creds checkin profile1 [profile2 ... profileN]"
+    echo -e "\t Checkin the given profiles. Same arguments as checkout."
+}
+
+function mode_checkout() {
+    [[ $# -eq 0 ]] && set -- default
+    for account; do
+        pybritive_checkout "$account"
+    done
+}
+
+# copy credentials & default region to another profile (called when we have aliases)
+function profile_copy() {
+    local src="$1"
+    local dst="$2"
+    local val
+
+    for var in aws_access_key_id aws_secret_access_key aws_session_token aws_expiration region; do
+        val=$(aws --profile="${src}" configure get "${var}")
+        aws --profile="${dst}" configure set "${var}" "${val}"
+    done
+}
+
+function pybritive_checkout() {
+    local profile
+    profile=$(find_profile "$1")
+
+    local awscli_profile awscli_profile_aliases
+    awscli_profile=$(lookup_profile "${profile}")
+
+    # pybritive "-m integrate" will write credentials directly to ~/.aws/credentials under the alias
+    # specified by "-a".
+    pybritive checkout -s -m integrate -a "${awscli_profile}" "${profile}"
+
+    # populate the default region for the new awscli profile
+    local region
+    region=$(aws --profile=default configure get region || true)
+    [[ -n "$region" ]] && aws --profile="${awscli_profile}" configure set region "$region"
+
+    echo "Checked out '${profile}' into awscli profile '${awscli_profile}'"
+    for profile_alias in $(lookup_profile_aliases "${profile}"); do
+        profile_copy "${awscli_profile}" "${profile_alias}"
+        echo "Checked out '${profile}' into awscli profile '${profile_alias}'"
+    done
+}
+
+function usage_checkout() {
+    echo "aws-creds checkout profile1 [profile2 ... profileN]"
+    echo -e "\t Checkout the given profile. profile can be one of:"
+    echo -e "\t - a predefined alias (run 'aws-creds aliases' to see a list)"
+    echo -e "\t - anything matching a pybritive profile name (e.g. an account number)"
+    echo -e "\t If no profile is provided, check out the 'default' alias."
+}
+
+function mode_console() {
+    local awscli_profile
+    local profile
+
+    [[ $# -eq 0 ]] && set -- default
+    profile=$(find_profile "$1")
+    awscli_profile=$(lookup_profile "${profile}")
+
+    # make sure the profile exists & is not expired
+    if ! aws --profile="${awscli_profile}" sts get-caller-identity >/dev/null 2>&1; then
+        mode_checkout "${profile}"
+    fi
+
+    pybritive aws console -p "${awscli_profile}"
+}
+
+function usage_console() {
+    echo "aws-creds console profile"
+    echo -e "\t Load the AWS console for the given profile. profile can be one of:"
+    echo -e "\t - a predefined alias (run 'aws-creds aliases' to see a list)"
+    echo -e "\t - anything matching a pybritive profile name (e.g. an account number)"
+    echo -e "\t If no profile is provided, loads console for the 'default' alias."
+}
+
+function mode_list() {
+    pybritive ls profiles | grep '^AWS'
+}
+
+function usage_list() {
+    echo "aws-creds list"
+    echo -e "\t Lists all available accounts/roles available in Britive"
+}
+
+function usage() {
+    [[ $# -gt 0 ]] && echo "$@"
+    echo "aws-creds is a helper script to manage AWS credentails through Britive"
+    echo ""
+    echo "aws-creds <mode> [options]"
+    echo ""
+    for runmode in "${MODES[@]}"; do
+        usage_"${runmode}"
+    done
+    exit 1
+}
+
+function needle_in_haystack() {
+    local needle="$1"
+    shift
+    for arg in "$@"; do
+        [[ "${needle}" = "${arg}" ]] && return 0
+    done
+    return 1
+}
+
+[[ $# == 0 ]] && usage
+runmode="$1"
+shift
+needle_in_haystack "${runmode}" "${MODES[@]}" || usage "unknown mode: ${runmode}"
+
+britive_setup
+
+mode_"${runmode}" "$@"

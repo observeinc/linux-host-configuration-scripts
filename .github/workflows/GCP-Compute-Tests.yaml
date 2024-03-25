@@ -26,7 +26,7 @@ on:
   push:
     branches:    
       - 'arthur/secret-manager'
-  pull_request:
+  # pull_request:
 
   schedule:
     # only runs on default branch
