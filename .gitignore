@@ -14,3 +14,4 @@ log_outputs
 /test_code/python_scripts/context
 /test_code/python_scripts/.idea
 /test_code/outputs.tf
+/test_code_v2/python/.*env
