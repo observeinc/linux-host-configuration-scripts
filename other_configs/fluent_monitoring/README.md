@@ -26,3 +26,5 @@ sudo service fluent-bit restart
 Do steps above but also add the following files to  /etc/fluent-bit:
 - linux-host-configuration-scripts/other_configs/fluent_monitoring/observe-monitoring-linux-only.conf
 
+# Adding content to Host Monitoring App
+Add the following entry to feature_flags on Host Monitoring App - enable_fluent_monitoring
