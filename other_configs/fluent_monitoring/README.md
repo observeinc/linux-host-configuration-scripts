@@ -7,7 +7,6 @@ In fluent-bit.conf - in the SERVICE stanza fo the following:
 ## Manual configuration - For all platforms
 Add the following files to to the /etc/fluent-bit directory and restart fluent-bit service:
 - linux-host-configuration-scripts/other_configs/fluent_monitoring/observe-monitoring-all-platforms.conf file
-- linux-host-configuration-scripts/other_configs/fluent_monitoring/parsers_multiline.conf
 
 ```
 
