@@ -2,7 +2,7 @@
 
 In fluent-bit.conf - in the SERVICE stanza fo the following:
 - set http server to On ```http_server  On```
-- add multiline parser ```parsers_file parsers_multiline.conf```
+
 
 ## Manual configuration - For all platforms
 Add the following files to to the /etc/fluent-bit directory and restart fluent-bit service:
