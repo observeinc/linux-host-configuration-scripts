@@ -300,17 +300,19 @@ validateObserveHostName () {
   local url="$1"
   # check for properly formatted url input - assumes - https://<customer-id>.collect.observe[anything]/
   # we can modify this rule to be specific as needed
-  regex='^(https?)://[0-9]+.collect.observe[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*\/'
+  regex='^(https?):\/\/[0-9]+.collect.observe[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*\/'
+  # regex for region specific hostname e.g.: collect.ap-1.observeinc.com
+  regex_alt='^(https?):\/\/[0-9]+.collect.[a-z0-9-]*.observe[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*\/'
 
 
-  if [[ $url =~ $regex ]]
+  if [[ $url =~ $regex ]] || [[ $url =~ $regex_alt ]]
   then
       log "$SPACER"
       log "$url IS valid"
       log "$SPACER"
   else
       log "$SPACER"
-      log "$url IS NOT valid - example valid input - https://123456789012.collect.observeinc.com/"
+      log "$url IS NOT valid - example valid input - https://123456789012.collect.observeinc.com/ OR https://123456789012.collect.(ap-1|eu-1).observeinc.com/"
       log "$SPACER"
       exit 1
   fi
