@@ -1,0 +1,155 @@
+<powershell>
+# Execute it with elevated permissions
+# Description: 
+# This script install automatically the open-ssh feature and enable it
+
+# enable tls1.2 for downloads
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+# creating openssh folder and download the zip
+mkdir c:\agent-install
+mkdir c:\openssh-install 
+cd c:\openssh-install
+
+#update the last version if you want the last release
+Invoke-WebRequest -Uri "https://github.com/PowerShell/Win32-OpenSSH/releases/download/V8.6.0.0p1-Beta/OpenSSH-Win64.zip" -OutFile .\openssh.zip
+Expand-Archive .\openssh.zip -DestinationPath .\openssh\
+cd .\openssh\OpenSSH-Win64\
+
+# required for enable the service
+setx PATH "$env:path;c:\openssh-install\openssh\OpenSSH-Win64\" -m
+
+# required for install the service
+powershell.exe -ExecutionPolicy Bypass -File install-sshd.ps1
+
+# required for execute remote connections
+New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
+
+net start sshd
+
+# auto enable for each restart machine
+Set-Service sshd -StartupType Automatic
+
+#Set default shell to powershell
+New-ItemProperty -Path "HKLM:\SOFTWARE\OpenSSH" -Name DefaultShell -Value "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe" -PropertyType String -Force
+
+Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))
+
+choco install 7zip -y
+
+
+###############
+# Create script file
+###############
+New-Item -Path "c:\" -Name "sample-log-gen" -ItemType "directory" -Force
+
+
+################################################################
+# Multiline text string
+# Event log types - Error, Information, FailureAudit, SuccessAudit, Warning
+################################################################
+
+$scriptInfoString = @'
+$source    = "ScheduledSampleLogScript"
+$logName   = "Application"
+$eventId   = 2002
+$entryType = "Information"
+$message   = "This is a custom information event log entry from a scheduled task."
+
+# Check if the event source exists, and if not, create it
+if (-not ([System.Diagnostics.EventLog]::SourceExists($source))) {
+    New-EventLog -LogName $logName -Source $source
+}
+
+# Write the event log entry
+Write-EventLog -LogName $logName -Source $source -EventId $eventId -EntryType $entryType -Message $message
+'@
+################################################################
+$scriptWarningString = @'
+$source    = "ScheduledSampleLogScript"
+$logName   = "Application"
+$eventId   = 2003
+$entryType = "Warning"
+$message   = "This is a custom warning event log entry from a scheduled task."
+
+# Check if the event source exists, and if not, create it
+if (-not ([System.Diagnostics.EventLog]::SourceExists($source))) {
+    New-EventLog -LogName $logName -Source $source
+}
+
+# Write the event log entry
+Write-EventLog -LogName $logName -Source $source -EventId $eventId -EntryType $entryType -Message $message
+'@
+################################################################
+$scriptErrorString = @'
+$source    = "ScheduledSampleLogScript"
+$logName   = "Application"
+$eventId   = 2004
+$entryType = "Error"
+$message   = "This is a custom error event log entry from a scheduled task."
+
+# Check if the event source exists, and if not, create it
+if (-not ([System.Diagnostics.EventLog]::SourceExists($source))) {
+    New-EventLog -LogName $logName -Source $source
+}
+
+# Write the event log entry
+Write-EventLog -LogName $logName -Source $source -EventId $eventId -EntryType $entryType -Message $message
+'@
+################################################################
+$scriptString = @'
+param(
+    [string]$source,
+    [string]$logName,
+    [int]$eventId,
+    [string]$entryType,
+    [string]$message
+)
+
+# Check if the event source exists, and if not, create it
+if (-not ([System.Diagnostics.EventLog]::SourceExists($source))) {
+    New-EventLog -LogName $logName -Source $source
+}
+
+# Write the event log entry
+Write-EventLog -LogName $logName -Source $source -EventId $eventId -EntryType $entryType -Message $message
+
+'@
+
+# Specify the path to the new file
+$scriptPath = "c:\sample-log-gen\CreateEventLogEntry.ps1"
+$scriptInfoPath = "c:\sample-log-gen\CreateEventLogEntryInfo.ps1"
+$scriptWarningPath = "c:\sample-log-gen\CreateEventLogEntryWarning.ps1"
+$scriptErrorPath = "c:\sample-log-gen\CreateEventLogEntryError.ps1"
+
+
+# Create a new file and write the text string to it
+$scriptString | Set-Content -Path $scriptPath
+
+$scriptInfoString | Set-Content -Path $scriptInfoPath
+$scriptWarningString | Set-Content -Path $scriptWarningPath
+$scriptErrorString | Set-Content -Path $scriptErrorPath
+
+# Create a new scheduled task
+
+$actionInfo = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-File c:\sample-log-gen\CreateEventLogEntryInfo.ps1"
+$actionWarning = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-File c:\sample-log-gen\CreateEventLogEntryWarning.ps1"
+$actionError = New-ScheduledTaskAction -Execute "PowerShell.exe" -Argument "-File c:\sample-log-gen\CreateEventLogEntryError.ps1"
+$trigger = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Minutes 1)
+
+# Register the scheduled task
+Register-ScheduledTask -TaskName "GenInfoEvent" -Trigger $trigger -Action $actionInfo -User "NT AUTHORITY\SYSTEM"
+Register-ScheduledTask -TaskName "GenWarningEvent" -Trigger $trigger -Action $actionWarning -User "NT AUTHORITY\SYSTEM"
+Register-ScheduledTask -TaskName "GenErrorEvent" -Trigger $trigger -Action $actionError -User "NT AUTHORITY\SYSTEM"
+
+# Sample run of script
+# Powershell.exe -File $scriptPath -source "SampleLogScript" -logName "Application" -eventId 1001 -entryType "Information" -message "This is a custom event log entry from SampleLogScript." 
+# Powershell.exe -File $scriptInfoPath  
+
+# Get-ScheduledTask GenInfoEvent | Get-ScheduledTaskInfo
+
+cd c:\agent-install
+
+[Net.ServicePointManager]::SecurityProtocol = "Tls, Tls11, Tls12, Ssl3"; Invoke-WebRequest -UseBasicParsing ${SCRIPT}
+</powershell>
+<persist>true</persist>
