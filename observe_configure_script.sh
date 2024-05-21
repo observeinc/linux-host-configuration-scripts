@@ -235,7 +235,7 @@ printHelp(){
       log "- Optional --osquery_version value for which osquery version to install (defaults to "latest"). Note this needs to be the full version number: i.e. '5.9.1-1.linux'"
       log "- Optional --telegraf_version value for which telegraf version to install (defaults to "latest"). Note this needs to be the full version number: i.e. '1.28.2-1'"
       log "- Optional --fluentbit_version value for which fluentbit version to install (defaults to "latest"). Note this needs to be the full version number: i.e. '2.1.10'"
-      log "- Optional --shell_history add option to capture users shell history, TRUE or FALSE - Defaults to FALSE"
+      log "- Optional --shell_history_enable add option to capture users shell history, TRUE or FALSE - Defaults to FALSE"
       log "***************************"
       log "### Sample command:"
       log "\`\`\` curl https://raw.githubusercontent.com/observeinc/linux-host-configuration-scripts/main/observe_configure_script.sh  | bash -s -- --customer_id OBSERVE_CUSTOMER --ingest_token OBSERVE_TOKEN --observe_host_name https://<OBSERVE_CUSTOMER>.collect.observeinc.com/ --config_files_clean TRUE --ec2metadata TRUE --datacenter MY_DATA_CENTER --appgroup MY_APP_GROUP\`\`\`"
@@ -274,7 +274,7 @@ printVariables(){
       log "osquery_version: ${osquery_version}"
       log "telegraf_version: ${telegraf_version}"
       log "fluentbit_version: ${fluentbit_version}"
-      log "shell_history: ${shell_history}"
+      log "shell_history_enable: ${shell_history_enable}"
       log "$SPACER"
 }
 
@@ -474,7 +474,7 @@ fluentbitinstall="FALSE"
 osquery_version="latest"
 telegraf_version="latest"
 fluentbit_version="latest"
-shell_history="FALSE"
+shell_history_enable="FALSE"
 observe_jenkins_path="/var/lib/jenkins/"
 
 
@@ -545,8 +545,8 @@ fi
         --fluentbit_version)
           fluentbit_version="$2"
           ;;
-        --shell_history)
-          shell_history="$2"
+        --shell_history_enable)
+          shell_history_enable="$2"
           ;;
         *)
 
@@ -588,7 +588,7 @@ log "custom_fluentbit_config: ${custom_fluentbit_config}"
 log "osquery_version: ${osquery_version}"
 log "telegraf_version: ${telegraf_version}"
 log "fluentbit_version: ${fluentbit_version}"
-log "shell_history: ${shell_history}"
+log "shell_history_enable: ${shell_history_enable}"
 
 setInstallFlags
 
@@ -673,8 +673,8 @@ if [ "$appgroup" != UNSET ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/Record appgroup ${appgroup}/g" ./*
 fi
 
-if [ "$shell_history" != TRUE ]; then
-    sed -i '/"shell_history": {/,/},/d' osquery.conf
+if [ "$shell_history_enable" != TRUE ]; then
+    sed -i '/"shell_history_enable": {/,/},/d' osquery.conf
 fi
 
 metadata_buffer_size="8mb"
