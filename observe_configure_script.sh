@@ -549,7 +549,6 @@ fi
           shell_history="$2"
           ;;
         *)
-        *)
 
       esac
       shift
