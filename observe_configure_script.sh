@@ -673,7 +673,7 @@ if [ "$appgroup" != UNSET ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/Record appgroup ${appgroup}/g" ./*
 fi
 
-if [ "shell_history" != TRUE ]; then
+if [ "$shell_history" != TRUE ]; then
     sed -i '/"shell_history": {/,/},/d' osquery.conf
 fi
 
