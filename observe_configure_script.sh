@@ -439,6 +439,12 @@ validateFluentbitVersion(){
   fi
 }
 
+removeOsqueryShellHistory(){
+  if [ "$shell_history_enable" != TRUE ]; then
+    sed -i '/"shell_history": {/,/},/d' $sourcefilename
+  fi
+}
+
 printMessage(){
   local message="$1"
   log
@@ -673,10 +679,6 @@ if [ "$appgroup" != UNSET ]; then
     sed -i "s/#REPLACE_WITH_OBSERVE_APP_GROUP_OPTION/Record appgroup ${appgroup}/g" ./*
 fi
 
-if [ "$shell_history_enable" != TRUE ]; then
-    sed -i '/"shell_history_enable": {/,/},/d' osquery.conf
-fi
-
 metadata_buffer_size="8mb"
 metadata_interval_secs="300"
 sed -i "s/REPLACE_WITH_METADATA_BUFFER_SIZE/${metadata_buffer_size}/g" ./*
@@ -772,8 +774,9 @@ case ${OS} in
         sourcefilename=$config_file_directory/osquery.conf
         filename=/etc/osquery/osquery.conf
 
-
         osquery_conf_filename=/etc/osquery/osquery.conf
+
+        removeOsqueryShellHistory
 
         if [ -f "$filename" ]
         then
@@ -920,6 +923,8 @@ EOF
 
         osquery_conf_filename=/etc/osquery/osquery.conf
 
+        removeOsqueryShellHistory
+
         if [ -f "$filename" ]
         then
             sudo mv "$filename"  "$filename".OLD
@@ -1054,6 +1059,8 @@ EOF
       filename=/etc/osquery/osquery.conf
 
       osquery_conf_filename=/etc/osquery/osquery.conf
+
+      removeOsqueryShellHistory
 
       if [ -f "$filename" ]
       then
