@@ -897,7 +897,7 @@ EOF
     # rhel|centos
     #####################################
     #####################################
-    rhel|centos)
+    rhel|centos|almalinux)
       log "RHEL OS"
 
       #####################################
@@ -1023,7 +1023,19 @@ EOF
 
       sudo cp "$sourcefilename" "$filename"
 
-      yum install ntp -y
+      case "$OS" in
+        almalinux)
+          echo "OS is AlmaLinux: updating dnf"
+          sudo dnf update -y
+          sudo dnf install chrony
+          sudo systemctl enable chronyd          
+          ;;
+        *)
+          sudo yum install ntp -y
+          ;;
+      esac
+
+
 
       sudo systemctl enable telegraf
 
