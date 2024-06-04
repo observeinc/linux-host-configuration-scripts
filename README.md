@@ -1,4 +1,11 @@
-# Configuration script for Linux
+# Configuration script for Linux [Legacy]
+
+---
+
+***This content is being deprecated in favor of [Host Quick Start Integration](https://docs.observeinc.com/en/latest/content/integrations/host/quickstart.html) and will be removed in a future release.***
+
+---
+
 ## Assumptions:
 - Assumes user running script can use passwordless sudo
 - Assumes Ubuntu, Debian, Amazon Linux, CentOS, or Red Hat

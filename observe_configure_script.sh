@@ -1265,6 +1265,9 @@ fi
 #####################################
 # BASELINEINSTALL - END
 #####################################
+log "$SPACER"
+log "This content is being DEPRECATED in favor of Host Quick Start Integration - https://docs.observeinc.com/en/latest/content/integrations/host/quickstart.html and will be removed in a future release."
+log "$SPACER"
 
 log "$SPACER"
 log "$END_OUTPUT"
