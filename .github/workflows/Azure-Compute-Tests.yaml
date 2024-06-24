@@ -205,7 +205,7 @@ jobs:
         working-directory: "${{ env.WORK_DIR }}"
 
       - name: Archive test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: file_outputs
           path: | 
