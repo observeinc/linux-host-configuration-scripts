@@ -114,7 +114,7 @@ jobs:
             echo "ARM_TENANT_ID=${{ steps.secrets.outputs.ARM_TENANT_ID }}" >> $GITHUB_ENV
 
       - name: Check out repository code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ env.THIS_REPO_BRANCH }}
 
