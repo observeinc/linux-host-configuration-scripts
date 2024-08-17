@@ -1204,9 +1204,9 @@ if [ "$fluentbitinstall" == TRUE ]; then
   log "$SPACER"
   log "fluent-bit status"
   if systemctl is-active --quiet fluent-bit; then
-    log fluent-bit is running
+    log "fluent-bit is running"
   else
-    log fluent-bit is NOT running
+    log "fluent-bit is NOT running"
     sudo service fluent-bit status
   fi
   log "$SPACER"
@@ -1221,9 +1221,9 @@ if [ "$osqueryinstall" == TRUE ]; then
   log "osqueryd status"
 
   if systemctl is-active --quiet osqueryd; then
-    log osqueryd is running
+    log "osqueryd is running"
   else
-    log osqueryd is NOT running
+    log "osqueryd is NOT running"
     sudo service osqueryd status
   fi
   log "$SPACER"
@@ -1241,9 +1241,9 @@ if [ "$telegrafinstall" == TRUE ]; then
     log "telegraf status"
 
     if systemctl is-active --quiet telegraf; then
-      log telegraf is running
+      log "telegraf is running"
     else
-      log telegraf is NOT running
+      log "telegraf is NOT running"
       sudo service telegraf status
     fi
     log "$SPACER"
