@@ -388,7 +388,7 @@ includeFilefluentAgent(){
   #install custom config if exists
   if ! [ -z ${custom_fluentbit_config}]
   then
-    sudo cp ${custom_fluentbit_config} /etc/td-agent-bit/observe-custom-config.conf
+    sudo cp ${custom_fluentbit_config} /etc/fluent-bit/observe-custom-config.conf
   fi
 }
 
