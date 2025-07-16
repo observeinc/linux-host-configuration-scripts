@@ -953,10 +953,18 @@ EOF
       if [ "$fluentbitinstall" == TRUE ]; then
       printMessage "${fluentbit_version}"
 
+if [[ "$OS" == "almalinux" ]]; then
+  log "Using AlmaLinux-specific Fluent Bit repo"
+  repo_base_url="https://packages.fluentbit.io/almalinux/\$releasever/"
+else
+  log "Using CentOS-based Fluent Bit repo for $OS"
+  repo_base_url="https://packages.fluentbit.io/centos/\$releasever/"
+fi
+
 cat << EOF | sudo tee /etc/yum.repos.d/fluent-bit.repo
 [fluent-bit]
 name = Fluent Bit
-baseurl = https://packages.fluentbit.io/centos/\$releasever/
+baseurl = $repo_base_url
 gpgcheck=1
 gpgkey=https://packages.fluentbit.io/fluentbit.key
 repo_gpgcheck=1
