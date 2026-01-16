@@ -1,3 +1,4 @@
+
 #!/bin/bash
 END_OUTPUT="END_OF_OUTPUT"
 
@@ -850,25 +851,31 @@ EOT
 
       printMessage "${telegraf_version}"
 
-cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
-[influxdb]
-name = InfluxDB Repository - RHEL 7
-baseurl = https://repos.influxdata.com/rhel/7/\$basearch/stable
+      if [[ $AL_VERSION == "2023" ]]; then
+        # Amazon Linux 2023 - use stable repo with dnf
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdata.repo
+[influxdata]
+name = InfluxData Repository - Stable
+baseurl = https://repos.influxdata.com/stable/\$basearch/main
 enabled = 1
 gpgcheck = 1
-gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
+gpgkey = https://repos.influxdata.com/influxdata-archive.key
 EOF
 
-# sudo tee /etc/yum.repos.d/influxdb.repo > /dev/null << EOT
-# [influxdb]
-# name = InfluxDB Repository - RHEL
-# baseurl = https://repos.influxdata.com/rhel/7/\$basearch/stable/
-# enabled = 1
-# gpgcheck = 1
-# gpgkey = https://repos.influxdata.com/influxdb.key
-# EOT
+        sudo dnf install "${telegraf_version/=/-}" -y
+      else
+        # Amazon Linux 2 - use stable repo with yum
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdata.repo
+[influxdata]
+name = InfluxData Repository - Stable
+baseurl = https://repos.influxdata.com/stable/\$basearch/main
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdata-archive.key
+EOF
 
-      sudo yum install "${telegraf_version/=/-}" -y
+        sudo yum install "${telegraf_version/=/-}" -y
+      fi
 
       sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
