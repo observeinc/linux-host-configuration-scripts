@@ -1006,25 +1006,30 @@ EOF
       if [ "$telegrafinstall" == TRUE ]; then
       printMessage "${telegraf_version}"
 
-cat <<EOF | sudo tee /etc/yum.repos.d/influxdb.repo
-[influxdb]
-name = InfluxDB Repository - RHEL \$releasever
-baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+if [[ "$OS" == "almalinux" ]]; then
+  log "Using AlmaLinux-specific telegraf repo with stable key"
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdata.repo
+[influxdata]
+name = InfluxData Repository - Stable
+baseurl = https://repos.influxdata.com/stable/\$basearch/main
 enabled = 1
 gpgcheck = 1
-gpgkey = https://repos.influxdata.com/influxdata-archive_compat.key
+gpgkey = https://repos.influxdata.com/influxdata-archive.key
 EOF
 
-# cat << EOF | sudo tee /etc/yum.repos.d/influxdb.repo
-# [influxdb]
-# name = InfluxDB Repository - RHEL \$releasever
-# baseurl = https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
-# enabled = 1
-# gpgcheck = 0
-# gpgkey = https://repos.influxdata.com/influxdb.key
-# EOF
+      sudo dnf install "${telegraf_version/=/-}" -y
+else
+cat <<EOF | sudo tee /etc/yum.repos.d/influxdata.repo
+[influxdata]
+name = InfluxData Repository - Stable
+baseurl = https://repos.influxdata.com/stable/\$basearch/main
+enabled = 1
+gpgcheck = 1
+gpgkey = https://repos.influxdata.com/influxdata-archive.key
+EOF
 
       sudo yum install "${telegraf_version/=/-}" -y
+fi
 
       sourcefilename=$config_file_directory/telegraf.conf
       filename=/etc/telegraf/telegraf.conf
@@ -1040,17 +1045,14 @@ EOF
 
       case "$OS" in
         almalinux)
-          echo "OS is AlmaLinux: updating dnf"
-          sudo dnf update -y
-          sudo dnf install chrony
-          sudo systemctl enable chronyd          
+          log "OS is AlmaLinux: installing chrony for time sync"
+          sudo dnf install -y chrony
+          sudo systemctl enable chronyd
           ;;
         *)
           sudo yum install ntp -y
           ;;
       esac
-
-
 
       sudo systemctl enable telegraf
 
