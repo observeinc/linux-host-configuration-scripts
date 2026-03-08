@@ -107,7 +107,7 @@ jobs:
             echo "TF_VAR_PUBLIC_KEY=${{ steps.secrets.outputs.TF_VAR_PUBLIC_KEY }}" >> $GITHUB_ENV
 
       - name: Check out repository code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.THIS_REPO_BRANCH }}
 
